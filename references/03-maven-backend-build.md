@@ -124,6 +124,7 @@ Controller 层：
 
 - 只做路由、参数接收、基础校验触发、权限注解、调用 Service 和响应转换。
 - 不写业务规则、复杂条件分支、状态流转、事务控制、数据库访问、远程调用编排。
+- 不堆叠简单字段校验，例如空值、范围、长度、格式判断；这类校验优先放到 DTO/Request 的 Bean Validation 注解中。
 - 如果 Controller 方法需要多段业务注释，优先把逻辑下沉到 Service。
 
 Service 接口层：
@@ -163,6 +164,36 @@ Service 实现层：
 - API、DTO、数据库、前端展示已有 code 时，新增 Enum 要兼容既有值。
 - 动态字典、用户可配置项、运行期可扩展值，不强行枚举化。
 - 涉及删除、改名、改 code 的枚举变更按高风险处理。
+
+## DTO 参数校验
+
+简单参数校验优先放在 DTO/Request 层：
+
+- 必填用 `@NotNull`、`@NotBlank`、`@NotEmpty`。
+- 数值范围用 `@Min`、`@Max` 或 `@Range`。
+- 长度用 `@Size` 或 `@Length`。
+- 格式用 `@Pattern`。
+- 嵌套对象用 `@Valid`。
+
+Controller 入参使用项目现有的 `@Validated` 或 `@Valid` 触发校验，并交给统一异常处理转换成 `AjaxResult` 或项目标准错误响应。
+
+不要把以下代码形态继续堆在 Controller 或 Service：
+
+```java
+if (input.getSensitivityLevel() == null || input.getSensitivityLevel() < 1 || input.getSensitivityLevel() > 10) {
+    return AjaxResult.error("探测灵敏度等级范围为1-10");
+}
+```
+
+优先改为 DTO 字段约束：
+
+```java
+@NotNull(message = "探测灵敏度等级不能为空")
+@Range(min = 1, max = 10, message = "探测灵敏度等级范围为1-10")
+private Integer sensitivityLevel;
+```
+
+保留在 Service 的校验必须是业务校验，例如跨字段关系、状态机、数据库唯一性、权限/租户、外部系统依赖。非连续规则如 `0 或 3-50` 可使用自定义注解，或集中到专门校验方法，避免 Controller 中堆多个字段的 `if`。
 
 ## Maven 失败处理
 
