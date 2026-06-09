@@ -22,9 +22,17 @@ references/
   04-frontend-rules.md
   05-delivery-templates.md
   06-environment-discovery.md
+  07-java-backend-rules.md
 ```
 
 `SKILL.md` 只保留触发、路由和硬约束；执行细则按索引进入对应文件，减少主文件负担。
+
+### 效率策略
+
+- 单个 reference 尽量保持入口化和主题化，避免一个文件堆到数百行。
+- `01-global-engineering-rules.md` 只保留全局共用规则。
+- Java 后端细则集中到 `07-java-backend-rules.md`，只有涉及后端代码结构、注释、枚举、参数校验、Lombok 或新建文件时才读取。
+- Maven 构建只读 `03-maven-backend-build.md`；环境路径发现只读 `06-environment-discovery.md`。
 
 ### 内置重点
 

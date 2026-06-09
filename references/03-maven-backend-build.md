@@ -1,8 +1,10 @@
 # Maven 与后端构建
 
+本文件只处理 Maven 环境、构建、验证和多模块定位。Java 后端分层、注释、枚举、参数校验、Lombok、新建文件归属地见 `07-java-backend-rules.md`。
+
 ## 本地 Maven 环境
 
-Maven 配置不要只依赖硬编码路径。执行 Maven 构建前，先按 `references/06-environment-discovery.md` 读取缓存、IDE/项目配置和本机候选路径。
+Maven 配置不要只依赖硬编码路径。执行 Maven 构建前，先按 `06-environment-discovery.md` 读取缓存、IDE/项目配置和本机候选路径。
 
 当前已知可用候选：
 
@@ -43,9 +45,9 @@ root 节点识别顺序：
 
 ```text
 repo-root/
-  pom.xml                  # 聚合 root
+  pom.xml
   server/
-    pom.xml                # 二级聚合或业务模块
+    pom.xml
     service-a/
       pom.xml
 ```
@@ -56,7 +58,7 @@ repo-root/
 /Users/lilinhan/dev/maven-3.9.10/bin/mvn -Dmaven.repo.local=/Users/lilinhan/maven-git -pl server/service-a -am test
 ```
 
-如果模块路径无法作为 `-pl` 参数使用，再查 `artifactId`，使用：
+如果模块路径无法作为 `-pl` 参数使用，再查 `artifactId`：
 
 ```bash
 /Users/lilinhan/dev/maven-3.9.10/bin/mvn -Dmaven.repo.local=/Users/lilinhan/maven-git -pl :artifact-id -am test
@@ -92,130 +94,6 @@ repo-root/
 - 异常响应与空值边界。
 
 不得为了修前端表现绕过后端校验、认证、授权、数据权限或审计。
-
-## 新建文件归属地检查
-
-多层 Maven 项目中新建文件前，必须先确认 module 归属，不要按当前目录就近创建。
-
-检查顺序：
-
-1. 从聚合 root 查看 `pom.xml` 的 `modules`。
-2. 查看目标业务域已有同类文件的位置和包名。
-3. 查看 module 依赖方向，确认新文件不会造成 API module 依赖 impl、web module 依赖 persistence 细节等反向依赖。
-4. 确认新文件层级：Controller、Service 接口、Service 实现、DAO/Mapper、DTO/VO、Entity、Enum、Config、Client、Job、Test。
-5. 修改前说明“为什么放在这个 module 和包路径”。
-
-常见归属：
-
-- Controller：web、server、adapter、application 启动 module。
-- Service 接口：api、contract、facade、service-api module。
-- Service 实现：service、service-impl、biz、server module。
-- Entity/DO/PO/Mapper/Repository：domain、dao、repository、infrastructure、persistence module。
-- DTO/Request/Response/VO：api、contract、web 或现有契约 module。
-- Feign/HTTP/RPC Client：client、integration、infrastructure 或现有外部调用 module。
-- Job/Scheduler：job、task、server 或现有调度 module。
-- Test：与被测类同 module 的 `src/test`。
-
-如果项目命名与上述不同，以当前项目已有同类文件和依赖关系为准。
-
-## Java 分层与注释
-
-Controller 层：
-
-- 只做路由、参数接收、基础校验触发、权限注解、调用 Service 和响应转换。
-- 不写业务规则、复杂条件分支、状态流转、事务控制、数据库访问、远程调用编排。
-- 不堆叠简单字段校验，例如空值、范围、长度、格式判断；这类校验优先放到 DTO/Request 的 Bean Validation 注解中。
-- 如果 Controller 方法需要多段业务注释，优先把逻辑下沉到 Service。
-
-Service 接口层：
-
-- 表达业务能力和契约，不暴露实现细节。
-- 重要接口方法必须注释业务语义、关键入参、返回含义、权限/租户/状态前置条件和异常边界。
-- 注释要稳定，避免记录实现类内部步骤。
-
-Service 实现层：
-
-- 承载业务流程、事务边界、状态流转、幂等、缓存、消息和跨系统调用。
-- 重要实现方法和复杂分支必须写原因型注释，说明为什么这样处理，而不是复述代码动作。
-- 注释粒度与业务决策一致，避免每行碎片化注释。
-
-注释质量检查：
-
-- 命名能说明的，不写注释。
-- 业务规则、权限边界、状态流转和兼容逻辑不能缺注释。
-- 同一规则只在最合适层级写一次，其他层通过方法名和接口契约表达。
-- 修改代码时同步清理过期注释，避免注释与行为不一致。
-
-## 枚举与固定值
-
-后端 Java 项目中，明知不会频繁变化的固定集合优先写成 Enum：
-
-- 状态：任务状态、审核状态、流程状态、启停状态。
-- 类型：文件类型、报告类型、规则类型、业务类型。
-- 来源：系统来源、数据来源、触发来源。
-- 动作：提交、撤回、通过、驳回、归档、重试。
-- 结果：成功、失败、跳过、待处理、部分成功。
-
-检查要求：
-
-- 多处重复出现的字符串或数字常量，要优先收敛为业务 Enum。
-- Enum 放置位置要符合 module 归属：跨模块契约使用的枚举放 api/contract/facade 类 module；仅实现内部使用的枚举放 service/biz/domain 类 module。
-- Enum 必须保留稳定 code，避免直接依赖 ordinal。
-- API、DTO、数据库、前端展示已有 code 时，新增 Enum 要兼容既有值。
-- 动态字典、用户可配置项、运行期可扩展值，不强行枚举化。
-- 涉及删除、改名、改 code 的枚举变更按高风险处理。
-
-## DTO 参数校验
-
-简单参数校验优先放在 DTO/Request 层：
-
-- 必填用 `@NotNull`、`@NotBlank`、`@NotEmpty`。
-- 数值范围用 `@Min`、`@Max` 或 `@Range`。
-- 长度用 `@Size` 或 `@Length`。
-- 格式用 `@Pattern`。
-- 嵌套对象用 `@Valid`。
-
-Controller 入参使用项目现有的 `@Validated` 或 `@Valid` 触发校验，并交给统一异常处理转换成 `AjaxResult` 或项目标准错误响应。
-
-不要把以下代码形态继续堆在 Controller 或 Service：
-
-```java
-if (input.getSensitivityLevel() == null || input.getSensitivityLevel() < 1 || input.getSensitivityLevel() > 10) {
-    return AjaxResult.error("探测灵敏度等级范围为1-10");
-}
-```
-
-优先改为 DTO 字段约束：
-
-```java
-@NotNull(message = "探测灵敏度等级不能为空")
-@Range(min = 1, max = 10, message = "探测灵敏度等级范围为1-10")
-private Integer sensitivityLevel;
-```
-
-保留在 Service 的校验必须是业务校验，例如跨字段关系、状态机、数据库唯一性、权限/租户、外部系统依赖。非连续规则如 `0 或 3-50` 可使用自定义注解，或集中到专门校验方法，避免 Controller 中堆多个字段的 `if`。
-
-## Lombok 使用
-
-如果项目已使用 Lombok，优先用 Lombok 消除无意义 getter/setter 和构造器样板：
-
-- DTO、VO、Request、Response：按项目风格使用 `@Getter`、`@Setter` 或必要时 `@Data`。
-- 配置属性类：可使用 `@Getter`、`@Setter`，结合项目已有配置绑定方式。
-- 依赖注入构造器：优先 `@RequiredArgsConstructor` 配合 `final` 字段。
-- 日志：已有 Lombok 风格时使用 `@Slf4j`。
-
-谨慎使用：
-
-- Entity、DO、PO 不要无脑 `@Data`，避免 `equals`、`hashCode`、`toString` 触发 ORM 懒加载、循环引用、敏感字段输出或主键语义问题。
-- 有继承关系时，`@EqualsAndHashCode(callSuper = ...)` 必须按业务语义明确设置。
-- 有敏感字段的类禁止默认 `@ToString` 输出敏感信息。
-- 有业务逻辑的 getter/setter 应显式保留，不能用 Lombok 替代。
-
-禁止：
-
-- 手写纯字段读写的 getter/setter。
-- 同一个类里 Lombok 与无意义手写 getter/setter 混用。
-- 未确认项目已有 Lombok 依赖时主动新增 Lombok。
 
 ## Maven 失败处理
 

@@ -20,9 +20,17 @@ references/
   04-frontend-rules.md
   05-delivery-templates.md
   06-environment-discovery.md
+  07-java-backend-rules.md
 ```
 
 `SKILL.md` is intentionally small. It routes the agent to indexed reference files instead of loading every rule at once.
+
+## Efficiency Strategy
+
+- Keep each reference file topic-focused instead of allowing one file to grow to several hundred lines.
+- `01-global-engineering-rules.md` only contains globally shared rules.
+- Java backend details live in `07-java-backend-rules.md` and should be opened only for backend structure, comments, enums, validation, Lombok, or new-file placement.
+- Maven builds use `03-maven-backend-build.md`; environment discovery uses `06-environment-discovery.md`.
 
 ## Key Rules
 

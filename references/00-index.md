@@ -7,18 +7,24 @@
 1. 所有编程任务先读 `01-global-engineering-rules.md` 的相关章节。
 2. 涉及定位、修改、排查、重构时读 `02-noise-filter-workflow.md`。
 3. 涉及 Java、Spring、Maven、后端构建、测试时读 `03-maven-backend-build.md`。
-4. 涉及前端、页面、组件、样式、交互时读 `04-frontend-rules.md`。
-5. 需要最终说明、上下文压缩、交接时读 `05-delivery-templates.md`。
-6. 涉及 Maven、JDK、Node、包管理器、IDE 配置路径时读 `06-environment-discovery.md`。
+4. 涉及 Java 后端代码结构、Controller/Service、DTO、Entity、Enum、Lombok、参数校验、注释、新建文件时读 `07-java-backend-rules.md`。
+5. 涉及前端、页面、组件、样式、交互时读 `04-frontend-rules.md`。
+6. 需要最终说明、上下文压缩、交接时读 `05-delivery-templates.md`。
+7. 涉及 Maven、JDK、Node、包管理器、IDE 配置路径时读 `06-environment-discovery.md`。
 
 ## 任务到文件映射
 
 - 语言与标题规范：`01-global-engineering-rules.md#语言偏好`
 - JetBrains 项目工具优先级：`01-global-engineering-rules.md#工具优先级`
 - 修改前检查：`01-global-engineering-rules.md#修改前确认`
-- 注释规范：`01-global-engineering-rules.md#注释规则`
 - 高风险变更：`01-global-engineering-rules.md#高风险变更`
 - AGENTS 演进建议：`01-global-engineering-rules.md#项目演进规则`
+- Java 后端分层：`07-java-backend-rules.md#后端分层`
+- 新建文件归属地：`07-java-backend-rules.md#新建文件归属地`
+- 注释规范：`07-java-backend-rules.md#注释规则`
+- 枚举与常量：`07-java-backend-rules.md#枚举与常量`
+- DTO 参数校验：`07-java-backend-rules.md#参数校验分层`
+- Lombok 使用标准：`07-java-backend-rules.md#lombok-使用标准`
 - token 预算与读取窗口：`02-noise-filter-workflow.md#上下文预算`
 - 调用链闭环：`02-noise-filter-workflow.md#调用链确认`
 - 失败回退：`02-noise-filter-workflow.md#失败处理`
