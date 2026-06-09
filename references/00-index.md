@@ -9,6 +9,7 @@
 3. 涉及 Java、Spring、Maven、后端构建、测试时读 `03-maven-backend-build.md`。
 4. 涉及前端、页面、组件、样式、交互时读 `04-frontend-rules.md`。
 5. 需要最终说明、上下文压缩、交接时读 `05-delivery-templates.md`。
+6. 涉及 Maven、JDK、Node、包管理器、IDE 配置路径时读 `06-environment-discovery.md`。
 
 ## 任务到文件映射
 
@@ -22,6 +23,8 @@
 - 调用链闭环：`02-noise-filter-workflow.md#调用链确认`
 - 失败回退：`02-noise-filter-workflow.md#失败处理`
 - Maven 发行版与本地仓库：`03-maven-backend-build.md#本地-maven-环境`
+- Maven/IDE 配置智能发现：`06-environment-discovery.md#发现顺序`
+- 环境缓存：`06-environment-discovery.md#缓存策略`
 - 多模块构建 root 节点：`03-maven-backend-build.md#多层-maven-结构构建`
 - 后端验证命令：`03-maven-backend-build.md#后端构建与验证`
 - 前端布局与组件：`04-frontend-rules.md#布局与组件`
@@ -30,6 +33,7 @@
 - 交付格式：`05-delivery-templates.md#最终回复结构`
 - Context Capsule：`05-delivery-templates.md#上下文胶囊`
 - Codex 会话上下文管理：`05-delivery-templates.md#codex-上下文管理`
+- Codex 记忆管理：`05-delivery-templates.md#codex-记忆管理`
 
 ## 性能原则
 

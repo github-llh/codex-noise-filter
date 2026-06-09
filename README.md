@@ -21,6 +21,7 @@ references/
   03-maven-backend-build.md
   04-frontend-rules.md
   05-delivery-templates.md
+  06-environment-discovery.md
 ```
 
 `SKILL.md` 只保留触发、路由和硬约束；执行细则按索引进入对应文件，减少主文件负担。
@@ -31,8 +32,8 @@ references/
 - JetBrains 项目优先使用 JetBrains MCP / IDE 工具。
 - 修改前确认目标文件、根因、最小方案和不影响范围。
 - 修改前必须完成调用链和影响面确认。
-- Maven 后端项目优先使用 `/Users/lilinhan/dev/maven-3.9.10/bin/mvn`。
-- Maven 本地仓库优先使用 `/Users/lilinhan/maven-git`。
+- Maven 后端项目优先读取 `.codex/local-environment.json`、IDE/项目配置和已验证本机候选路径。
+- 当前已验证 Maven 候选为 `/Users/lilinhan/dev/maven-3.9.10/bin/mvn`，本地仓库候选为 `/Users/lilinhan/maven-git`。
 - 多模块 Maven 项目默认从聚合 root 节点执行，并使用 `-pl <module> -am`。
 - 前端优先修布局、组件属性和状态契约，不用硬编码掩盖后端问题。
 - 编程任务规则已内化到 skill；全局 `/Users/lilinhan/.codex/AGENTS.md` 仍建议保留为兜底。
@@ -46,6 +47,14 @@ references/
 /Users/lilinhan/dev/maven-3.9.10/bin/mvn -Dmaven.repo.local=/Users/lilinhan/maven-git -pl <module-path-or-artifact> -am -Dtest=ClassNameTest#methodName -Dsurefire.failIfNoSpecifiedTests=false test
 ```
 
+### 环境发现
+
+- 首次使用 Maven、JDK、Node 或包管理器时，先读 IDE/项目配置。
+- 如果配置中拿不到路径，再查找本机常见候选路径。
+- 找到后必须执行最小验证，例如 `mvn -version`。
+- 验证通过后写入 `.codex/local-environment.json`，后续优先复用缓存。
+- 缓存失效或项目配置显式变化时，重新发现并更新缓存。
+
 ### Codex 上下文管理
 
 - 主文件只负责触发和路由，细则通过 `references/00-index.md` 渐进读取。
@@ -53,5 +62,6 @@ references/
 - 切换窗口或上下文压缩前输出 Context Capsule，避免丢失目标、证据、回滚点和下一步。
 - 用户中途插入新目标时，先判断与主任务关系，不默认重置已有调用链。
 - 全局 `AGENTS.md` 不需要承载全部细则，但建议保留为兜底入口。
+- 长期 memory 只记录稳定偏好和跨任务规则；临时日志、一次性失败和未验证猜测不写入长期记忆。
 
 英文说明见 [README.en.md](README.en.md)。

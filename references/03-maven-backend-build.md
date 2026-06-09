@@ -2,35 +2,30 @@
 
 ## 本地 Maven 环境
 
-用户 Maven 发行版路径：
+Maven 配置不要只依赖硬编码路径。执行 Maven 构建前，先按 `references/06-environment-discovery.md` 读取缓存、IDE/项目配置和本机候选路径。
+
+当前已知可用候选：
 
 ```bash
 /Users/lilinhan/dev/maven-3.9.10
-```
-
-优先使用的 Maven 可执行文件：
-
-```bash
 /Users/lilinhan/dev/maven-3.9.10/bin/mvn
-```
-
-用户本地 Maven repository 路径：
-
-```bash
 /Users/lilinhan/maven-git
 ```
 
-构建 Java/Maven 项目时，优先使用：
+构建 Java/Maven 项目时，使用发现到的 `mavenExecutable` 和 `localRepository` 组合。若本地缓存中仍是当前已知值，则命令形态为：
 
 ```bash
 /Users/lilinhan/dev/maven-3.9.10/bin/mvn -Dmaven.repo.local=/Users/lilinhan/maven-git
 ```
 
-命令选择顺序：
+Maven 命令选择顺序：
 
-1. 如果项目已配置 Maven Wrapper 且项目规则要求使用 Wrapper，优先使用项目内 `./mvnw`。
-2. 否则优先使用 `/Users/lilinhan/dev/maven-3.9.10/bin/mvn`。
-3. 只有上述路径不可用时，才退回系统 `mvn`。
+1. 读取 `.codex/local-environment.json` 中已验证的 `maven.executable` 和 `maven.localRepository`。
+2. 读取 IDE/项目 Maven 配置，例如 `.idea/misc.xml`、`.idea/workspace.xml`、`.mvn/maven.config`、`.mvn/wrapper/maven-wrapper.properties`。
+3. 如果项目已配置 Maven Wrapper 且项目规则要求使用 Wrapper，使用项目内 `./mvnw`。
+4. 否则查找本机候选 Maven，例如 `/Users/lilinhan/dev/maven-*/bin/mvn`、`~/dev/maven-*/bin/mvn`、`/opt/homebrew/bin/mvn`、`/usr/local/bin/mvn`、`mvn`。
+5. 找到后执行 `mvn -version` 或 `<path>/mvn -version` 验证，再缓存。
+6. 只有上述路径都不可用时，才让用户确认 Maven 环境。
 
 不要擅自修改用户 Maven settings，不新增远程仓库，不执行会写入外部系统的网络发布命令。
 
@@ -100,8 +95,8 @@ repo-root/
 
 ## Maven 失败处理
 
-- 依赖缺失时先确认是否使用了 `/Users/lilinhan/maven-git`。
-- Maven 版本不一致时先确认是否使用了 `/Users/lilinhan/dev/maven-3.9.10/bin/mvn`。
+- 依赖缺失时先确认本次使用的 `maven.localRepository` 是否来自缓存、IDE 配置或项目配置。
+- Maven 版本不一致时先确认本次使用的 `maven.executable` 是否已验证并缓存。
 - 多模块找不到依赖时确认是否加了 `-am`。
 - 指定测试不存在或跨模块时可加 `-Dsurefire.failIfNoSpecifiedTests=false`。
 - 构建失败后先区分是本次改动、历史失败、依赖环境还是测试选择错误，不连续盲改。
