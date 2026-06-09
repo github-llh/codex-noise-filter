@@ -195,6 +195,28 @@ private Integer sensitivityLevel;
 
 保留在 Service 的校验必须是业务校验，例如跨字段关系、状态机、数据库唯一性、权限/租户、外部系统依赖。非连续规则如 `0 或 3-50` 可使用自定义注解，或集中到专门校验方法，避免 Controller 中堆多个字段的 `if`。
 
+## Lombok 使用
+
+如果项目已使用 Lombok，优先用 Lombok 消除无意义 getter/setter 和构造器样板：
+
+- DTO、VO、Request、Response：按项目风格使用 `@Getter`、`@Setter` 或必要时 `@Data`。
+- 配置属性类：可使用 `@Getter`、`@Setter`，结合项目已有配置绑定方式。
+- 依赖注入构造器：优先 `@RequiredArgsConstructor` 配合 `final` 字段。
+- 日志：已有 Lombok 风格时使用 `@Slf4j`。
+
+谨慎使用：
+
+- Entity、DO、PO 不要无脑 `@Data`，避免 `equals`、`hashCode`、`toString` 触发 ORM 懒加载、循环引用、敏感字段输出或主键语义问题。
+- 有继承关系时，`@EqualsAndHashCode(callSuper = ...)` 必须按业务语义明确设置。
+- 有敏感字段的类禁止默认 `@ToString` 输出敏感信息。
+- 有业务逻辑的 getter/setter 应显式保留，不能用 Lombok 替代。
+
+禁止：
+
+- 手写纯字段读写的 getter/setter。
+- 同一个类里 Lombok 与无意义手写 getter/setter 混用。
+- 未确认项目已有 Lombok 依赖时主动新增 Lombok。
+
 ## Maven 失败处理
 
 - 依赖缺失时先确认本次使用的 `maven.localRepository` 是否来自缓存、IDE 配置或项目配置。
