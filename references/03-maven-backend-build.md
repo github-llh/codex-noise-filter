@@ -93,6 +93,77 @@ repo-root/
 
 不得为了修前端表现绕过后端校验、认证、授权、数据权限或审计。
 
+## 新建文件归属地检查
+
+多层 Maven 项目中新建文件前，必须先确认 module 归属，不要按当前目录就近创建。
+
+检查顺序：
+
+1. 从聚合 root 查看 `pom.xml` 的 `modules`。
+2. 查看目标业务域已有同类文件的位置和包名。
+3. 查看 module 依赖方向，确认新文件不会造成 API module 依赖 impl、web module 依赖 persistence 细节等反向依赖。
+4. 确认新文件层级：Controller、Service 接口、Service 实现、DAO/Mapper、DTO/VO、Entity、Enum、Config、Client、Job、Test。
+5. 修改前说明“为什么放在这个 module 和包路径”。
+
+常见归属：
+
+- Controller：web、server、adapter、application 启动 module。
+- Service 接口：api、contract、facade、service-api module。
+- Service 实现：service、service-impl、biz、server module。
+- Entity/DO/PO/Mapper/Repository：domain、dao、repository、infrastructure、persistence module。
+- DTO/Request/Response/VO：api、contract、web 或现有契约 module。
+- Feign/HTTP/RPC Client：client、integration、infrastructure 或现有外部调用 module。
+- Job/Scheduler：job、task、server 或现有调度 module。
+- Test：与被测类同 module 的 `src/test`。
+
+如果项目命名与上述不同，以当前项目已有同类文件和依赖关系为准。
+
+## Java 分层与注释
+
+Controller 层：
+
+- 只做路由、参数接收、基础校验触发、权限注解、调用 Service 和响应转换。
+- 不写业务规则、复杂条件分支、状态流转、事务控制、数据库访问、远程调用编排。
+- 如果 Controller 方法需要多段业务注释，优先把逻辑下沉到 Service。
+
+Service 接口层：
+
+- 表达业务能力和契约，不暴露实现细节。
+- 重要接口方法必须注释业务语义、关键入参、返回含义、权限/租户/状态前置条件和异常边界。
+- 注释要稳定，避免记录实现类内部步骤。
+
+Service 实现层：
+
+- 承载业务流程、事务边界、状态流转、幂等、缓存、消息和跨系统调用。
+- 重要实现方法和复杂分支必须写原因型注释，说明为什么这样处理，而不是复述代码动作。
+- 注释粒度与业务决策一致，避免每行碎片化注释。
+
+注释质量检查：
+
+- 命名能说明的，不写注释。
+- 业务规则、权限边界、状态流转和兼容逻辑不能缺注释。
+- 同一规则只在最合适层级写一次，其他层通过方法名和接口契约表达。
+- 修改代码时同步清理过期注释，避免注释与行为不一致。
+
+## 枚举与固定值
+
+后端 Java 项目中，明知不会频繁变化的固定集合优先写成 Enum：
+
+- 状态：任务状态、审核状态、流程状态、启停状态。
+- 类型：文件类型、报告类型、规则类型、业务类型。
+- 来源：系统来源、数据来源、触发来源。
+- 动作：提交、撤回、通过、驳回、归档、重试。
+- 结果：成功、失败、跳过、待处理、部分成功。
+
+检查要求：
+
+- 多处重复出现的字符串或数字常量，要优先收敛为业务 Enum。
+- Enum 放置位置要符合 module 归属：跨模块契约使用的枚举放 api/contract/facade 类 module；仅实现内部使用的枚举放 service/biz/domain 类 module。
+- Enum 必须保留稳定 code，避免直接依赖 ordinal。
+- API、DTO、数据库、前端展示已有 code 时，新增 Enum 要兼容既有值。
+- 动态字典、用户可配置项、运行期可扩展值，不强行枚举化。
+- 涉及删除、改名、改 code 的枚举变更按高风险处理。
+
 ## Maven 失败处理
 
 - 依赖缺失时先确认本次使用的 `maven.localRepository` 是否来自缓存、IDE 配置或项目配置。

@@ -35,6 +35,10 @@ references/
 - Maven 后端项目优先读取 `.codex/local-environment.json`、IDE/项目配置和已验证本机候选路径。
 - 当前已验证 Maven 候选为 `/Users/lilinhan/dev/maven-3.9.10/bin/mvn`，本地仓库候选为 `/Users/lilinhan/maven-git`。
 - 多模块 Maven 项目默认从聚合 root 节点执行，并使用 `-pl <module> -am`。
+- 新建文件前必须确认 module、层级职责、包路径、同类文件位置和依赖方向，尤其注意接口、实现、实体、契约可能分属不同 module。
+- 明确固定集合的状态、类型、来源、动作、阶段、结果等值优先写成业务 Enum，避免魔法字符串和数字散落。
+- Java 后端 Controller 保持轻薄，不写业务代码；业务契约放 Service 接口，业务流程放 Service 实现。
+- Service 接口和重要实现方法要有原因型注释，做到不冗余、不缺失、不杂乱。
 - 前端优先修布局、组件属性和状态契约，不用硬编码掩盖后端问题。
 - 编程任务规则已内化到 skill；全局 `/Users/lilinhan/.codex/AGENTS.md` 仍建议保留为兜底。
 - 长任务、切换窗口或上下文压缩前，使用 Context Capsule 保留目标、证据、已改、回滚和下一步。

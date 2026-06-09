@@ -33,6 +33,10 @@ references/
 - Discover Maven from `.codex/local-environment.json`, IDE/project configuration, and verified local candidates.
 - The currently verified Maven candidate is `/Users/lilinhan/dev/maven-3.9.10/bin/mvn`; the local repository candidate is `/Users/lilinhan/maven-git`.
 - Build multi-module Maven projects from the aggregation root with `-pl <module> -am`.
+- Before creating files, confirm the target module, layer responsibility, package path, existing peer files, and dependency direction. Interfaces, implementations, entities, and contracts may live in different modules.
+- Prefer business enums for stable fixed sets such as status, type, source, action, phase, and result values. Avoid scattered magic strings and numbers.
+- Keep Java backend controllers thin. Put business contracts in service interfaces and business flow in service implementations.
+- Add reason-focused comments to service interfaces and important implementation methods. Comments should be non-redundant, complete where needed, and orderly.
 - For frontend work, fix layout, component props, state handling, and contracts directly; do not hide backend issues with frontend hardcoding.
 - Coding rules are embedded in this skill; keep the global `/Users/lilinhan/.codex/AGENTS.md` as a lightweight fallback.
 - Before long context compression or window switching, write a Context Capsule with goal, evidence, changes, rollback points, and next step.
