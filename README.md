@@ -45,6 +45,8 @@ references/
 - JetBrains 项目优先使用 JetBrains MCP / IDE 工具。
 - 修改前确认目标文件、根因、最小方案和不影响范围。
 - 修改前必须完成调用链和影响面确认。
+- Plan/计划阶段也必须走 skill 索引，计划里要列出适用 reference、触碰范围、局部对齐项和验收检查。
+- Global/Goal/目标追踪模式也必须走 skill 索引，每轮恢复目标、适用 reference、触碰范围、局部对齐项、验收检查和 Context Capsule。
 - 规则同时适用于新增代码和已有代码修改；凡本次触碰的方法、类、DTO、SQL、测试和调用链，都要做局部规则对齐。
 - Maven 后端项目优先读取 `.codex/local-environment.json`、IDE/项目配置和已验证本机候选路径。
 - 当前已验证 Maven 候选为 `/Users/lilinhan/dev/maven-3.9.10/bin/mvn`，本地仓库候选为 `/Users/lilinhan/maven-git`。
@@ -56,6 +58,7 @@ references/
 - 判空逻辑可在 Java 版本和项目风格支持时使用 `Optional`、Stream、方法引用等函数式写法，但不要滥用于 DTO/Entity 字段或简单场景。
 - 项目已使用 Lombok 时，不手写无意义 getter/setter；DTO/VO 按项目风格用 Lombok，Entity 谨慎使用 `@Data`。
 - Java 后端 Controller 保持轻薄，不写业务代码；业务契约放 Service 接口，业务流程放 Service 实现。
+- Service 接口类和所有对外方法必须有契约注释；修改已有接口时，本次触碰的方法也要同步补齐。
 - 事务默认放在 Service 实现层业务入口；需要精确控制提交/回滚、分段提交或部分失败保留时，优先复用项目事务管理器或 `TransactionTemplate` 函数式写法。
 - 高并发默认考虑幂等、锁顺序、死锁规避、异步最终一致、批量分批和用户/租户/审计上下文传播。
 - Service 接口和重要实现方法要有原因型注释，做到不冗余、不缺失、不杂乱。
@@ -84,6 +87,7 @@ references/
 - 主文件只负责触发和路由，细则通过 `references/00-index.md` 渐进读取。
 - 长任务按“任务胶囊 -> 调用链确认 -> 最小修改 -> 轻量验证 -> Context Capsule”执行。
 - 修改已有代码时，执行“触碰范围局部对齐”：不全量重构，但不能只让新增代码遵守规则。
+- Global/Goal 模式每轮推进前恢复 Context Capsule，不能用“追求目标”绕过索引、调用链和局部对齐。
 - 切换窗口或上下文压缩前输出 Context Capsule，避免丢失目标、证据、回滚点和下一步。
 - 用户中途插入新目标时，先判断与主任务关系，不默认重置已有调用链。
 - 全局 `AGENTS.md` 不需要承载全部细则，但建议保留为兜底入口。

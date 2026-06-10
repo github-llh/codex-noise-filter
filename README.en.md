@@ -43,6 +43,8 @@ references/
 - Prefer JetBrains MCP / IDE tools for JetBrains projects.
 - Before editing, confirm target files, root cause, minimal fix, and unaffected contracts.
 - Confirm call chains and impact before code changes.
+- Plan stages must also use the skill index. Plans must list applicable references, touched scope, local-alignment items, and acceptance checks.
+- Global/Goal mode must also use the skill index. Each round must restore the goal, applicable references, touched scope, local-alignment items, acceptance checks, and Context Capsule.
 - Rules apply to both new code and existing-code edits. Every touched method, class, DTO, SQL, test, and direct call chain must be locally aligned with the rules.
 - Discover Maven from `.codex/local-environment.json`, IDE/project configuration, and verified local candidates.
 - The currently verified Maven candidate is `/Users/lilinhan/dev/maven-3.9.10/bin/mvn`; the local repository candidate is `/Users/lilinhan/maven-git`.
@@ -54,6 +56,7 @@ references/
 - Use `Optional`, Stream, method references, and functional style for null handling when the Java version and project style support them, but do not overuse them in DTO/entity fields or simple cases.
 - When a project already uses Lombok, do not hand-write meaningless getters/setters. Use Lombok for DTO/VO classes following project style, and use `@Data` carefully on entities.
 - Keep Java backend controllers thin. Put business contracts in service interfaces and business flow in service implementations.
+- Service interfaces and all public service methods must have contract comments. When editing existing interfaces, touched methods must be updated too.
 - Put transactions on service implementation business-entry methods by default. For precise commit/rollback boundaries, segmented commits, or allowed partial failures, reuse the project transaction manager or functional `TransactionTemplate` style.
 - For high concurrency, consider idempotency, lock ordering, deadlock prevention, async eventual consistency, batched execution, and user/tenant/audit context propagation.
 - Add reason-focused comments to service interfaces and important implementation methods. Comments should be non-redundant, complete where needed, and orderly.
@@ -82,6 +85,7 @@ references/
 - Keep `SKILL.md` small and route details through `references/00-index.md`.
 - For long tasks, use the sequence: task capsule, call-chain confirmation, minimal edit, lightweight validation, Context Capsule.
 - When editing existing code, locally align the touched scope. Do not refactor the whole module, but do not apply the rules only to newly added lines.
+- In Global/Goal mode, restore the Context Capsule before each round. Goal pursuit must not bypass indexing, call-chain checks, or touched-scope alignment.
 - Before switching windows or compacting context, emit a Context Capsule so goals, evidence, rollback points, and next steps are preserved.
 - When the user inserts a new goal, treat it as an incremental task first and do not reset confirmed call chains by default.
 - The global `AGENTS.md` no longer needs to carry every detail, but it should remain as a fallback entry point.

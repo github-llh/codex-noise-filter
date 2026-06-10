@@ -21,6 +21,8 @@
 - 修改前检查：`01-global-engineering-rules.md#修改前确认`
 - 高风险变更：`01-global-engineering-rules.md#高风险变更`
 - AGENTS 演进建议：`01-global-engineering-rules.md#项目演进规则`
+- Plan 阶段门禁：`02-noise-filter-workflow.md#plan-阶段门禁`
+- Global/Goal 模式门禁：`02-noise-filter-workflow.md#globalgoal-模式门禁`
 - Java 后端分层：`07-java-backend-architecture.md#后端分层`
 - 事务管理：`07-java-backend-architecture.md#事务管理`
 - 新建文件归属地：`07-java-backend-architecture.md#新建文件归属地`
@@ -65,8 +67,10 @@
 
 ## 高精度路由
 
-- `Controller`、`Service`、`接口层`、`实现层`、`事务`、`@Transactional`、`rollbackFor`、`module 归属`、`新建文件放哪`、`注释`：读 `07-java-backend-architecture.md`。
-- `Enum`、`常量`、`参数校验`、`Bean Validation`、`Lombok`、`Optional`、`Stream`、`重复 if/set`、`硬编码`、`函数式`：读 `08-java-style-patterns.md`。
+- `Plan`、`计划`、`执行计划`、`分步实现`：先读 `02-noise-filter-workflow.md#plan-阶段门禁`。
+- `Global`、`Goal`、`目标追踪`、`长期推进`、`自动续跑`、`跨轮推进`：先读 `02-noise-filter-workflow.md#globalgoal-模式门禁`。
+- `Controller`、`Service`、`接口层`、`实现层`、`I*Service`、`事务`、`@Transactional`、`rollbackFor`、`module 归属`、`新建文件放哪`、`注释`：读 `07-java-backend-architecture.md`。
+- `Enum`、`常量`、`固定值`、`状态值`、`类型值`、`来源值`、`协议`、`默认值`、`阈值`、`时间窗`、`参数校验`、`Bean Validation`、`Lombok`、`Optional`、`Stream`、`重复 if/set`、`硬编码`、`函数式`：读 `08-java-style-patterns.md`。
 - `高并发`、`幂等`、`死锁`、`异步`、`MQ`、`事件`、`线程池`、`虚拟线程`、`批量`、`用户上下文`、`创建人`、`修改人`：读 `09-concurrency-async-batch.md`。
 - `mvn`、`pom.xml`、`-pl`、`-am`、`多模块构建`、`测试命令`：读 `03-maven-backend-build.md`。
 - `MAVEN_HOME`、`JAVA_HOME`、`Node`、`pnpm`、`IDE 配置路径`、`.codex/local-environment.json`：读 `06-environment-discovery.md`。
