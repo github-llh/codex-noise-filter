@@ -9,9 +9,10 @@
 3. 涉及 Java、Spring、Maven、后端构建、测试时读 `03-maven-backend-build.md`。
 4. 涉及 Java 后端分层、Controller/Service、模块归属、注释、调用链时读 `07-java-backend-architecture.md`。
 5. 涉及 Java 枚举、参数校验、去硬编码、重复赋值、Optional、函数式风格、Lombok 时读 `08-java-style-patterns.md`。
-6. 涉及前端、页面、组件、样式、交互时读 `04-frontend-rules.md`。
-7. 需要最终说明、上下文压缩、交接时读 `05-delivery-templates.md`。
-8. 涉及 Maven、JDK、Node、包管理器、IDE 配置路径时读 `06-environment-discovery.md`。
+6. 涉及高并发、幂等、异步事件、中间件、死锁、批量、线程池、虚拟线程、用户上下文传播时读 `09-concurrency-async-batch.md`。
+7. 涉及前端、页面、组件、样式、交互时读 `04-frontend-rules.md`。
+8. 需要最终说明、上下文压缩、交接时读 `05-delivery-templates.md`。
+9. 涉及 Maven、JDK、Node、包管理器、IDE 配置路径时读 `06-environment-discovery.md`。
 
 ## 任务到文件映射
 
@@ -21,8 +22,15 @@
 - 高风险变更：`01-global-engineering-rules.md#高风险变更`
 - AGENTS 演进建议：`01-global-engineering-rules.md#项目演进规则`
 - Java 后端分层：`07-java-backend-architecture.md#后端分层`
+- 事务管理：`07-java-backend-architecture.md#事务管理`
 - 新建文件归属地：`07-java-backend-architecture.md#新建文件归属地`
 - 注释规范：`07-java-backend-architecture.md#注释规则`
+- 高并发可用性：`09-concurrency-async-batch.md#高并发可用性`
+- 幂等性：`09-concurrency-async-batch.md#幂等性`
+- 死锁规避：`09-concurrency-async-batch.md#死锁规避`
+- 异步事件与中间件：`09-concurrency-async-batch.md#异步事件与中间件`
+- 批量操作与并发执行：`09-concurrency-async-batch.md#批量操作与并发执行`
+- 用户上下文传播：`09-concurrency-async-batch.md#用户上下文传播`
 - 枚举与常量：`08-java-style-patterns.md#枚举与常量`
 - DTO 参数校验：`08-java-style-patterns.md#参数校验分层`
 - 去硬编码与重复逻辑：`08-java-style-patterns.md#去硬编码与重复逻辑`
@@ -55,8 +63,9 @@
 
 ## 高精度路由
 
-- `Controller`、`Service`、`接口层`、`实现层`、`module 归属`、`新建文件放哪`、`注释`：读 `07-java-backend-architecture.md`。
+- `Controller`、`Service`、`接口层`、`实现层`、`事务`、`@Transactional`、`rollbackFor`、`module 归属`、`新建文件放哪`、`注释`：读 `07-java-backend-architecture.md`。
 - `Enum`、`常量`、`参数校验`、`Bean Validation`、`Lombok`、`Optional`、`Stream`、`重复 if/set`、`硬编码`、`函数式`：读 `08-java-style-patterns.md`。
+- `高并发`、`幂等`、`死锁`、`异步`、`MQ`、`事件`、`线程池`、`虚拟线程`、`批量`、`用户上下文`、`创建人`、`修改人`：读 `09-concurrency-async-batch.md`。
 - `mvn`、`pom.xml`、`-pl`、`-am`、`多模块构建`、`测试命令`：读 `03-maven-backend-build.md`。
 - `MAVEN_HOME`、`JAVA_HOME`、`Node`、`pnpm`、`IDE 配置路径`、`.codex/local-environment.json`：读 `06-environment-discovery.md`。
 - `flex`、`grid`、`组件`、`页面`、`路由守卫`、`加载/空状态`：读 `04-frontend-rules.md`。

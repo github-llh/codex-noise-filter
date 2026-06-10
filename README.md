@@ -24,6 +24,7 @@ references/
   06-environment-discovery.md
   07-java-backend-architecture.md
   08-java-style-patterns.md
+  09-concurrency-async-batch.md
 ```
 
 `SKILL.md` 只保留触发、路由和硬约束；执行细则按索引进入对应文件，减少主文件负担。
@@ -34,6 +35,7 @@ references/
 - `01-global-engineering-rules.md` 只保留全局共用规则。
 - Java 后端架构规则集中到 `07-java-backend-architecture.md`，只有涉及分层、归属地、注释、调用链时才读取。
 - Java 代码风格规则集中到 `08-java-style-patterns.md`，只有涉及枚举、参数校验、Lombok、Optional、函数式、去重复时才读取。
+- 并发、异步和批量规则集中到 `09-concurrency-async-batch.md`，只有涉及高并发、幂等、死锁、事件、中间件、线程池、虚拟线程、用户上下文传播时才读取。
 - Maven 构建只读 `03-maven-backend-build.md`；环境路径发现只读 `06-environment-discovery.md`。
 - 索引路由用“关键词 + 任务意图 + 影响面”交叉确认，减少误读，同时避免把所有规则一次性读入。
 
@@ -53,6 +55,8 @@ references/
 - 判空逻辑可在 Java 版本和项目风格支持时使用 `Optional`、Stream、方法引用等函数式写法，但不要滥用于 DTO/Entity 字段或简单场景。
 - 项目已使用 Lombok 时，不手写无意义 getter/setter；DTO/VO 按项目风格用 Lombok，Entity 谨慎使用 `@Data`。
 - Java 后端 Controller 保持轻薄，不写业务代码；业务契约放 Service 接口，业务流程放 Service 实现。
+- 事务默认放在 Service 实现层业务入口，先确认事务边界、传播、回滚、异常吞吐、缓存/消息/外部调用副作用。
+- 高并发默认考虑幂等、锁顺序、死锁规避、异步最终一致、批量分批和用户/租户/审计上下文传播。
 - Service 接口和重要实现方法要有原因型注释，做到不冗余、不缺失、不杂乱。
 - 前端优先修布局、组件属性和状态契约，不用硬编码掩盖后端问题。
 - 编程任务规则已内化到 skill；全局 `/Users/lilinhan/.codex/AGENTS.md` 仍建议保留为兜底。

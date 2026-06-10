@@ -22,6 +22,7 @@ references/
   06-environment-discovery.md
   07-java-backend-architecture.md
   08-java-style-patterns.md
+  09-concurrency-async-batch.md
 ```
 
 `SKILL.md` is intentionally small. It routes the agent to indexed reference files instead of loading every rule at once.
@@ -32,6 +33,7 @@ references/
 - `01-global-engineering-rules.md` only contains globally shared rules.
 - Java backend architecture rules live in `07-java-backend-architecture.md` and should be opened only for layering, file placement, comments, or call chains.
 - Java style rules live in `08-java-style-patterns.md` and should be opened only for enums, validation, Lombok, Optional, functional style, or repeated logic.
+- Concurrency, async, and batch rules live in `09-concurrency-async-batch.md` and should be opened only for high concurrency, idempotency, deadlocks, events, middleware, thread pools, virtual threads, or user-context propagation.
 - Maven builds use `03-maven-backend-build.md`; environment discovery uses `06-environment-discovery.md`.
 - Routing should cross-check keywords, user intent, and impact area to preserve accuracy without reading every rule file.
 
@@ -51,6 +53,8 @@ references/
 - Use `Optional`, Stream, method references, and functional style for null handling when the Java version and project style support them, but do not overuse them in DTO/entity fields or simple cases.
 - When a project already uses Lombok, do not hand-write meaningless getters/setters. Use Lombok for DTO/VO classes following project style, and use `@Data` carefully on entities.
 - Keep Java backend controllers thin. Put business contracts in service interfaces and business flow in service implementations.
+- Put transactions on service implementation business-entry methods by default. Confirm transaction boundaries, propagation, rollback, swallowed exceptions, and cache/message/external side effects.
+- For high concurrency, consider idempotency, lock ordering, deadlock prevention, async eventual consistency, batched execution, and user/tenant/audit context propagation.
 - Add reason-focused comments to service interfaces and important implementation methods. Comments should be non-redundant, complete where needed, and orderly.
 - For frontend work, fix layout, component props, state handling, and contracts directly; do not hide backend issues with frontend hardcoding.
 - Coding rules are embedded in this skill; keep the global `/Users/lilinhan/.codex/AGENTS.md` as a lightweight fallback.
