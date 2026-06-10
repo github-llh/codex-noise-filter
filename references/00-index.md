@@ -34,6 +34,7 @@
 - 批量操作与并发执行：`09-concurrency-async-batch.md#批量操作与并发执行`
 - 用户上下文传播：`09-concurrency-async-batch.md#用户上下文传播`
 - 枚举与常量：`08-java-style-patterns.md#枚举与常量`
+- 配置外置化：`08-java-style-patterns.md#配置外置化`
 - DTO 参数校验：`08-java-style-patterns.md#参数校验分层`
 - 去硬编码与重复逻辑：`08-java-style-patterns.md#去硬编码与重复逻辑`
 - 判空与函数式风格：`08-java-style-patterns.md#判空与函数式风格`
@@ -70,7 +71,7 @@
 - `Plan`、`计划`、`执行计划`、`分步实现`：先读 `02-noise-filter-workflow.md#plan-阶段门禁`。
 - `Global`、`Goal`、`目标追踪`、`长期推进`、`自动续跑`、`跨轮推进`：先读 `02-noise-filter-workflow.md#globalgoal-模式门禁`。
 - `Controller`、`Service`、`接口层`、`实现层`、`I*Service`、`事务`、`@Transactional`、`rollbackFor`、`module 归属`、`新建文件放哪`、`注释`：读 `07-java-backend-architecture.md`。
-- `Enum`、`常量`、`固定值`、`状态值`、`类型值`、`来源值`、`协议`、`默认值`、`阈值`、`时间窗`、`参数校验`、`Bean Validation`、`Lombok`、`Optional`、`Stream`、`重复 if/set`、`硬编码`、`函数式`：读 `08-java-style-patterns.md`。
+- `Enum`、`常量`、`固定值`、`状态值`、`类型值`、`来源值`、`协议`、`默认值`、`阈值`、`时间窗`、`yml`、`properties`、`@ConfigurationProperties`、`@Value`、`配置外置`、`参数校验`、`Bean Validation`、`Lombok`、`Optional`、`Stream`、`重复 if/set`、`硬编码`、`函数式`：读 `08-java-style-patterns.md`。
 - `高并发`、`幂等`、`死锁`、`异步`、`MQ`、`事件`、`线程池`、`虚拟线程`、`批量`、`用户上下文`、`创建人`、`修改人`：读 `09-concurrency-async-batch.md`。
 - `mvn`、`pom.xml`、`-pl`、`-am`、`多模块构建`、`测试命令`：读 `03-maven-backend-build.md`。
 - `MAVEN_HOME`、`JAVA_HOME`、`Node`、`pnpm`、`IDE 配置路径`、`.codex/local-environment.json`：读 `06-environment-discovery.md`。

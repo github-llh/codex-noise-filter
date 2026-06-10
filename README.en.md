@@ -51,6 +51,7 @@ references/
 - Build multi-module Maven projects from the aggregation root with `-pl <module> -am`.
 - Before creating files, confirm the target module, layer responsibility, package path, existing peer files, and dependency direction. Interfaces, implementations, entities, and contracts may live in different modules.
 - Prefer business enums for stable fixed sets such as status, type, source, action, phase, and result values. Avoid scattered magic strings and numbers.
+- Environment- or operations-variable values such as URLs, secrets, toggles, thresholds, time windows, thread pools, cache TTLs, and external-system parameters should live in yml/properties or the configuration center and be injected through typed configuration classes.
 - Put simple input validation on DTO/Request classes with Bean Validation annotations. Controllers should only trigger validation and rely on unified exception handling.
 - Avoid long repeated `if`, `set`, conversion, or defaulting blocks where only field names differ. Prefer existing project mapping, validation, enum strategy, conditional update, or helper patterns.
 - Use `Optional`, Stream, method references, and functional style for null handling when the Java version and project style support them, but do not overuse them in DTO/entity fields or simple cases.
