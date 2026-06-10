@@ -147,6 +147,50 @@ setIfNotNull(input.getType(), entity::setType);
 
 如果项目已有 MapStruct 等映射器，应优先使用项目既有 mapper，而不是新增 helper。
 
+## 判空与函数式风格
+
+判空逻辑优先选择当前 Java 版本和项目技术栈支持的清晰写法，不机械堆叠多层 `if (x != null)`。
+
+使用前先确认：
+
+- `pom.xml`、`maven-compiler-plugin`、`maven.compiler.release/source/target`、IDE SDK 或 toolchain 指定的 Java 版本。
+- 项目现有风格是否已经使用 `Optional`、Stream、lambda、方法引用、增强 `switch`、record 等语法。
+- 团队是否已有 `StringUtils`、`CollectionUtils`、`ObjectUtils`、业务 helper 或统一空值处理工具。
+
+推荐使用：
+
+- 可缺失的查询结果或中间计算结果，可用 `Optional<T>` 表达“可能没有值”。
+- 链式取值、默认值、条件映射可用 `map`、`flatMap`、`filter`、`orElse`、`orElseGet`、`orElseThrow`。
+- 集合转换、过滤、分组、聚合可用 Stream，但要保持可读性。
+- 重复判空赋值可结合方法引用、`Consumer`、`Function` 或小型 helper。
+- Java 版本支持时，可借鉴 Scala 的表达式化思路：用 `map/filter/flatMap`、不可变中间值、策略映射、增强 `switch` 表达清晰分支。
+
+谨慎或避免：
+
+- 不要把 `Optional` 用作 Entity、DTO、VO 字段类型、Controller 入参或 JSON 契约字段。
+- 不要把集合包装成 `Optional<List<T>>`；空集合优先用空集合表达。
+- 不要在业务代码里 `optional.get()` 后不检查。
+- 不要为了函数式而写深层嵌套 Optional/Stream，导致调试困难。
+- 简单直接的空判断如果更清楚，可以保留，不强行改成函数式链。
+- 性能敏感路径、复杂异常处理、需要详细日志的流程，优先选择清晰的显式代码。
+
+示例：
+
+```java
+String name = Optional.ofNullable(input)
+    .map(Input::getName)
+    .filter(StringUtils::hasText)
+    .orElse(defaultName);
+```
+
+```java
+Optional.ofNullable(input.getType())
+    .map(TypeEnum::ofCode)
+    .ifPresent(entity::setType);
+```
+
+函数式风格必须服务业务表达：减少重复、减少空指针风险、让数据流更清楚；不能为了“像 Scala”而牺牲 Java 项目的可维护性。
+
 ## Lombok 使用标准
 
 使用前先确认项目已有 Lombok 依赖和风格；未批准不要新增 Lombok 依赖。

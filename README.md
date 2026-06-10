@@ -47,6 +47,7 @@ references/
 - 明确固定集合的状态、类型、来源、动作、阶段、结果等值优先写成业务 Enum，避免魔法字符串和数字散落。
 - 简单入参校验优先写在 DTO/Request 的 Bean Validation 注解上，Controller 只触发校验并走统一异常处理。
 - 避免字段不同但逻辑相同的一长串 `if`、`set`、转换或默认值代码，优先复用项目已有映射、校验、枚举策略、条件更新和 helper 能力。
+- 判空逻辑可在 Java 版本和项目风格支持时使用 `Optional`、Stream、方法引用等函数式写法，但不要滥用于 DTO/Entity 字段或简单场景。
 - 项目已使用 Lombok 时，不手写无意义 getter/setter；DTO/VO 按项目风格用 Lombok，Entity 谨慎使用 `@Data`。
 - Java 后端 Controller 保持轻薄，不写业务代码；业务契约放 Service 接口，业务流程放 Service 实现。
 - Service 接口和重要实现方法要有原因型注释，做到不冗余、不缺失、不杂乱。

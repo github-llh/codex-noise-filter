@@ -45,6 +45,7 @@ references/
 - Prefer business enums for stable fixed sets such as status, type, source, action, phase, and result values. Avoid scattered magic strings and numbers.
 - Put simple input validation on DTO/Request classes with Bean Validation annotations. Controllers should only trigger validation and rely on unified exception handling.
 - Avoid long repeated `if`, `set`, conversion, or defaulting blocks where only field names differ. Prefer existing project mapping, validation, enum strategy, conditional update, or helper patterns.
+- Use `Optional`, Stream, method references, and functional style for null handling when the Java version and project style support them, but do not overuse them in DTO/entity fields or simple cases.
 - When a project already uses Lombok, do not hand-write meaningless getters/setters. Use Lombok for DTO/VO classes following project style, and use `@Data` carefully on entities.
 - Keep Java backend controllers thin. Put business contracts in service interfaces and business flow in service implementations.
 - Add reason-focused comments to service interfaces and important implementation methods. Comments should be non-redundant, complete where needed, and orderly.
