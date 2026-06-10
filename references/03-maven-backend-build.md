@@ -1,6 +1,6 @@
 # Maven 与后端构建
 
-本文件只处理 Maven 环境、构建、验证和多模块定位。Java 后端分层、注释、枚举、参数校验、Lombok、新建文件归属地见 `07-java-backend-rules.md`。
+本文件只处理 Maven 环境、构建、验证和多模块定位。Java 后端分层、注释、新建文件归属地见 `07-java-backend-architecture.md`；枚举、参数校验、Lombok、Optional 和去重复逻辑见 `08-java-style-patterns.md`。
 
 ## 本地 Maven 环境
 

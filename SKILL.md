@@ -33,6 +33,8 @@ description: |
 - 前端代码规范、布局、状态、验证：`references/04-frontend-rules.md`
 - 输出格式、交付清单、上下文胶囊：`references/05-delivery-templates.md`
 - IDE、Maven、Node 等本机环境发现与缓存：`references/06-environment-discovery.md`
+- Java 后端架构、归属地、分层和注释：`references/07-java-backend-architecture.md`
+- Java 代码风格、枚举、校验、Lombok、Optional、去重复：`references/08-java-style-patterns.md`
 
 ## 硬约束
 
