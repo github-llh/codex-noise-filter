@@ -36,10 +36,35 @@
 
 - 只读查询优先标注或复用 `readOnly = true`，避免无意义写事务。
 - 写操作按最小业务一致性边界加 `@Transactional`，不要把无关查询、远程调用、文件 IO、耗时计算包进长事务。
+- 需要精确控制提交/回滚边界、返回值、异常转换、分段提交或部分失败保留时，优先使用项目已有事务管理器或 `TransactionTemplate` 这类函数式事务写法。
 - 默认回滚运行时异常；需要对 checked exception 回滚时明确 `rollbackFor`。
 - 不在事务内吞异常后继续返回成功；需要捕获时必须重新抛出、标记回滚或返回明确失败。
 - 谨慎使用 `REQUIRES_NEW`、`NESTED`、手动事务，必须说明业务原因和回滚边界。
 - 批量更新要关注事务大小、锁范围、分页/分批、超时和重试策略。
+
+函数式事务：
+
+- 优先复用项目已有 `PlatformTransactionManager`、`TransactionTemplate`、事务工具类或封装后的事务执行器。
+- 适用于“某一段必须回滚、其他段允许提交”的批量处理、导入、补偿、重试和局部失败收集。
+- 每个事务块必须有清晰输入、输出、异常策略和回滚说明，不把大量无关逻辑塞进一个 lambda。
+- 部分回滚要显式记录成功/失败明细、失败原因、补偿入口和幂等键，避免调用方误以为全量成功。
+- 不要在一个大事务里靠吞异常模拟部分成功；应拆分事务边界，或用事务模板分段提交。
+- 需要强一致的核心状态流转，不要随意部分提交，除非业务规则明确允许。
+
+示例形态：
+
+```java
+Result result = transactionTemplate.execute(status -> {
+    try {
+        return doBusiness();
+    } catch (RecoverableException ex) {
+        status.setRollbackOnly();
+        return Result.failed(ex.getMessage());
+    }
+});
+```
+
+如果项目已有事务工具封装，优先使用项目封装，不重复创建 `TransactionTemplate`。
 
 外部副作用：
 

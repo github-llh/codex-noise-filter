@@ -53,7 +53,7 @@ references/
 - Use `Optional`, Stream, method references, and functional style for null handling when the Java version and project style support them, but do not overuse them in DTO/entity fields or simple cases.
 - When a project already uses Lombok, do not hand-write meaningless getters/setters. Use Lombok for DTO/VO classes following project style, and use `@Data` carefully on entities.
 - Keep Java backend controllers thin. Put business contracts in service interfaces and business flow in service implementations.
-- Put transactions on service implementation business-entry methods by default. Confirm transaction boundaries, propagation, rollback, swallowed exceptions, and cache/message/external side effects.
+- Put transactions on service implementation business-entry methods by default. For precise commit/rollback boundaries, segmented commits, or allowed partial failures, reuse the project transaction manager or functional `TransactionTemplate` style.
 - For high concurrency, consider idempotency, lock ordering, deadlock prevention, async eventual consistency, batched execution, and user/tenant/audit context propagation.
 - Add reason-focused comments to service interfaces and important implementation methods. Comments should be non-redundant, complete where needed, and orderly.
 - For frontend work, fix layout, component props, state handling, and contracts directly; do not hide backend issues with frontend hardcoding.
