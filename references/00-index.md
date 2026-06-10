@@ -24,6 +24,7 @@
 - 注释规范：`07-java-backend-rules.md#注释规则`
 - 枚举与常量：`07-java-backend-rules.md#枚举与常量`
 - DTO 参数校验：`07-java-backend-rules.md#参数校验分层`
+- 去硬编码与重复逻辑：`07-java-backend-rules.md#去硬编码与重复逻辑`
 - Lombok 使用标准：`07-java-backend-rules.md#lombok-使用标准`
 - token 预算与读取窗口：`02-noise-filter-workflow.md#上下文预算`
 - 调用链闭环：`02-noise-filter-workflow.md#调用链确认`
