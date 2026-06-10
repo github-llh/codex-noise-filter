@@ -43,6 +43,7 @@ references/
 - Prefer JetBrains MCP / IDE tools for JetBrains projects.
 - Before editing, confirm target files, root cause, minimal fix, and unaffected contracts.
 - Confirm call chains and impact before code changes.
+- Rules apply to both new code and existing-code edits. Every touched method, class, DTO, SQL, test, and direct call chain must be locally aligned with the rules.
 - Discover Maven from `.codex/local-environment.json`, IDE/project configuration, and verified local candidates.
 - The currently verified Maven candidate is `/Users/lilinhan/dev/maven-3.9.10/bin/mvn`; the local repository candidate is `/Users/lilinhan/maven-git`.
 - Build multi-module Maven projects from the aggregation root with `-pl <module> -am`.
@@ -80,6 +81,7 @@ references/
 
 - Keep `SKILL.md` small and route details through `references/00-index.md`.
 - For long tasks, use the sequence: task capsule, call-chain confirmation, minimal edit, lightweight validation, Context Capsule.
+- When editing existing code, locally align the touched scope. Do not refactor the whole module, but do not apply the rules only to newly added lines.
 - Before switching windows or compacting context, emit a Context Capsule so goals, evidence, rollback points, and next steps are preserved.
 - When the user inserts a new goal, treat it as an incremental task first and do not reset confirmed call chains by default.
 - The global `AGENTS.md` no longer needs to carry every detail, but it should remain as a fallback entry point.

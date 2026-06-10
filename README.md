@@ -45,6 +45,7 @@ references/
 - JetBrains 项目优先使用 JetBrains MCP / IDE 工具。
 - 修改前确认目标文件、根因、最小方案和不影响范围。
 - 修改前必须完成调用链和影响面确认。
+- 规则同时适用于新增代码和已有代码修改；凡本次触碰的方法、类、DTO、SQL、测试和调用链，都要做局部规则对齐。
 - Maven 后端项目优先读取 `.codex/local-environment.json`、IDE/项目配置和已验证本机候选路径。
 - 当前已验证 Maven 候选为 `/Users/lilinhan/dev/maven-3.9.10/bin/mvn`，本地仓库候选为 `/Users/lilinhan/maven-git`。
 - 多模块 Maven 项目默认从聚合 root 节点执行，并使用 `-pl <module> -am`。
@@ -82,6 +83,7 @@ references/
 
 - 主文件只负责触发和路由，细则通过 `references/00-index.md` 渐进读取。
 - 长任务按“任务胶囊 -> 调用链确认 -> 最小修改 -> 轻量验证 -> Context Capsule”执行。
+- 修改已有代码时，执行“触碰范围局部对齐”：不全量重构，但不能只让新增代码遵守规则。
 - 切换窗口或上下文压缩前输出 Context Capsule，避免丢失目标、证据、回滚点和下一步。
 - 用户中途插入新目标时，先判断与主任务关系，不默认重置已有调用链。
 - 全局 `AGENTS.md` 不需要承载全部细则，但建议保留为兜底入口。
