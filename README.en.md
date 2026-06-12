@@ -55,9 +55,10 @@ references/
 - Put simple input validation on DTO/Request classes with Bean Validation annotations. Controllers should only trigger validation and rely on unified exception handling.
 - Avoid long repeated `if`, `set`, conversion, or defaulting blocks where only field names differ. Prefer existing project mapping, validation, enum strategy, conditional update, or helper patterns.
 - Use `Optional`, Stream, method references, and functional style for null handling when the Java version and project style support them, but do not overuse them in DTO/entity fields or simple cases.
-- When a project already uses Lombok, do not hand-write meaningless getters/setters. Use Lombok for DTO/VO classes following project style, and use `@Data` carefully on entities.
-- Keep Java backend controllers thin. Put business contracts in service interfaces and business flow in service implementations.
-- Service interfaces and all public service methods must have contract comments. When editing existing interfaces, touched methods must be updated too.
+- When a project already uses Lombok, do not hand-write meaningless getters/setters. Use Lombok for DTO/VO/entity classes following peer-file style, and reuse the existing `@Data` entity convention when the project already has one.
+- Keep Java backend controllers thin. Return-data enrichment, list post-processing, URL/name/status filling, database/cache/remote reads, state transitions, and complex branching must move to service implementations, assemblers, or existing business components.
+- Service interfaces and all public service methods must have contract comments. When editing existing interfaces, touched methods must be updated too, without waiting for a user reminder.
+- When adding or editing response entities, database entities, DTOs, or VOs, update class and key-field comments in the same change, especially for status, type, source, unit, external mapping, compatibility fields, permission semantics, and masking semantics.
 - Put transactions on service implementation business-entry methods by default. For precise commit/rollback boundaries, segmented commits, or allowed partial failures, reuse the project transaction manager or functional `TransactionTemplate` style.
 - For high concurrency, consider idempotency, lock ordering, deadlock prevention, async eventual consistency, batched execution, and user/tenant/audit context propagation.
 - Add reason-focused comments to service interfaces and important implementation methods. Comments should be non-redundant, complete where needed, and orderly.
