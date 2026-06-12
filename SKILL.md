@@ -25,7 +25,7 @@ description: |
 
 ## 必读入口
 
-先读 `references/00-index.md`，再按任务类型只打开对应文件。不要把所有 references 一次性读完。
+先读 `references/00-index.md`，按快速决策表选择最小 reference 组合，再按触碰范围追加对应文件。不要把所有 references 一次性读完；减少读取不能减少硬约束执行。
 
 最常用路由：
 

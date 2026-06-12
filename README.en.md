@@ -36,6 +36,9 @@ references/
 - Concurrency, async, and batch rules live in `09-concurrency-async-batch.md` and should be opened only for high concurrency, idempotency, deadlocks, events, middleware, thread pools, virtual threads, or user-context propagation.
 - Maven builds use `03-maven-backend-build.md`; environment discovery uses `06-environment-discovery.md`.
 - Routing should cross-check keywords, user intent, and impact area to preserve accuracy without reading every rule file.
+- `SKILL.md` hard constraints are always in force. Index performance tuning may reduce unrelated reference reads, but must not reduce mandatory constraints.
+- Common tasks should use the quick-decision minimum set first, for example Java Controller/Service edits default to `02 + 07`, and add `08` only when enums, validation, Lombok, Optional, or repeated logic are involved.
+- If the touched scope expands during execution, add references through the index. Do not skip non-bypass gates, existing-code local alignment, layering, comments, transactions, concurrency, or business abstraction rules just to read fewer files.
 
 ## Key Rules
 
