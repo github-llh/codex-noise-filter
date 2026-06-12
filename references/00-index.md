@@ -2,20 +2,34 @@
 
 只读取当前任务需要的文件，避免主文件和上下文膨胀。
 
-## 先读顺序
+## 路由原则
 
-1. 所有编程任务先读 `01-global-engineering-rules.md` 的相关章节。
-2. 涉及定位、修改、排查、重构时读 `02-noise-filter-workflow.md`。
-3. 涉及 Java、Spring、Maven、后端构建、测试时读 `03-maven-backend-build.md`。
-4. 涉及 Java 后端分层、Controller/Service、模块归属、注释、调用链时读 `07-java-backend-architecture.md`。
-5. 涉及 Java 枚举、参数校验、去硬编码、重复赋值、Optional、函数式风格、Lombok 时读 `08-java-style-patterns.md`。
-6. 涉及高并发、幂等、异步事件、中间件、死锁、批量、线程池、虚拟线程、用户上下文传播时读 `09-concurrency-async-batch.md`。
-7. 涉及前端、页面、组件、样式、交互时读 `04-frontend-rules.md`。
-8. 需要最终说明、上下文压缩、交接时读 `05-delivery-templates.md`。
-9. 涉及 Maven、JDK、Node、包管理器、IDE 配置路径时读 `06-environment-discovery.md`。
+`SKILL.md` 的硬约束视为常驻规则，不因索引性能优化而丢失；`00-index.md` 只负责把任务导向最小 reference 集，不重复展开全部细则。
+
+读取顺序按三段执行：
+
+1. 先判定运行门禁：涉及读取、修改、构建、测试、重构、Plan、Global/Goal、自动续跑、上下文恢复时，读 `02-noise-filter-workflow.md` 对应章节。
+2. 再判定业务域：Java 后端读 `07`，Java 风格读 `08`，并发/异步/批量读 `09`，前端读 `04`，构建读 `03`，环境发现读 `06`。
+3. 最后按需补充：只在需要交付模板、Context Capsule、语言/工具细则、高风险说明时读 `05` 或 `01`。
+
+性能优先级：
+
+- 默认打开 `00-index.md` + 1 个主 reference。
+- Java 后端修改通常打开 `02` + `07`，只有命中枚举、校验、Lombok、Optional、重复逻辑时再加 `08`。
+- 涉及事务、高并发、幂等、异步、批量时，在 `07` 基础上加 `09`。
+- 涉及 Maven 构建但不改代码时，优先 `03`，需要路径发现时才加 `06`。
+- 涉及前端时，优先 `04`；只有接口契约或后端联动明确时再加后端 reference。
+- 不为了“保险”一次性读取所有 reference；如果执行中发现触碰范围扩大，再按关键词追加读取。
+
+约束保真：
+
+- 性能优化不能跳过 `SKILL.md` 硬约束、`02` 的不可绕过门禁、既有代码局部对齐、Controller 分层、Service 注释、实体 Lombok、业务抽象、事务与并发要求。
+- 若一个任务同时命中性能限制和硬约束，硬约束优先，宁可多打开一个 reference，也不能漏掉触碰范围必须执行的规则。
+- 新增、修改、续跑、Plan、Global/Goal、跨窗口恢复都使用同一套路由；不得因任务入口不同而降低规则集。
 
 ## 任务到文件映射
 
+- 不可绕过执行门禁：`02-noise-filter-workflow.md#不可绕过执行门禁`
 - 语言与标题规范：`01-global-engineering-rules.md#语言偏好`
 - JetBrains 项目工具优先级：`01-global-engineering-rules.md#工具优先级`
 - 修改前检查：`01-global-engineering-rules.md#修改前确认`
@@ -57,6 +71,24 @@
 - Context Capsule：`05-delivery-templates.md#上下文胶囊`
 - Codex 会话上下文管理：`05-delivery-templates.md#codex-上下文管理`
 - Codex 记忆管理：`05-delivery-templates.md#codex-记忆管理`
+
+## 快速决策表
+
+按第一条命中的任务形态选最小组合，再用高精度路由补充：
+
+| 任务形态 | 默认读取 | 追加条件 |
+| --- | --- | --- |
+| 只问规则、解释 skill、优化索引 | `00` + 目标 reference | 需要同步说明时加 README |
+| Plan/Global/Goal/续跑/上下文恢复 | `02` | 涉及代码层再加对应业务 reference |
+| Java Controller/Service/Entity/DTO 修改 | `02` + `07` | 枚举/校验/Lombok/Optional/重复逻辑加 `08` |
+| Java 事务/并发/批量/异步 | `02` + `07` + `09` | 需要构建验证时加 `03` |
+| Java 枚举/配置/校验/Lombok/重复 if-set | `02` + `08` | 涉及分层或接口注释加 `07` |
+| Maven 构建/测试/多模块 root | `03` | Maven/JDK 路径未知时加 `06` |
+| 环境路径发现/缓存 | `06` | 需要构建命令时加 `03` |
+| 前端页面/组件/状态/样式 | `04` | 涉及接口契约或后端问题时加 `07` 或 `08` |
+| 最终回复/交接/压缩上下文 | `05` | 长任务恢复时加 `02` |
+
+最小组合不是放宽规则；它只是延迟打开无关 reference。执行中一旦触碰范围命中其他规则，立即追加对应 reference。
 
 ## 性能原则
 
