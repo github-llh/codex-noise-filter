@@ -43,6 +43,7 @@ references/
 - Prefer JetBrains MCP / IDE tools for JetBrains projects.
 - Before editing, confirm target files, root cause, minimal fix, and unaffected contracts.
 - Confirm call chains and impact before code changes.
+- Regardless of whether the work is new code, an existing-code edit, Plan, Global/Goal mode, auto-resume, context restoration, cross-window continuation, a local patch, or a follow-up fix, coding tasks must run through the skill index, touched-scope confirmation, call-chain confirmation, and local rule alignment.
 - Plan stages must also use the skill index. Plans must list applicable references, touched scope, local-alignment items, and acceptance checks.
 - Global/Goal mode must also use the skill index. Each round must restore the goal, applicable references, touched scope, local-alignment items, acceptance checks, and Context Capsule.
 - Rules apply to both new code and existing-code edits. Every touched method, class, DTO, SQL, test, and direct call chain must be locally aligned with the rules.
@@ -53,6 +54,7 @@ references/
 - Prefer business enums for stable fixed sets such as status, type, source, action, phase, and result values. Avoid scattered magic strings and numbers.
 - Environment- or operations-variable values such as URLs, secrets, toggles, thresholds, time windows, thread pools, cache TTLs, and external-system parameters should live in yml/properties or the configuration center and be injected through typed configuration classes.
 - Put simple input validation on DTO/Request classes with Bean Validation annotations. Controllers should only trigger validation and rely on unified exception handling.
+- Multi-status, multi-type, multi-source, multi-external-system, repeated workflow, repeated assembly, repeated field mapping, or stable extension-point logic must be evaluated for business abstraction into service methods, domain components, strategies, enum behavior, assemblers/converters, configuration properties, or existing project extension points.
 - Avoid long repeated `if`, `set`, conversion, or defaulting blocks where only field names differ. Prefer existing project mapping, validation, enum strategy, conditional update, or helper patterns.
 - Use `Optional`, Stream, method references, and functional style for null handling when the Java version and project style support them, but do not overuse them in DTO/entity fields or simple cases.
 - When a project already uses Lombok, do not hand-write meaningless getters/setters. Use Lombok for DTO/VO/entity classes following peer-file style, and reuse the existing `@Data` entity convention when the project already has one.

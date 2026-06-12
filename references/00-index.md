@@ -25,6 +25,7 @@
 - Global/Goal 模式门禁：`02-noise-filter-workflow.md#globalgoal-模式门禁`
 - Java 后端分层：`07-java-backend-architecture.md#后端分层`
 - Controller 业务逻辑迁出：`07-java-backend-architecture.md#后端分层`
+- 业务抽象与扩展性：`07-java-backend-architecture.md#业务抽象与扩展性`
 - 事务管理：`07-java-backend-architecture.md#事务管理`
 - 新建文件归属地：`07-java-backend-architecture.md#新建文件归属地`
 - 注释规范：`07-java-backend-architecture.md#注释规则`
@@ -71,7 +72,8 @@
 
 - `Plan`、`计划`、`执行计划`、`分步实现`：先读 `02-noise-filter-workflow.md#plan-阶段门禁`。
 - `Global`、`Goal`、`目标追踪`、`长期推进`、`自动续跑`、`跨轮推进`：先读 `02-noise-filter-workflow.md#globalgoal-模式门禁`。
-- `Controller`、`Service`、`接口层`、`实现层`、`I*Service`、`返回实体`、`数据库实体`、`VO`、`DTO`、`DO`、`PO`、`Entity`、`业务代码下沉`、`URL 填充`、`列表加工`、`事务`、`@Transactional`、`rollbackFor`、`module 归属`、`新建文件放哪`、`注释`：读 `07-java-backend-architecture.md`。
+- `新增代码`、`修改已有代码`、`旧代码`、`自动续跑`、`跨窗口`、`不可绕过`、`强制执行`：先读 `02-noise-filter-workflow.md#不可绕过执行门禁`。
+- `Controller`、`Service`、`接口层`、`实现层`、`I*Service`、`返回实体`、`数据库实体`、`VO`、`DTO`、`DO`、`PO`、`Entity`、`业务代码下沉`、`URL 填充`、`列表加工`、`业务抽象`、`扩展性`、`可维护`、`健壮性`、`策略`、`handler map`、`Assembler`、`Converter`、`领域组件`、`事务`、`@Transactional`、`rollbackFor`、`module 归属`、`新建文件放哪`、`注释`：读 `07-java-backend-architecture.md`。
 - `Enum`、`常量`、`固定值`、`状态值`、`类型值`、`来源值`、`协议`、`默认值`、`阈值`、`时间窗`、`yml`、`properties`、`@ConfigurationProperties`、`@Value`、`配置外置`、`参数校验`、`Bean Validation`、`Lombok`、`@Data`、`getter/setter`、`Optional`、`Stream`、`重复 if/set`、`硬编码`、`函数式`：读 `08-java-style-patterns.md`。
 - `高并发`、`幂等`、`死锁`、`异步`、`MQ`、`事件`、`线程池`、`虚拟线程`、`批量`、`用户上下文`、`创建人`、`修改人`：读 `09-concurrency-async-batch.md`。
 - `mvn`、`pom.xml`、`-pl`、`-am`、`多模块构建`、`测试命令`：读 `03-maven-backend-build.md`。
