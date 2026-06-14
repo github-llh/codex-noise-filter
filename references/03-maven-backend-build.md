@@ -6,18 +6,12 @@
 
 Maven 配置不要只依赖硬编码路径。执行 Maven 构建前，先按 `06-environment-discovery.md` 读取缓存、IDE/项目配置和本机候选路径。
 
-当前已知可用候选：
+每个使用者的 Maven 安装路径和本地仓库都可能不同，skill 文档不得写死个人目录。构建命令必须使用本工作区 `.codex/local-environment.json` 中已验证的 `maven.executable` 与 `maven.localRepository`；没有缓存时先发现、验证，再写入缓存。
+
+构建 Java/Maven 项目时，命令形态为：
 
 ```bash
-/Users/lilinhan/dev/maven-3.9.10
-/Users/lilinhan/dev/maven-3.9.10/bin/mvn
-/Users/lilinhan/maven-git
-```
-
-构建 Java/Maven 项目时，使用发现到的 `mavenExecutable` 和 `localRepository` 组合。若本地缓存中仍是当前已知值，则命令形态为：
-
-```bash
-/Users/lilinhan/dev/maven-3.9.10/bin/mvn -Dmaven.repo.local=/Users/lilinhan/maven-git
+<mavenExecutable> -Dmaven.repo.local=<localRepository>
 ```
 
 Maven 命令选择顺序：
@@ -25,7 +19,7 @@ Maven 命令选择顺序：
 1. 读取 `.codex/local-environment.json` 中已验证的 `maven.executable` 和 `maven.localRepository`。
 2. 读取 IDE/项目 Maven 配置，例如 `.idea/misc.xml`、`.idea/workspace.xml`、`.mvn/maven.config`、`.mvn/wrapper/maven-wrapper.properties`。
 3. 如果项目已配置 Maven Wrapper 且项目规则要求使用 Wrapper，使用项目内 `./mvnw`。
-4. 否则查找本机候选 Maven，例如 `/Users/lilinhan/dev/maven-*/bin/mvn`、`~/dev/maven-*/bin/mvn`、`/opt/homebrew/bin/mvn`、`/usr/local/bin/mvn`、`mvn`。
+4. 否则查找本机候选 Maven，例如 `~/dev/maven-*/bin/mvn`、`~/.sdkman/candidates/maven/*/bin/mvn`、`/opt/homebrew/bin/mvn`、`/usr/local/bin/mvn`、`mvn`。
 5. 找到后执行 `mvn -version` 或 `<path>/mvn -version` 验证，再缓存。
 6. 只有上述路径都不可用时，才让用户确认 Maven 环境。
 
@@ -55,13 +49,13 @@ repo-root/
 构建 `server/service-a` 时优先在 `repo-root` 执行：
 
 ```bash
-/Users/lilinhan/dev/maven-3.9.10/bin/mvn -Dmaven.repo.local=/Users/lilinhan/maven-git -pl server/service-a -am test
+<mavenExecutable> -Dmaven.repo.local=<localRepository> -pl server/service-a -am test
 ```
 
 如果模块路径无法作为 `-pl` 参数使用，再查 `artifactId`：
 
 ```bash
-/Users/lilinhan/dev/maven-3.9.10/bin/mvn -Dmaven.repo.local=/Users/lilinhan/maven-git -pl :artifact-id -am test
+<mavenExecutable> -Dmaven.repo.local=<localRepository> -pl :artifact-id -am test
 ```
 
 ## 后端构建与验证
@@ -76,10 +70,10 @@ repo-root/
 常用命令：
 
 ```bash
-/Users/lilinhan/dev/maven-3.9.10/bin/mvn -Dmaven.repo.local=/Users/lilinhan/maven-git -pl <module-path-or-artifact> -am test
-/Users/lilinhan/dev/maven-3.9.10/bin/mvn -Dmaven.repo.local=/Users/lilinhan/maven-git -pl <module-path-or-artifact> -am -DskipTests package
-/Users/lilinhan/dev/maven-3.9.10/bin/mvn -Dmaven.repo.local=/Users/lilinhan/maven-git -pl <module-path-or-artifact> -am -Dtest=ClassNameTest test
-/Users/lilinhan/dev/maven-3.9.10/bin/mvn -Dmaven.repo.local=/Users/lilinhan/maven-git -pl <module-path-or-artifact> -am -Dtest=ClassNameTest#methodName -Dsurefire.failIfNoSpecifiedTests=false test
+<mavenExecutable> -Dmaven.repo.local=<localRepository> -pl <module-path-or-artifact> -am test
+<mavenExecutable> -Dmaven.repo.local=<localRepository> -pl <module-path-or-artifact> -am -DskipTests package
+<mavenExecutable> -Dmaven.repo.local=<localRepository> -pl <module-path-or-artifact> -am -Dtest=ClassNameTest test
+<mavenExecutable> -Dmaven.repo.local=<localRepository> -pl <module-path-or-artifact> -am -Dtest=ClassNameTest#methodName -Dsurefire.failIfNoSpecifiedTests=false test
 ```
 
 ## 后端调用链检查

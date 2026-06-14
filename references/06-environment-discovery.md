@@ -41,11 +41,13 @@
    - `which poetry`
    - `which pytest`
 4. 查找本机常见路径，只做小范围候选，不全盘扫描：
-   - `/Users/lilinhan/dev/maven-*/bin/mvn`
-   - `/Users/lilinhan/maven-git`
-   - `/Users/lilinhan/.m2/repository`
+   - 用户明确提供过的 Maven 路径和本地仓库路径。
+   - `~/dev/maven-*/bin/mvn`
+   - `~/.sdkman/candidates/maven/*/bin/mvn`
+   - `~/.m2/repository`
    - `/opt/homebrew/bin/mvn`
    - `/usr/local/bin/mvn`
+   - `mvn`
    - `/Library/Java/JavaVirtualMachines/*/Contents/Home`
    - `<workspace>/.venv/bin/python`
    - `/opt/homebrew/bin/python3`
@@ -75,17 +77,22 @@ Maven 本地仓库必须是存在的目录，且构建命令使用：
 -Dmaven.repo.local=<localRepository>
 ```
 
-当前已验证示例：
+缓存示例使用占位路径；实际值必须来自当前工作区发现和验证结果：
 
 ```json
 {
   "maven": {
-    "executable": "/Users/lilinhan/dev/maven-3.9.10/bin/mvn",
-    "home": "/Users/lilinhan/dev/maven-3.9.10",
-    "localRepository": "/Users/lilinhan/maven-git"
+    "source": "verified-local-candidate",
+    "executable": "/path/to/mvn",
+    "home": "/path/to/maven",
+    "localRepository": "/path/to/local-repository",
+    "verifiedCommand": "/path/to/mvn -version",
+    "verified": true
   }
 }
 ```
+
+不要把某个用户机器上的绝对路径写进 skill 文档或 README；只能写入当前工作区本地缓存 `.codex/local-environment.json`。
 
 ## Node / 前端验证
 
@@ -244,5 +251,5 @@ Python 项目缓存建议记录：
 ## 与长期记忆的关系
 
 - 本地缓存记录“这个工作区当前可用的环境路径”。
-- 长期 memory 只记录稳定偏好，例如“优先从 IDE 配置和本地缓存发现 Maven”。
+- 长期 memory 只记录稳定偏好，例如“优先从 IDE 配置和本地缓存发现 Maven”；不记录某台机器的 Maven、JDK、Node、Python 绝对路径。
 - 如果用户明确要求更新长期 memory，再按 memory 规则写入长期记忆更新请求。

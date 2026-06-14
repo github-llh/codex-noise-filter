@@ -62,7 +62,7 @@ references/
 - Global/Goal/目标追踪模式也必须走 skill 索引，每轮恢复目标、适用 reference、触碰范围、局部对齐项、验收检查和 Context Capsule。
 - 规则同时适用于新增代码和已有代码修改；凡本次触碰的方法、类、DTO、SQL、测试和调用链，都要做局部规则对齐。
 - Maven 后端项目优先读取 `.codex/local-environment.json`、IDE/项目配置和已验证本机候选路径。
-- 当前已验证 Maven 候选为 `/Users/lilinhan/dev/maven-3.9.10/bin/mvn`，本地仓库候选为 `/Users/lilinhan/maven-git`。
+- Maven 可执行文件和本地仓库不写死个人目录；首次使用时按当前机器和项目配置发现，验证通过后写入本工作区 `.codex/local-environment.json`，后续直接复用。
 - 多模块 Maven 项目默认从聚合 root 节点执行，并使用 `-pl <module> -am`。
 - Python 项目先确认 `requires-python`、`.python-version`、IDE 解释器、`.venv` 或锁文件；优先复用 uv、poetry、pipenv、venv、tox、nox 等项目已有工具链，不直接使用全局 pip 乱装依赖。
 - Python 代码遵守项目已有 `pyproject.toml`、Ruff/Black/isort/mypy/pyright/pytest 配置；公共函数、复杂返回值、跨模块 DTO/配置对象补类型标注和必要 docstring。
@@ -94,15 +94,15 @@ references/
 - 高并发默认考虑幂等、锁顺序、死锁规避、异步最终一致、批量分批和用户/租户/审计上下文传播。
 - Service 接口和重要实现方法要有原因型注释，做到不冗余、不缺失、不杂乱。
 - 前端优先修布局、组件属性和状态契约，不用硬编码掩盖后端问题。
-- 编程任务规则已内化到 skill；全局 `/Users/lilinhan/.codex/AGENTS.md` 仍建议保留为兜底。
+- 编程任务规则已内化到 skill；当前 Codex home 下的全局 `AGENTS.md` 仍建议保留为轻量兜底。
 - 长任务、切换窗口或上下文压缩前，使用 Context Capsule 保留目标、证据、已改、回滚和下一步。
 
 ### Maven 示例
 
 ```bash
-/Users/lilinhan/dev/maven-3.9.10/bin/mvn -Dmaven.repo.local=/Users/lilinhan/maven-git -pl <module-path-or-artifact> -am test
-/Users/lilinhan/dev/maven-3.9.10/bin/mvn -Dmaven.repo.local=/Users/lilinhan/maven-git -pl <module-path-or-artifact> -am -DskipTests package
-/Users/lilinhan/dev/maven-3.9.10/bin/mvn -Dmaven.repo.local=/Users/lilinhan/maven-git -pl <module-path-or-artifact> -am -Dtest=ClassNameTest#methodName -Dsurefire.failIfNoSpecifiedTests=false test
+<mavenExecutable> -Dmaven.repo.local=<localRepository> -pl <module-path-or-artifact> -am test
+<mavenExecutable> -Dmaven.repo.local=<localRepository> -pl <module-path-or-artifact> -am -DskipTests package
+<mavenExecutable> -Dmaven.repo.local=<localRepository> -pl <module-path-or-artifact> -am -Dtest=ClassNameTest#methodName -Dsurefire.failIfNoSpecifiedTests=false test
 ```
 
 ### 环境发现
@@ -122,6 +122,6 @@ references/
 - 切换窗口或上下文压缩前输出 Context Capsule，避免丢失目标、证据、回滚点和下一步。
 - 用户中途插入新目标时，先判断与主任务关系，不默认重置已有调用链。
 - 全局 `AGENTS.md` 不需要承载全部细则，但建议保留为兜底入口。
-- 长期 memory 只记录稳定偏好和跨任务规则；临时日志、一次性失败和未验证猜测不写入长期记忆。
+- 长期 memory 只记录稳定偏好和跨任务规则；机器私有绝对路径、临时日志、一次性失败和未验证猜测不写入长期记忆。
 
 英文说明见 [README.en.md](README.en.md)。

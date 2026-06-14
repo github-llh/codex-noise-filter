@@ -88,7 +88,7 @@ Context Capsule
 
 ### 全局 AGENTS 的定位
 
-- 本 skill 已内化全局 `/Users/lilinhan/.codex/AGENTS.md` 的编程规则，编程任务优先读 skill 索引。
+- 本 skill 已内化全局 `AGENTS.md` 中应保留的编程规则，编程任务优先读 skill 索引。
 - 全局 `AGENTS.md` 仍建议保留，作为非 skill 场景、未触发 skill 场景和其他 agent 的兜底规则。
 - 不建议删除全局 `AGENTS.md`；如要瘦身，可保留语言偏好、工具优先级和“编程任务启用 codex-noise-filter”的指向。
 
@@ -98,7 +98,7 @@ Codex 的记忆分三层处理：
 
 1. 会话内上下文：用 Context Capsule 保存当前任务边界、证据、已改、回滚和下一步。
 2. 工作区本地缓存：用 `.codex/local-environment.json` 保存已验证的环境路径，例如 Maven、JDK、Node、包管理器；该文件只服务当前工作区，默认不提交。
-3. 长期 memory：只记录稳定偏好、跨任务复用规则和长期有效路径；临时错误日志、一次性构建结果和未验证猜测不要写入长期记忆。
+3. 长期 memory：只记录稳定偏好和跨任务复用规则；机器私有绝对路径、临时错误日志、一次性构建结果和未验证猜测不要写入长期记忆。
 
 ### 何时读取
 

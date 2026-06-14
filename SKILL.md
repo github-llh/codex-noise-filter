@@ -56,7 +56,7 @@ description: |
 - 对 JetBrains 项目，优先使用 JetBrains MCP / IDE 工具读取、定位、修改和诊断；只有明确不可用、超时或错误时才使用 Shell。
 - 不修改无关文件，不随意重构，不新增依赖，不改 API、DTO、数据库字段、权限、路由、配置键和公共契约，除非用户明确批准。
 - 后端 Maven 多模块项目默认从聚合 root 节点构建；Maven 可执行文件和本地仓库先按环境发现规则读取缓存或 IDE 配置，未命中时再查找本机候选路径。
-- 全局 `/Users/lilinhan/.codex/AGENTS.md` 建议保留为兜底；本 skill 已内化其规则，编程任务优先按 skill 索引执行。
+- 当前 Codex home 下的全局 `AGENTS.md` 建议保留为轻量兜底；本 skill 已内化编程规则，编程任务优先按 skill 索引执行。
 
 ## 执行节奏
 

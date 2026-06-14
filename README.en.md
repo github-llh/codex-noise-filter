@@ -60,7 +60,7 @@ references/
 - Global/Goal mode must also use the skill index. Each round must restore the goal, applicable references, touched scope, local-alignment items, acceptance checks, and Context Capsule.
 - Rules apply to both new code and existing-code edits. Every touched method, class, DTO, SQL, test, and direct call chain must be locally aligned with the rules.
 - Discover Maven from `.codex/local-environment.json`, IDE/project configuration, and verified local candidates.
-- The currently verified Maven candidate is `/Users/lilinhan/dev/maven-3.9.10/bin/mvn`; the local repository candidate is `/Users/lilinhan/maven-git`.
+- Do not hardcode personal Maven executable or local-repository paths. On first use, discover them from the current machine and project configuration, validate them, write them to this workspace's `.codex/local-environment.json`, and reuse that cache later.
 - Build multi-module Maven projects from the aggregation root with `-pl <module> -am`.
 - For Python projects, first confirm `requires-python`, `.python-version`, IDE interpreter, `.venv`, or lock files. Reuse the project's existing uv, poetry, pipenv, venv, tox, or nox workflow instead of installing dependencies into global pip.
 - Python code should follow existing `pyproject.toml`, Ruff/Black/isort/mypy/pyright/pytest configuration. Add type hints and necessary docstrings for public functions, complex return values, cross-module DTOs, and configuration objects.
@@ -92,15 +92,15 @@ references/
 - For high concurrency, consider idempotency, lock ordering, deadlock prevention, async eventual consistency, batched execution, and user/tenant/audit context propagation.
 - Add reason-focused comments to service interfaces and important implementation methods. Comments should be non-redundant, complete where needed, and orderly.
 - For frontend work, fix layout, component props, state handling, and contracts directly; do not hide backend issues with frontend hardcoding.
-- Coding rules are embedded in this skill; keep the global `/Users/lilinhan/.codex/AGENTS.md` as a lightweight fallback.
+- Coding rules are embedded in this skill; keep the global `AGENTS.md` under the current Codex home as a lightweight fallback.
 - Before long context compression or window switching, write a Context Capsule with goal, evidence, changes, rollback points, and next step.
 
 ## Maven Examples
 
 ```bash
-/Users/lilinhan/dev/maven-3.9.10/bin/mvn -Dmaven.repo.local=/Users/lilinhan/maven-git -pl <module-path-or-artifact> -am test
-/Users/lilinhan/dev/maven-3.9.10/bin/mvn -Dmaven.repo.local=/Users/lilinhan/maven-git -pl <module-path-or-artifact> -am -DskipTests package
-/Users/lilinhan/dev/maven-3.9.10/bin/mvn -Dmaven.repo.local=/Users/lilinhan/maven-git -pl <module-path-or-artifact> -am -Dtest=ClassNameTest#methodName -Dsurefire.failIfNoSpecifiedTests=false test
+<mavenExecutable> -Dmaven.repo.local=<localRepository> -pl <module-path-or-artifact> -am test
+<mavenExecutable> -Dmaven.repo.local=<localRepository> -pl <module-path-or-artifact> -am -DskipTests package
+<mavenExecutable> -Dmaven.repo.local=<localRepository> -pl <module-path-or-artifact> -am -Dtest=ClassNameTest#methodName -Dsurefire.failIfNoSpecifiedTests=false test
 ```
 
 ## Environment Discovery
@@ -120,4 +120,4 @@ references/
 - Before switching windows or compacting context, emit a Context Capsule so goals, evidence, rollback points, and next steps are preserved.
 - When the user inserts a new goal, treat it as an incremental task first and do not reset confirmed call chains by default.
 - The global `AGENTS.md` no longer needs to carry every detail, but it should remain as a fallback entry point.
-- Long-term memory should only store stable preferences and reusable rules, not temporary logs, one-off failures, or unverified guesses.
+- Long-term memory should only store stable preferences and reusable rules, not machine-private absolute paths, temporary logs, one-off failures, or unverified guesses.
