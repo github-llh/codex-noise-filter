@@ -34,6 +34,7 @@ description: |
 - Maven、本地仓库、后端多模块构建：`references/03-maven-backend-build.md`
 - 前端代码规范、布局、状态、验证：`references/04-frontend-rules.md`
 - Vue/React 语法、版本、环境、运行、测试和构建：`references/11-frontend-vue-react.md`
+- 小程序原生/uni-app/Taro 语法、分包、运行、模拟器和测试：`references/12-miniprogram-development.md`
 - 输出格式、交付清单、上下文胶囊：`references/05-delivery-templates.md`
 - IDE、Maven、Node 等本机环境发现与缓存：`references/06-environment-discovery.md`
 - Java 后端架构、归属地、分层和注释：`references/07-java-backend-architecture.md`

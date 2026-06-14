@@ -7,7 +7,7 @@
 ### 适用场景
 
 - 编写、修改、调试、排查、重构、迁移、解释代码。
-- 多文件排查、跨模块调用链分析、后端构建、前端页面修复、Python 脚本/服务/包/测试治理。
+- 多文件排查、跨模块调用链分析、后端构建、前端页面修复、小程序原生/uni-app/Taro 治理、Python 脚本/服务/包/测试治理。
 - 用户要求减少 token、压缩噪音、简洁可追溯或可复盘。
 
 ### 结构
@@ -27,6 +27,7 @@ references/
   09-concurrency-async-batch.md
   10-python-development.md
   11-frontend-vue-react.md
+  12-miniprogram-development.md
 ```
 
 `SKILL.md` 只保留触发、路由和硬约束；执行细则按索引进入对应文件，减少主文件负担。
@@ -40,12 +41,14 @@ references/
 - 并发、异步和批量规则集中到 `09-concurrency-async-batch.md`，只有涉及高并发、幂等、死锁、事件、中间件、线程池、虚拟线程、用户上下文传播时才读取。
 - Python 规则集中到 `10-python-development.md`，只有涉及 `.py`、Python 语法、虚拟环境、依赖、运行、测试、lint、类型检查或 Python 性能时才读取。
 - Vue/React 规则集中到 `11-frontend-vue-react.md`，只有涉及 Vue2/Vue3、React、Vite、组件语法、包管理、运行、测试、lint、类型检查或前端构建时才读取。
+- 小程序规则集中到 `12-miniprogram-development.md`，只有涉及原生微信小程序、uni-app、Taro、分包、模拟器、`project.config.json`、`app.json`、`pages.json`、`app.config.*`、构建、发布或测试时才读取。
 - Maven 构建只读 `03-maven-backend-build.md`；环境路径发现只读 `06-environment-discovery.md`。
 - 索引路由用“关键词 + 任务意图 + 影响面”交叉确认，减少误读，同时避免把所有规则一次性读入。
 - `SKILL.md` 硬约束视为常驻规则；优化索引性能时只减少无关 reference 读取，不减少必须执行的约束。
 - 常见任务先按快速决策表读取最小组合，例如 Java Controller/Service 改动默认 `02 + 07`，命中枚举、校验、Lombok、Optional、重复逻辑时再追加 `08`。
 - Python 任务默认读取 `02 + 10`，环境路径未知才追加 `06`，跨系统或前后端调用链明确时再追加对应 reference。
 - 普通布局/状态契约任务默认读取 `02 + 04`；Vue/React 任务默认读取 `02 + 11`，环境路径未知才追加 `06`。
+- 小程序任务默认读取 `02 + 12`；uni-app/Taro 命中 Vue/React 语法时追加 `11`，通用布局状态追加 `04`，开发者工具路径未知才追加 `06`。
 - 执行中触碰范围扩大时，按索引追加 reference；不得为了少读文件而跳过不可绕过门禁、既有代码局部对齐、分层、注释、事务、并发和业务抽象规则。
 
 ### 内置重点
@@ -69,6 +72,11 @@ references/
 - Vue 项目必须先区分 Vue 2 与 Vue 3：Vue 2 默认 Options API 和 Vue Test Utils v1，Vue 3 可用 Composition API、`<script setup>`、Pinia 和 Vue Test Utils v2。
 - React 项目先确认 React/React DOM 版本、框架和 TypeScript/JSX 配置；Hooks 只能在组件或自定义 Hook 顶层调用，副作用放 `useEffect`，纯派生值不额外存 state。
 - Vue/React 新建组件前必须确认归属、复用价值、公开契约和测试/示例入口；组件使用优先复用项目已有组件，props/slots/children/API 边界要小而稳定。
+- 小程序项目必须先识别原生、uni-app、Taro 或其他跨平台框架；不同构建方式走不同语法约束，uni-app/Taro 复用对应 Vue/React 规则，原生小程序走 `Page`、`Component`、`wxml`、`wxss`、`setData` 和官方 API 约束。
+- 小程序运行优先使用官方开发者工具模拟器或项目已有 CLI/CI；先生成目标平台工程，再打开正确输出目录，不把 `dist/`、`unpackage/dist/` 当源码长期维护。
+- 小程序分包要在主包接近平台限制、首屏变慢、重功能局部使用、多业务域天然独立或依赖只在局部使用时主动评估；平台包体积限制以官方文档、开发者工具和 CI 当前校验为准，不凭旧经验写死。
+- 小程序 npm、插件、分包、独立分包、预下载、权限、登录、支付、订阅消息、web-view 等能力必须按目标平台官方限制处理，并保留密钥、appid、上传凭证和白名单安全边界。
+- 小程序测试优先复用项目已有 `miniprogram-simulate`、`miniprogram-ci`、HBuilderX/uni-app 自动化测试、Taro/Jest/Vitest/Testing Library 或官方模拟器验证；高风险能力说明是否需要真机验证。
 - 注释原则跨技术栈保持一致：注释放在对应技术栈最自然的契约位置，例如 Java Service 接口、Python docstring、Vue props/emits/slots 附近、React 组件/Hook/type 附近、SQL/配置定义处。
 - Vue/React 修改优先运行项目已有 `lint`、`typecheck`、`test`、`build` 或定向测试；涉及交互和布局时用浏览器验证关键页面。
 - 新建文件前必须确认 module、层级职责、包路径、同类文件位置和依赖方向，尤其注意接口、实现、实体、契约可能分属不同 module。

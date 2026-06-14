@@ -1,6 +1,6 @@
 # 前端规则
 
-本文件只处理通用前端布局、状态契约、安全和验证。涉及 Vue 2、Vue 3、React、Vite、组件语法、包管理、运行、测试、lint/format/type check 或前端构建时，继续读取 `11-frontend-vue-react.md`。
+本文件只处理通用前端布局、状态契约、安全和验证。涉及 Vue 2、Vue 3、React、Vite、组件语法、包管理、运行、测试、lint/format/type check 或前端构建时，继续读取 `11-frontend-vue-react.md`；涉及微信小程序、uni-app、Taro、分包、开发者工具模拟器、`project.config.json`、`app.json`、`pages.json` 或 `app.config.*` 时，继续读取 `12-miniprogram-development.md`。
 
 ## 基本原则
 

@@ -9,7 +9,7 @@
 读取顺序按三段执行：
 
 1. 先判定运行门禁：涉及读取、修改、构建、测试、重构、Plan、Global/Goal、自动续跑、上下文恢复时，读 `02-noise-filter-workflow.md` 对应章节。
-2. 再判定业务域：Java 后端读 `07`，Java 风格读 `08`，Python 读 `10`，Vue/React 读 `11`，通用前端读 `04`，并发/异步/批量读 `09`，构建读 `03`，环境发现读 `06`。
+2. 再判定业务域：Java 后端读 `07`，Java 风格读 `08`，Python 读 `10`，Vue/React 读 `11`，小程序读 `12`，通用前端读 `04`，并发/异步/批量读 `09`，构建读 `03`，环境发现读 `06`。
 3. 最后按需补充：只在需要交付模板、Context Capsule、语言/工具细则、高风险说明时读 `05` 或 `01`。
 
 性能优先级：
@@ -20,6 +20,7 @@
 - 涉及事务、高并发、幂等、异步、批量时，在 `07` 基础上加 `09`。
 - 涉及 Maven 构建但不改代码时，优先 `03`，需要路径发现时才加 `06`。
 - 涉及通用前端布局/表单/状态契约时优先 `04`；涉及 Vue/React/Vite/测试/构建时优先 `11`，接口契约或后端联动明确时再加后端 reference。
+- 涉及小程序原生、uni-app、Taro、分包、模拟器、`project.config.json`、`app.json`、`pages.json` 或 `app.config.*` 时优先 `12`；uni-app/Taro 命中 Vue/React 语法再加 `11`，环境路径未知再加 `06`。
 - 不为了“保险”一次性读取所有 reference；如果执行中发现触碰范围扩大，再按关键词追加读取。
 
 约束保真：
@@ -69,6 +70,15 @@
 - 前端运行与构建：`11-frontend-vue-react.md#运行与构建`
 - 前端测试与验证：`11-frontend-vue-react.md#测试与验证`
 - 前端 lint/format/type check：`11-frontend-vue-react.md#lint格式化与类型检查`
+- 小程序开发规则：`12-miniprogram-development.md`
+- 小程序项目形态识别：`12-miniprogram-development.md#项目形态识别`
+- 小程序语法与框架选择：`12-miniprogram-development.md#语法与框架选择`
+- 小程序文件归属与依赖边界：`12-miniprogram-development.md#文件归属与依赖边界`
+- 小程序分包与包体积：`12-miniprogram-development.md#分包与包体积`
+- 小程序组件、页面与注释：`12-miniprogram-development.md#组件页面与注释`
+- 小程序环境与运行：`12-miniprogram-development.md#环境与运行`
+- 小程序构建与发布：`12-miniprogram-development.md#构建与发布`
+- 小程序测试与验证：`12-miniprogram-development.md#测试与验证`
 - 枚举与常量：`08-java-style-patterns.md#枚举与常量`
 - 配置外置化：`08-java-style-patterns.md#配置外置化`
 - DTO 参数校验：`08-java-style-patterns.md#参数校验分层`
@@ -108,6 +118,7 @@
 | 环境路径发现/缓存 | `06` | 需要构建命令时加 `03` |
 | 前端页面/布局/表单/状态契约 | `02` + `04` | 涉及 Vue/React 语法或构建测试加 `11` |
 | Vue/React/Vite/组件测试/前端构建 | `02` + `11` | 通用布局状态加 `04`，环境路径未知加 `06` |
+| 小程序原生/uni-app/Taro/分包/模拟器 | `02` + `12` | uni-app/Taro 语法加 `11`，通用布局状态加 `04`，开发者工具路径未知加 `06` |
 | 最终回复/交接/压缩上下文 | `05` | 长任务恢复时加 `02` |
 
 最小组合不是放宽规则；它只是延迟打开无关 reference。执行中一旦触碰范围命中其他规则，立即追加对应 reference。
@@ -131,6 +142,9 @@
 - `Enum`、`常量`、`固定值`、`状态值`、`类型值`、`来源值`、`协议`、`默认值`、`阈值`、`时间窗`、`yml`、`properties`、`@ConfigurationProperties`、`@Value`、`配置外置`、`参数校验`、`Bean Validation`、`Lombok`、`@Data`、`getter/setter`、`Optional`、`Stream`、`重复 if/set`、`硬编码`、`函数式`：读 `08-java-style-patterns.md`。
 - `Python`、`.py`、`pyproject.toml`、`requirements.txt`、`setup.py`、`tox.ini`、`noxfile.py`、`Pipfile`、`poetry.lock`、`uv.lock`、`pytest`、`unittest`、`ruff`、`black`、`isort`、`mypy`、`pyright`、`venv`、`.venv`、`typing`、`dataclass`、`asyncio`、`脚本`、`包管理`、`虚拟环境`：读 `10-python-development.md`。
 - `Vue`、`Vue2`、`Vue 2`、`Vue3`、`Vue 3`、`.vue`、`SFC`、`Composition API`、`Options API`、`script setup`、`defineProps`、`defineEmits`、`props`、`emits`、`slots`、`Vuex`、`Pinia`、`Vue Router`、`React`、`JSX`、`TSX`、`Hooks`、`children`、`render prop`、`useState`、`useEffect`、`Vite`、`Vitest`、`Jest`、`Testing Library`、`Vue Test Utils`、`Cypress`、`Playwright`、`组件创建`、`组件使用`、`组件注释`、`package.json`、`pnpm`、`yarn`、`npm`、`bun`：读 `11-frontend-vue-react.md`。
+- `小程序`、`微信小程序`、`weapp`、`mp-weixin`、`mini program`、`project.config.json`、`project.private.config.json`、`app.json`、`app.wxss`、`app.js`、`sitemap.json`、`wxml`、`wxss`、`wxs`、`wx:`、`setData`、`Component`、`Page`、`Behavior`、`miniprogramRoot`、`miniprogram_npm`、`subPackages`、`subpackages`、`preloadRule`、`independent`、`分包`、`主包`、`独立分包`、`分包预下载`、`分包异步化`、`模拟器`、`微信开发者工具`、`miniprogram-ci`、`miniprogram-simulate`：读 `12-miniprogram-development.md`。
+- `uni-app`、`uniapp`、`pages.json`、`manifest.json`、`App.vue`、`uni.scss`、`uni_modules`、`#ifdef MP`、`#ifdef MP-WEIXIN`、`unpackage/dist`：读 `12-miniprogram-development.md`；涉及 Vue 语法继续读 `11-frontend-vue-react.md`。
+- `Taro`、`@tarojs`、`Taro.`、`app.config.js`、`app.config.ts`、`page.config.*`、`config/index.js`、`config/index.ts`、`TARO_ENV`、`dev:weapp`、`build:weapp`、`taro build --type weapp`：读 `12-miniprogram-development.md`；涉及 React/Vue 语法继续读 `11-frontend-vue-react.md`。
 - `注释位置`、`注释原则`、`docstring`、`Javadoc`、`props 注释`、`slot 注释`、`hook 注释`、`配置注释`、`SQL 注释`：读 `01-global-engineering-rules.md#跨技术栈注释原则`，再按技术栈追加对应 reference。
 - `高并发`、`幂等`、`死锁`、`异步`、`MQ`、`事件`、`线程池`、`虚拟线程`、`批量`、`用户上下文`、`创建人`、`修改人`：读 `09-concurrency-async-batch.md`。
 - `mvn`、`pom.xml`、`-pl`、`-am`、`多模块构建`、`测试命令`：读 `03-maven-backend-build.md`。

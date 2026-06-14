@@ -2,6 +2,17 @@
 
 用于 Maven、JDK、Node、Python、包管理器、IDE 配置路径等本机环境。目标是避免每次硬编码路径或重复全盘查找。
 
+## 目录
+
+- [发现顺序](#发现顺序)
+- [Maven 验证](#maven-验证)
+- [Node / 前端验证](#node--前端验证)
+- [小程序验证](#小程序验证)
+- [Python 验证](#python-验证)
+- [缓存策略](#缓存策略)
+- [写入边界](#写入边界)
+- [与长期记忆的关系](#与长期记忆的关系)
+
 ## 发现顺序
 
 1. 读取工作区缓存：`.codex/local-environment.json`。
@@ -9,6 +20,7 @@
    - JetBrains：`.idea/misc.xml`、`.idea/workspace.xml`、`.idea/compiler.xml`、`.idea/jarRepositories.xml`。
    - Maven 项目：`.mvn/maven.config`、`.mvn/jvm.config`、`.mvn/wrapper/maven-wrapper.properties`、`pom.xml`。
    - 前端项目：`package.json`、`pnpm-lock.yaml`、`yarn.lock`、`package-lock.json`、`bun.lockb`、`bun.lock`、`.nvmrc`、`.node-version`、`.tool-versions`、`.npmrc`、`.yarnrc.yml`、`vite.config.*`、`vue.config.js`、`next.config.*`。
+   - 小程序项目：`project.config.json`、`project.private.config.json`、`app.json`、`sitemap.json`、`pages.json`、`manifest.json`、`app.config.js`、`app.config.ts`、`config/index.js`、`config/index.ts`、`miniprogram_npm/`、`unpackage/dist/`、`dist/`。
    - Python 项目：`pyproject.toml`、`requirements.txt`、`requirements-dev.txt`、`uv.lock`、`poetry.lock`、`Pipfile.lock`、`tox.ini`、`noxfile.py`、`pytest.ini`、`.python-version`、`.tool-versions`、`.venv/pyvenv.cfg`。
 3. 读取 shell 环境和常见命令：
    - `JAVA_HOME`
@@ -22,6 +34,7 @@
    - `which npm`
    - `which bun`
    - `which corepack`
+   - 微信开发者工具 CLI 候选路径
    - `which python`
    - `which python3`
    - `which uv`
@@ -43,6 +56,8 @@
    - `/usr/local/bin/node`
    - `/opt/homebrew/bin/pnpm`
    - `/usr/local/bin/pnpm`
+   - `/Applications/wechatwebdevtools.app/Contents/MacOS/cli`
+   - `/Applications/微信开发者工具.app/Contents/MacOS/cli`
 5. 找到候选后执行最小验证。
 6. 验证通过后写入 `.codex/local-environment.json`，下次优先复用。
 
@@ -112,6 +127,43 @@ corepack --version
 ```
 
 不把临时全局安装、未验证 Node、错误目录下的 lockfile 判断写入缓存。
+
+## 小程序验证
+
+小程序项目先识别项目形态和源码/输出目录：
+
+- 原生微信小程序：`project.config.json`、`app.json`、`app.js`、`app.wxss`、`pages/**`、`components/**`、`miniprogram_npm/`。
+- uni-app：`pages.json`、`manifest.json`、`App.vue`、`main.js`/`main.ts`、`uni_modules/`、`unpackage/dist/dev/mp-*` 或 `unpackage/dist/build/mp-*`。
+- Taro：`config/index.js`/`config/index.ts`、`src/app.config.*`、`@tarojs/*` 依赖、`dist/`、`taro build --type weapp` 或项目脚本。
+
+运行到微信小程序时，优先使用项目已有脚本生成目标小程序工程，再用微信开发者工具模拟器打开输出目录。不要直接修改 `dist/`、`unpackage/dist/` 这类构建产物，除非任务明确是排查构建结果。
+
+微信开发者工具 CLI 至少验证：
+
+```bash
+<wechatDevtoolsCli> --help
+```
+
+项目若使用 `miniprogram-ci`，优先读项目已有上传/预览脚本和密钥路径配置，只能验证命令、构建和本地预览能力；不得提交或暴露上传密钥、真实 `appid` 私钥、机器人编号或 IP 白名单配置。
+
+小程序缓存建议记录：
+
+```json
+{
+  "miniprogram": {
+    "source": "project-config",
+    "framework": "native-weapp|uni-app|taro|other",
+    "platform": "weapp|alipay|tt|swan|qq|jd|ks|other",
+    "sourceRoot": "src|.",
+    "outputRoot": "dist|unpackage/dist/dev/mp-weixin",
+    "devtoolsCli": "/Applications/wechatwebdevtools.app/Contents/MacOS/cli",
+    "verifiedCommand": "<wechatDevtoolsCli> --help",
+    "verified": true
+  }
+}
+```
+
+不把未验证开发者工具路径、密钥文件内容、CI 上传凭证、构建产物临时路径写入长期记忆。
 
 ## Python 验证
 

@@ -5,7 +5,7 @@ A coding-focused Codex skill for reducing noisy context, enforcing call-chain an
 ## When To Use
 
 - Coding, debugging, refactoring, migration, and code explanation tasks.
-- Multi-file investigation, cross-module backend analysis, Maven builds, frontend fixes, and Python script/service/package/test work.
+- Multi-file investigation, cross-module backend analysis, Maven builds, frontend fixes, Mini Program native/uni-app/Taro work, and Python script/service/package/test work.
 - Requests that ask for lower token usage, concise evidence, or reproducible reasoning.
 
 ## Layout
@@ -25,6 +25,7 @@ references/
   09-concurrency-async-batch.md
   10-python-development.md
   11-frontend-vue-react.md
+  12-miniprogram-development.md
 ```
 
 `SKILL.md` is intentionally small. It routes the agent to indexed reference files instead of loading every rule at once.
@@ -38,12 +39,14 @@ references/
 - Concurrency, async, and batch rules live in `09-concurrency-async-batch.md` and should be opened only for high concurrency, idempotency, deadlocks, events, middleware, thread pools, virtual threads, or user-context propagation.
 - Python rules live in `10-python-development.md` and should be opened only for `.py`, Python syntax, virtual environments, dependencies, running commands, tests, linting, type checking, or Python performance work.
 - Vue/React rules live in `11-frontend-vue-react.md` and should be opened only for Vue 2/3, React, Vite, component syntax, package management, running commands, tests, linting, type checking, or frontend builds.
+- Mini Program rules live in `12-miniprogram-development.md` and should be opened only for native WeChat Mini Programs, uni-app, Taro, subpackages, official simulators, `project.config.json`, `app.json`, `pages.json`, `app.config.*`, builds, releases, or tests.
 - Maven builds use `03-maven-backend-build.md`; environment discovery uses `06-environment-discovery.md`.
 - Routing should cross-check keywords, user intent, and impact area to preserve accuracy without reading every rule file.
 - `SKILL.md` hard constraints are always in force. Index performance tuning may reduce unrelated reference reads, but must not reduce mandatory constraints.
 - Common tasks should use the quick-decision minimum set first, for example Java Controller/Service edits default to `02 + 07`, and add `08` only when enums, validation, Lombok, Optional, or repeated logic are involved.
 - Python tasks default to `02 + 10`; add `06` only when environment paths are unknown, and add other references only when cross-system or frontend/backend call chains require them.
 - General layout/state-contract tasks default to `02 + 04`; Vue/React tasks default to `02 + 11`, and add `06` only when environment paths are unknown.
+- Mini Program tasks default to `02 + 12`; add `11` when uni-app/Taro touches Vue/React syntax, add `04` for general layout/state contracts, and add `06` only when developer-tool paths are unknown.
 - If the touched scope expands during execution, add references through the index. Do not skip non-bypass gates, existing-code local alignment, layering, comments, transactions, concurrency, or business abstraction rules just to read fewer files.
 
 ## Key Rules
@@ -67,6 +70,11 @@ references/
 - Vue projects must distinguish Vue 2 from Vue 3 first: Vue 2 defaults to Options API and Vue Test Utils v1, while Vue 3 can use Composition API, `<script setup>`, Pinia, and Vue Test Utils v2.
 - React projects must first identify React/React DOM versions, framework, and TypeScript/JSX configuration. Hooks must only run at the top level of components or custom hooks; effects belong in `useEffect`, and pure derived values should not be stored as extra state.
 - Before creating Vue/React components, confirm ownership, reuse value, public contract, and test/example entry points. When using components, prefer existing project components and keep props/slots/children/API boundaries small and stable.
+- Mini Program projects must first identify whether they are native, uni-app, Taro, or another cross-platform framework. Different build modes use different syntax constraints: uni-app/Taro reuse the matching Vue/React rules, while native Mini Programs follow `Page`, `Component`, `wxml`, `wxss`, `setData`, and official API constraints.
+- Mini Program execution should prefer the official developer-tool simulator or existing CLI/CI workflow. Generate the target platform project first, open the correct output directory, and do not maintain `dist/` or `unpackage/dist/` as source code.
+- Mini Program subpackages must be evaluated when the main package approaches platform limits, startup slows down, heavy features are local-only, business domains are naturally isolated, or dependencies are only used in one area. Package-size limits must come from current official docs, developer-tool checks, or CI checks, not stale memory.
+- Mini Program npm packages, plugins, subpackages, independent subpackages, preload rules, permissions, login, payment, subscribe messages, and web-view usage must follow target-platform official limits while preserving secrets, appids, upload credentials, and allowlist boundaries.
+- Mini Program validation should reuse existing `miniprogram-simulate`, `miniprogram-ci`, HBuilderX/uni-app automated tests, Taro/Jest/Vitest/Testing Library, or official simulator checks. High-risk platform capabilities should state whether device validation is still needed.
 - Comment rules apply across stacks: place comments at the natural contract location for each technology, such as Java service interfaces, Python docstrings, Vue props/emits/slots, React components/hooks/types, and SQL/config definitions.
 - Vue/React edits should run existing `lint`, `typecheck`, `test`, `build`, or targeted test commands. For interaction and layout changes, verify key pages in a browser.
 - Before creating files, confirm the target module, layer responsibility, package path, existing peer files, and dependency direction. Interfaces, implementations, entities, and contracts may live in different modules.
