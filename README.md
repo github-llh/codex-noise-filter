@@ -1,16 +1,42 @@
+<div align="center">
+
 # codex-noise-filter
 
-编程任务专用的 Codex skill，用于减少无效上下文、强制调用链确认，并把全局工程规则沉淀到 skill 内，避免切换会话或窗口时遗漏规则。
+**Codex 编程任务去噪与规则路由 skill**
 
-## 中文说明
+减少无效上下文 · 强制调用链确认 · 渐进读取规则 · 新旧代码同等约束
 
-### 适用场景
+![Skill](https://img.shields.io/badge/Codex%20Skill-codex--noise--filter-2563eb)
+![Routing](https://img.shields.io/badge/Routing-indexed%20references-16a34a)
+![Mode](https://img.shields.io/badge/Mode-non--bypassable-f97316)
+![Languages](https://img.shields.io/badge/Stacks-Java%20%7C%20Python%20%7C%20Vue%2FReact%20%7C%20MiniProgram-7c3aed)
+
+[快速开始](#快速开始) · [能力概览](#能力概览) · [结构](#结构) · [内置重点](#内置重点) · [English](README.en.md)
+
+</div>
+
+## 快速开始
+
+`codex-noise-filter` 是编程任务专用的 Codex skill。它把“先读规则、先收敛上下文、先确认调用链，再改代码”固化为默认流程，并通过 `references/00-index.md` 按需加载 Java 后端、Maven、前端、Python、小程序、并发事务和交付模板等规则。
+
+适用场景：
 
 - 编写、修改、调试、排查、重构、迁移、解释代码。
 - 多文件排查、跨模块调用链分析、后端构建、前端页面修复、小程序原生/uni-app/Taro 治理、Python 脚本/服务/包/测试治理。
 - 用户要求减少 token、压缩噪音、简洁可追溯或可复盘。
 
-### 结构
+## 能力概览
+
+| 能力 | 说明 |
+| --- | --- |
+| 索引路由 | 先读 `00-index.md`，按任务类型只打开必要 reference，避免主文件和上下文膨胀。 |
+| 不可绕过门禁 | 新增、修改、Plan、Global/Goal、续跑、跨窗口恢复都必须确认触碰范围、调用链和局部对齐项。 |
+| Java 后端治理 | 强制 Controller 轻薄、Service 接口注释、实体 Lombok、事务边界、枚举/配置/校验/去重复。 |
+| 前端与小程序 | 覆盖通用前端、Vue 2/3、React、Vite、原生小程序、uni-app、Taro、分包、模拟器和测试。 |
+| 环境发现 | Maven/JDK/Node/Python/小程序工具先读项目配置和缓存，验证通过后写入 `.codex/local-environment.json`。 |
+| 上下文管理 | 长任务使用 Context Capsule 保存目标、阶段、证据、已改、回滚点和下一步，降低会话切换丢失风险。 |
+
+## 结构
 
 ```text
 SKILL.md

@@ -1,12 +1,40 @@
+<div align="center">
+
 # codex-noise-filter
 
-A coding-focused Codex skill for reducing noisy context, enforcing call-chain analysis before edits, and embedding the user's global engineering rules inside the skill so they remain available across sessions and windows.
+**A Codex skill for coding-task noise reduction and indexed rule routing**
 
-## When To Use
+Reduce context noise · enforce call-chain checks · load rules progressively · align new and existing code
+
+![Skill](https://img.shields.io/badge/Codex%20Skill-codex--noise--filter-2563eb)
+![Routing](https://img.shields.io/badge/Routing-indexed%20references-16a34a)
+![Mode](https://img.shields.io/badge/Mode-non--bypassable-f97316)
+![Stacks](https://img.shields.io/badge/Stacks-Java%20%7C%20Python%20%7C%20Vue%2FReact%20%7C%20MiniProgram-7c3aed)
+
+[Quick Start](#quick-start) · [Capabilities](#capabilities) · [Layout](#layout) · [Key Rules](#key-rules) · [简体中文](README.md)
+
+</div>
+
+## Quick Start
+
+`codex-noise-filter` is a coding-focused Codex skill. It makes "read rules first, narrow context first, confirm call chains before editing" the default workflow, and uses `references/00-index.md` to progressively load rules for Java backend, Maven, frontend, Python, Mini Programs, concurrency/transactions, and delivery templates.
+
+Use it for:
 
 - Coding, debugging, refactoring, migration, and code explanation tasks.
 - Multi-file investigation, cross-module backend analysis, Maven builds, frontend fixes, Mini Program native/uni-app/Taro work, and Python script/service/package/test work.
 - Requests that ask for lower token usage, concise evidence, or reproducible reasoning.
+
+## Capabilities
+
+| Capability | Description |
+| --- | --- |
+| Indexed routing | Read `00-index.md` first and open only the required reference files for the task. |
+| Non-bypass gates | New code, existing-code edits, Plan, Global/Goal, resumes, and cross-window work must confirm touched scope, call chains, and local alignment. |
+| Java backend governance | Keeps controllers thin, requires service-interface comments, aligns entity Lombok usage, and checks transactions, enums, config, validation, and repeated logic. |
+| Frontend and Mini Programs | Covers general frontend, Vue 2/3, React, Vite, native Mini Programs, uni-app, Taro, subpackages, simulators, and tests. |
+| Environment discovery | Maven/JDK/Node/Python/Mini Program tools are discovered from project config and cache first, then validated into `.codex/local-environment.json`. |
+| Context management | Uses Context Capsules for long tasks so goals, evidence, changes, rollback points, and next steps survive context switches. |
 
 ## Layout
 
