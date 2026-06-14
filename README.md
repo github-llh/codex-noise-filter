@@ -10,8 +10,9 @@
 ![Routing](https://img.shields.io/badge/Routing-indexed%20references-16a34a)
 ![Mode](https://img.shields.io/badge/Mode-non--bypassable-f97316)
 ![Languages](https://img.shields.io/badge/Stacks-Java%20%7C%20Python%20%7C%20Vue%2FReact%20%7C%20MiniProgram-7c3aed)
+[![License](https://img.shields.io/badge/License-Apache--2.0-blue)](LICENSE)
 
-[快速开始](#快速开始) · [能力概览](#能力概览) · [结构](#结构) · [内置重点](#内置重点) · [English](README.en.md)
+[快速开始](#快速开始) · [能力概览](#能力概览) · [结构](#结构) · [协议](#协议) · [English](README.en.md)
 
 </div>
 
@@ -149,5 +150,11 @@ references/
 - 用户中途插入新目标时，先判断与主任务关系，不默认重置已有调用链。
 - 全局 `AGENTS.md` 不需要承载全部细则，但建议保留为兜底入口。
 - 长期 memory 只记录稳定偏好和跨任务规则；机器私有绝对路径、临时日志、一次性失败和未验证猜测不写入长期记忆。
+
+## 协议
+
+本项目使用 [Apache License 2.0](LICENSE) 开源协议。
+
+选择 Apache-2.0 是为了在保持宽松复用的同时，明确版权、专利授权、贡献提交和免责声明边界，降低后续分发、修改和二次使用时的争议风险。若在企业或受监管场景中使用，请结合自身组织的开源合规流程复核。
 
 英文说明见 [README.en.md](README.en.md)。

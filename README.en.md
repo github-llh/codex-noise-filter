@@ -10,8 +10,9 @@ Reduce context noise · enforce call-chain checks · load rules progressively ·
 ![Routing](https://img.shields.io/badge/Routing-indexed%20references-16a34a)
 ![Mode](https://img.shields.io/badge/Mode-non--bypassable-f97316)
 ![Stacks](https://img.shields.io/badge/Stacks-Java%20%7C%20Python%20%7C%20Vue%2FReact%20%7C%20MiniProgram-7c3aed)
+[![License](https://img.shields.io/badge/License-Apache--2.0-blue)](LICENSE)
 
-[Quick Start](#quick-start) · [Capabilities](#capabilities) · [Layout](#layout) · [Key Rules](#key-rules) · [简体中文](README.md)
+[Quick Start](#quick-start) · [Capabilities](#capabilities) · [Layout](#layout) · [License](#license) · [简体中文](README.md)
 
 </div>
 
@@ -149,3 +150,9 @@ references/
 - When the user inserts a new goal, treat it as an incremental task first and do not reset confirmed call chains by default.
 - The global `AGENTS.md` no longer needs to carry every detail, but it should remain as a fallback entry point.
 - Long-term memory should only store stable preferences and reusable rules, not machine-private absolute paths, temporary logs, one-off failures, or unverified guesses.
+
+## License
+
+This project is licensed under the [Apache License 2.0](LICENSE).
+
+Apache-2.0 keeps reuse permissive while making copyright, patent grant, contribution submission, and warranty-disclaimer boundaries explicit. For enterprise or regulated use, review it against your organization's open-source compliance process.
