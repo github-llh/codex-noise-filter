@@ -24,6 +24,7 @@ references/
   08-java-style-patterns.md
   09-concurrency-async-batch.md
   10-python-development.md
+  11-frontend-vue-react.md
 ```
 
 `SKILL.md` is intentionally small. It routes the agent to indexed reference files instead of loading every rule at once.
@@ -36,11 +37,13 @@ references/
 - Java style rules live in `08-java-style-patterns.md` and should be opened only for enums, validation, Lombok, Optional, functional style, or repeated logic.
 - Concurrency, async, and batch rules live in `09-concurrency-async-batch.md` and should be opened only for high concurrency, idempotency, deadlocks, events, middleware, thread pools, virtual threads, or user-context propagation.
 - Python rules live in `10-python-development.md` and should be opened only for `.py`, Python syntax, virtual environments, dependencies, running commands, tests, linting, type checking, or Python performance work.
+- Vue/React rules live in `11-frontend-vue-react.md` and should be opened only for Vue 2/3, React, Vite, component syntax, package management, running commands, tests, linting, type checking, or frontend builds.
 - Maven builds use `03-maven-backend-build.md`; environment discovery uses `06-environment-discovery.md`.
 - Routing should cross-check keywords, user intent, and impact area to preserve accuracy without reading every rule file.
 - `SKILL.md` hard constraints are always in force. Index performance tuning may reduce unrelated reference reads, but must not reduce mandatory constraints.
 - Common tasks should use the quick-decision minimum set first, for example Java Controller/Service edits default to `02 + 07`, and add `08` only when enums, validation, Lombok, Optional, or repeated logic are involved.
 - Python tasks default to `02 + 10`; add `06` only when environment paths are unknown, and add other references only when cross-system or frontend/backend call chains require them.
+- General layout/state-contract tasks default to `02 + 04`; Vue/React tasks default to `02 + 11`, and add `06` only when environment paths are unknown.
 - If the touched scope expands during execution, add references through the index. Do not skip non-bypass gates, existing-code local alignment, layering, comments, transactions, concurrency, or business abstraction rules just to read fewer files.
 
 ## Key Rules
@@ -60,6 +63,10 @@ references/
 - Python code should follow existing `pyproject.toml`, Ruff/Black/isort/mypy/pyright/pytest configuration. Add type hints and necessary docstrings for public functions, complex return values, cross-module DTOs, and configuration objects.
 - Prefer project commands, `python -m ...`, `uv run ...`, or `poetry run ...` for Python execution. Prefer targeted tests such as `python -m pytest path::test` or existing `tox/nox` commands.
 - Python edits should get the lightest relevant validation: syntax/import checks, targeted tests, and touched-scope lint/format/type checks. If validation cannot run, state why.
+- Frontend projects must first identify `package.json`, lockfile, `packageManager`, Node version, and build tool. Do not mix npm/yarn/pnpm/bun.
+- Vue projects must distinguish Vue 2 from Vue 3 first: Vue 2 defaults to Options API and Vue Test Utils v1, while Vue 3 can use Composition API, `<script setup>`, Pinia, and Vue Test Utils v2.
+- React projects must first identify React/React DOM versions, framework, and TypeScript/JSX configuration. Hooks must only run at the top level of components or custom hooks; effects belong in `useEffect`, and pure derived values should not be stored as extra state.
+- Vue/React edits should run existing `lint`, `typecheck`, `test`, `build`, or targeted test commands. For interaction and layout changes, verify key pages in a browser.
 - Before creating files, confirm the target module, layer responsibility, package path, existing peer files, and dependency direction. Interfaces, implementations, entities, and contracts may live in different modules.
 - Prefer business enums for stable fixed sets such as status, type, source, action, phase, and result values. Avoid scattered magic strings and numbers.
 - Environment- or operations-variable values such as URLs, secrets, toggles, thresholds, time windows, thread pools, cache TTLs, and external-system parameters should live in yml/properties or the configuration center and be injected through typed configuration classes.

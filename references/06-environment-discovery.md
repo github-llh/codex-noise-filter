@@ -8,7 +8,7 @@
 2. 读取 IDE/项目配置：
    - JetBrains：`.idea/misc.xml`、`.idea/workspace.xml`、`.idea/compiler.xml`、`.idea/jarRepositories.xml`。
    - Maven 项目：`.mvn/maven.config`、`.mvn/jvm.config`、`.mvn/wrapper/maven-wrapper.properties`、`pom.xml`。
-   - 前端项目：`package.json`、`pnpm-lock.yaml`、`yarn.lock`、`package-lock.json`、`.nvmrc`、`.node-version`。
+   - 前端项目：`package.json`、`pnpm-lock.yaml`、`yarn.lock`、`package-lock.json`、`bun.lockb`、`bun.lock`、`.nvmrc`、`.node-version`、`.tool-versions`、`.npmrc`、`.yarnrc.yml`、`vite.config.*`、`vue.config.js`、`next.config.*`。
    - Python 项目：`pyproject.toml`、`requirements.txt`、`requirements-dev.txt`、`uv.lock`、`poetry.lock`、`Pipfile.lock`、`tox.ini`、`noxfile.py`、`pytest.ini`、`.python-version`、`.tool-versions`、`.venv/pyvenv.cfg`。
 3. 读取 shell 环境和常见命令：
    - `JAVA_HOME`
@@ -18,6 +18,10 @@
    - `which mvn`
    - `which node`
    - `which pnpm`
+   - `which yarn`
+   - `which npm`
+   - `which bun`
+   - `which corepack`
    - `which python`
    - `which python3`
    - `which uv`
@@ -35,6 +39,10 @@
    - `/usr/local/bin/python3`
    - `/opt/homebrew/bin/uv`
    - `/usr/local/bin/uv`
+   - `/opt/homebrew/bin/node`
+   - `/usr/local/bin/node`
+   - `/opt/homebrew/bin/pnpm`
+   - `/usr/local/bin/pnpm`
 5. 找到候选后执行最小验证。
 6. 验证通过后写入 `.codex/local-environment.json`，下次优先复用。
 
@@ -63,6 +71,47 @@ Maven 本地仓库必须是存在的目录，且构建命令使用：
   }
 }
 ```
+
+## Node / 前端验证
+
+前端项目先从 `package.json` 判断包管理器：
+
+- `packageManager` 明确指定时优先使用该工具和版本。
+- 存在 `pnpm-lock.yaml` 用 pnpm。
+- 存在 `yarn.lock` 用 yarn。
+- 存在 `package-lock.json` 用 npm。
+- 存在 `bun.lock` 或 `bun.lockb` 用 bun。
+
+Node 和包管理器至少验证：
+
+```bash
+node --version
+npm --version
+pnpm --version
+yarn --version
+bun --version
+corepack --version
+```
+
+只验证项目实际使用的工具；不要为了验证而安装新包管理器。若 `corepack` 已启用且项目声明 `packageManager`，优先按项目声明执行。
+
+前端项目缓存建议记录：
+
+```json
+{
+  "node": {
+    "source": "project-config",
+    "executable": "/path/to/node",
+    "version": "vX.Y.Z",
+    "packageManager": "pnpm|npm|yarn|bun",
+    "packageManagerVersion": "X.Y.Z",
+    "lockfile": "pnpm-lock.yaml",
+    "verified": true
+  }
+}
+```
+
+不把临时全局安装、未验证 Node、错误目录下的 lockfile 判断写入缓存。
 
 ## Python 验证
 

@@ -26,6 +26,7 @@ references/
   08-java-style-patterns.md
   09-concurrency-async-batch.md
   10-python-development.md
+  11-frontend-vue-react.md
 ```
 
 `SKILL.md` 只保留触发、路由和硬约束；执行细则按索引进入对应文件，减少主文件负担。
@@ -38,11 +39,13 @@ references/
 - Java 代码风格规则集中到 `08-java-style-patterns.md`，只有涉及枚举、参数校验、Lombok、Optional、函数式、去重复时才读取。
 - 并发、异步和批量规则集中到 `09-concurrency-async-batch.md`，只有涉及高并发、幂等、死锁、事件、中间件、线程池、虚拟线程、用户上下文传播时才读取。
 - Python 规则集中到 `10-python-development.md`，只有涉及 `.py`、Python 语法、虚拟环境、依赖、运行、测试、lint、类型检查或 Python 性能时才读取。
+- Vue/React 规则集中到 `11-frontend-vue-react.md`，只有涉及 Vue2/Vue3、React、Vite、组件语法、包管理、运行、测试、lint、类型检查或前端构建时才读取。
 - Maven 构建只读 `03-maven-backend-build.md`；环境路径发现只读 `06-environment-discovery.md`。
 - 索引路由用“关键词 + 任务意图 + 影响面”交叉确认，减少误读，同时避免把所有规则一次性读入。
 - `SKILL.md` 硬约束视为常驻规则；优化索引性能时只减少无关 reference 读取，不减少必须执行的约束。
 - 常见任务先按快速决策表读取最小组合，例如 Java Controller/Service 改动默认 `02 + 07`，命中枚举、校验、Lombok、Optional、重复逻辑时再追加 `08`。
 - Python 任务默认读取 `02 + 10`，环境路径未知才追加 `06`，跨系统或前后端调用链明确时再追加对应 reference。
+- 普通布局/状态契约任务默认读取 `02 + 04`；Vue/React 任务默认读取 `02 + 11`，环境路径未知才追加 `06`。
 - 执行中触碰范围扩大时，按索引追加 reference；不得为了少读文件而跳过不可绕过门禁、既有代码局部对齐、分层、注释、事务、并发和业务抽象规则。
 
 ### 内置重点
@@ -62,6 +65,10 @@ references/
 - Python 代码遵守项目已有 `pyproject.toml`、Ruff/Black/isort/mypy/pyright/pytest 配置；公共函数、复杂返回值、跨模块 DTO/配置对象补类型标注和必要 docstring。
 - Python 运行优先使用项目命令、`python -m ...`、`uv run ...`、`poetry run ...`；测试优先定向运行 `python -m pytest path::test` 或项目已有 `tox/nox` 命令。
 - Python 修改要做最小验证：语法/导入、定向测试、lint/format/type check 中与触碰范围相关的项；无法验证时说明原因。
+- 前端项目先确认 `package.json`、lockfile、`packageManager`、Node 版本和构建工具；不要混用 npm/yarn/pnpm/bun。
+- Vue 项目必须先区分 Vue 2 与 Vue 3：Vue 2 默认 Options API 和 Vue Test Utils v1，Vue 3 可用 Composition API、`<script setup>`、Pinia 和 Vue Test Utils v2。
+- React 项目先确认 React/React DOM 版本、框架和 TypeScript/JSX 配置；Hooks 只能在组件或自定义 Hook 顶层调用，副作用放 `useEffect`，纯派生值不额外存 state。
+- Vue/React 修改优先运行项目已有 `lint`、`typecheck`、`test`、`build` 或定向测试；涉及交互和布局时用浏览器验证关键页面。
 - 新建文件前必须确认 module、层级职责、包路径、同类文件位置和依赖方向，尤其注意接口、实现、实体、契约可能分属不同 module。
 - 明确固定集合的状态、类型、来源、动作、阶段、结果等值优先写成业务 Enum，避免魔法字符串和数字散落。
 - URL、密钥、开关、阈值、时间窗、线程池、缓存 TTL、外部系统参数等环境或运维可变值优先写入 yml/properties 或配置中心，并通过配置类注入。
