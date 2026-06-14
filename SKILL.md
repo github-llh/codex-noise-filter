@@ -37,6 +37,7 @@ description: |
 - IDE、Maven、Node 等本机环境发现与缓存：`references/06-environment-discovery.md`
 - Java 后端架构、归属地、分层和注释：`references/07-java-backend-architecture.md`
 - Java 代码风格、枚举、校验、Lombok、Optional、去重复：`references/08-java-style-patterns.md`
+- Python 语法、环境、运行、测试、lint、类型和性能：`references/10-python-development.md`
 
 ## 硬约束
 

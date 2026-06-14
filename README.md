@@ -7,7 +7,7 @@
 ### 适用场景
 
 - 编写、修改、调试、排查、重构、迁移、解释代码。
-- 多文件排查、跨模块调用链分析、后端构建、前端页面修复。
+- 多文件排查、跨模块调用链分析、后端构建、前端页面修复、Python 脚本/服务/包/测试治理。
 - 用户要求减少 token、压缩噪音、简洁可追溯或可复盘。
 
 ### 结构
@@ -25,6 +25,7 @@ references/
   07-java-backend-architecture.md
   08-java-style-patterns.md
   09-concurrency-async-batch.md
+  10-python-development.md
 ```
 
 `SKILL.md` 只保留触发、路由和硬约束；执行细则按索引进入对应文件，减少主文件负担。
@@ -36,10 +37,12 @@ references/
 - Java 后端架构规则集中到 `07-java-backend-architecture.md`，只有涉及分层、归属地、注释、调用链时才读取。
 - Java 代码风格规则集中到 `08-java-style-patterns.md`，只有涉及枚举、参数校验、Lombok、Optional、函数式、去重复时才读取。
 - 并发、异步和批量规则集中到 `09-concurrency-async-batch.md`，只有涉及高并发、幂等、死锁、事件、中间件、线程池、虚拟线程、用户上下文传播时才读取。
+- Python 规则集中到 `10-python-development.md`，只有涉及 `.py`、Python 语法、虚拟环境、依赖、运行、测试、lint、类型检查或 Python 性能时才读取。
 - Maven 构建只读 `03-maven-backend-build.md`；环境路径发现只读 `06-environment-discovery.md`。
 - 索引路由用“关键词 + 任务意图 + 影响面”交叉确认，减少误读，同时避免把所有规则一次性读入。
 - `SKILL.md` 硬约束视为常驻规则；优化索引性能时只减少无关 reference 读取，不减少必须执行的约束。
 - 常见任务先按快速决策表读取最小组合，例如 Java Controller/Service 改动默认 `02 + 07`，命中枚举、校验、Lombok、Optional、重复逻辑时再追加 `08`。
+- Python 任务默认读取 `02 + 10`，环境路径未知才追加 `06`，跨系统或前后端调用链明确时再追加对应 reference。
 - 执行中触碰范围扩大时，按索引追加 reference；不得为了少读文件而跳过不可绕过门禁、既有代码局部对齐、分层、注释、事务、并发和业务抽象规则。
 
 ### 内置重点
@@ -55,6 +58,10 @@ references/
 - Maven 后端项目优先读取 `.codex/local-environment.json`、IDE/项目配置和已验证本机候选路径。
 - 当前已验证 Maven 候选为 `/Users/lilinhan/dev/maven-3.9.10/bin/mvn`，本地仓库候选为 `/Users/lilinhan/maven-git`。
 - 多模块 Maven 项目默认从聚合 root 节点执行，并使用 `-pl <module> -am`。
+- Python 项目先确认 `requires-python`、`.python-version`、IDE 解释器、`.venv` 或锁文件；优先复用 uv、poetry、pipenv、venv、tox、nox 等项目已有工具链，不直接使用全局 pip 乱装依赖。
+- Python 代码遵守项目已有 `pyproject.toml`、Ruff/Black/isort/mypy/pyright/pytest 配置；公共函数、复杂返回值、跨模块 DTO/配置对象补类型标注和必要 docstring。
+- Python 运行优先使用项目命令、`python -m ...`、`uv run ...`、`poetry run ...`；测试优先定向运行 `python -m pytest path::test` 或项目已有 `tox/nox` 命令。
+- Python 修改要做最小验证：语法/导入、定向测试、lint/format/type check 中与触碰范围相关的项；无法验证时说明原因。
 - 新建文件前必须确认 module、层级职责、包路径、同类文件位置和依赖方向，尤其注意接口、实现、实体、契约可能分属不同 module。
 - 明确固定集合的状态、类型、来源、动作、阶段、结果等值优先写成业务 Enum，避免魔法字符串和数字散落。
 - URL、密钥、开关、阈值、时间窗、线程池、缓存 TTL、外部系统参数等环境或运维可变值优先写入 yml/properties 或配置中心，并通过配置类注入。
@@ -83,7 +90,7 @@ references/
 
 ### 环境发现
 
-- 首次使用 Maven、JDK、Node 或包管理器时，先读 IDE/项目配置。
+- 首次使用 Maven、JDK、Node、Python 或包管理器时，先读 IDE/项目配置。
 - 如果配置中拿不到路径，再查找本机常见候选路径。
 - 找到后必须执行最小验证，例如 `mvn -version`。
 - 验证通过后写入 `.codex/local-environment.json`，后续优先复用缓存。

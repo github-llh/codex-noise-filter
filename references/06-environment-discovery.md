@@ -1,6 +1,6 @@
 # 环境发现与缓存
 
-用于 Maven、JDK、Node、包管理器、IDE 配置路径等本机环境。目标是避免每次硬编码路径或重复全盘查找。
+用于 Maven、JDK、Node、Python、包管理器、IDE 配置路径等本机环境。目标是避免每次硬编码路径或重复全盘查找。
 
 ## 发现顺序
 
@@ -9,6 +9,7 @@
    - JetBrains：`.idea/misc.xml`、`.idea/workspace.xml`、`.idea/compiler.xml`、`.idea/jarRepositories.xml`。
    - Maven 项目：`.mvn/maven.config`、`.mvn/jvm.config`、`.mvn/wrapper/maven-wrapper.properties`、`pom.xml`。
    - 前端项目：`package.json`、`pnpm-lock.yaml`、`yarn.lock`、`package-lock.json`、`.nvmrc`、`.node-version`。
+   - Python 项目：`pyproject.toml`、`requirements.txt`、`requirements-dev.txt`、`uv.lock`、`poetry.lock`、`Pipfile.lock`、`tox.ini`、`noxfile.py`、`pytest.ini`、`.python-version`、`.tool-versions`、`.venv/pyvenv.cfg`。
 3. 读取 shell 环境和常见命令：
    - `JAVA_HOME`
    - `MAVEN_HOME`
@@ -17,6 +18,11 @@
    - `which mvn`
    - `which node`
    - `which pnpm`
+   - `which python`
+   - `which python3`
+   - `which uv`
+   - `which poetry`
+   - `which pytest`
 4. 查找本机常见路径，只做小范围候选，不全盘扫描：
    - `/Users/lilinhan/dev/maven-*/bin/mvn`
    - `/Users/lilinhan/maven-git`
@@ -24,6 +30,11 @@
    - `/opt/homebrew/bin/mvn`
    - `/usr/local/bin/mvn`
    - `/Library/Java/JavaVirtualMachines/*/Contents/Home`
+   - `<workspace>/.venv/bin/python`
+   - `/opt/homebrew/bin/python3`
+   - `/usr/local/bin/python3`
+   - `/opt/homebrew/bin/uv`
+   - `/usr/local/bin/uv`
 5. 找到候选后执行最小验证。
 6. 验证通过后写入 `.codex/local-environment.json`，下次优先复用。
 
@@ -52,6 +63,41 @@ Maven 本地仓库必须是存在的目录，且构建命令使用：
   }
 }
 ```
+
+## Python 验证
+
+Python 解释器必须通过：
+
+```bash
+<pythonExecutable> --version
+```
+
+如果项目已有虚拟环境、uv、poetry、pipenv、tox 或 nox，优先验证项目工具链：
+
+```bash
+uv --version
+poetry --version
+<pythonExecutable> -m pip --version
+<pythonExecutable> -m pytest --version
+```
+
+Python 项目缓存建议记录：
+
+```json
+{
+  "python": {
+    "source": "project-venv",
+    "executable": "<workspace>/.venv/bin/python",
+    "version": "Python X.Y.Z",
+    "manager": "uv|poetry|pipenv|venv|conda|system",
+    "projectFile": "pyproject.toml",
+    "verifiedCommand": "<workspace>/.venv/bin/python --version",
+    "verified": true
+  }
+}
+```
+
+不把未验证解释器、全局 pip 安装结果、临时虚拟环境路径写入缓存。
 
 ## 缓存策略
 
