@@ -8,9 +8,12 @@
 
 - [触发与读取](#触发与读取)
 - [项目识别](#项目识别)
+- [组件创建规则](#组件创建规则)
+- [组件使用规则](#组件使用规则)
 - [Vue 2 规则](#vue-2-规则)
 - [Vue 3 规则](#vue-3-规则)
 - [React 规则](#react-规则)
+- [组件注释位置](#组件注释位置)
 - [状态、路由与接口](#状态路由与接口)
 - [环境与依赖](#环境与依赖)
 - [运行与构建](#运行与构建)
@@ -34,6 +37,30 @@
   - React：`react`、`react-dom` 主版本决定可用 API；Next、Remix、CRA、Vite、Rsbuild 等框架先按项目配置识别。
 - 不按文件后缀猜版本；Vue 2 和 Vue 3 都可能使用 `.vue`，React 也可能混用 `.js/.jsx/.ts/.tsx`。
 - 修改前确认 TypeScript、JSX、SFC、CSS Modules、Sass/Less、Tailwind、组件库、状态库、路由库和测试框架。
+
+## 组件创建规则
+
+- 新建组件前先确认归属：业务域、页面私有组件、通用基础组件、表单组件、表格/列表组件、弹窗/抽屉组件、布局组件、图表/可视化组件或第三方封装组件。
+- 只有满足以下任一条件时才新建组件：跨页面/跨模块复用、单组件过大且职责混杂、需要隔离复杂交互、需要稳定公开 props/slots/children 契约、需要独立测试或 Story/示例。
+- 不为两三行模板或一次性静态片段过度拆组件；可读性更强时保留在父组件中。
+- 组件名必须表达业务或 UI 角色，避免 `CommonComponent`、`BaseItem`、`TempModal` 这类泛名。Vue SFC 和 React 组件文件按项目约定使用 PascalCase 或既有命名范式。
+- 目录位置跟随项目结构：页面私有组件放页面目录下的 `components/`，跨业务复用放业务域共享目录，真正通用基础组件才放全局 `components/common`、`shared` 或设计系统目录。
+- 组件公开 API 要小而稳定：props/emit/slots/children/ref 暴露必要能力，不把父组件内部数据结构整体透传。
+- 展示组件只负责渲染和轻交互；容器组件负责取数、权限、路由、状态协调；业务规则和接口调用优先下沉到 store、service、api client、composable、hook 或 mapper。
+- 表单、表格、弹窗、上传、下载、权限按钮等高复用组件必须保留 loading、disabled、error、empty、permission、重复提交防护和可访问性状态。
+- 新建组件时同步考虑测试或示例入口：项目已有 Storybook、Histoire、demo、unit test 或 playground 时，按既有规则补最小覆盖。
+
+## 组件使用规则
+
+- 使用组件前先查同业务域、设计系统、组件库和历史页面是否已有同类组件；优先复用，不重复造轮子。
+- Vue 组件通信优先 props down / events up；跨层级共享使用项目已有 provide/inject、store 或 composable，不用事件总线继续扩大隐式耦合。
+- Vue 插槽用于可变内容区域；默认插槽、具名插槽、作用域插槽要有清晰命名和数据边界，不用插槽传递大块业务状态。
+- React 组合优先使用 props、children、render prop、context 或自定义 Hook；共享状态按 React 官方建议提升到最近公共父组件，或复用项目已有 store。
+- React props 使用 camelCase；布尔 prop 为 true 时按项目 lint 规则可省略值。避免随意 `{...props}` 透传，除非是明确封装原生元素或第三方组件，并已过滤无关字段。
+- 列表渲染必须使用稳定业务 key，不用数组 index 作为默认 key，除非列表完全静态且不会重排、插入、删除。
+- 组件使用不能绕过权限、路由守卫、表单校验、错误处理、loading、空状态和重复提交防护。
+- 不在模板或 JSX 中堆复杂业务表达式；超过一行且含业务含义的判断，抽到 computed、method、composable、hook、selector 或 mapper。
+- 组件库二次封装要保留原组件关键能力：禁用态、错误态、尺寸、插槽/children、事件、aria、class/style 扩展和测试选择器。
 
 ## Vue 2 规则
 
@@ -65,6 +92,16 @@
 - 组件 props、事件、children、ref、context 边界要类型化；TypeScript 项目避免无意义 `any` 和过宽 `React.FC` 约束。
 - React 版本相关 API 必须先确认版本；不要在 React 17/18 项目中直接使用只在更高版本或特定框架中可用的 API。
 - Next/Remix 等框架项目要区分客户端组件、服务端组件、loader/action、路由约定和构建边界，不把纯客户端写法硬塞进服务端文件。
+
+## 组件注释位置
+
+- 注释遵循通用原则：解释业务原因、边界、兼容性、风险和非显然契约，不重复模板/JSX 正在做什么。
+- Vue SFC：组件用途和业务边界写在 `<script>` 中组件定义、`defineOptions`、props/emits 类型附近；复杂 slot 契约写在 slot 对应定义附近；模板注释只保留非显然布局、兼容 hack 或权限边界；样式注释只说明设计 token、覆盖第三方样式或浏览器兼容原因。
+- Vue 2 Options API：复杂 `props`、`computed`、`watch`、生命周期副作用和兼容逻辑写在对应 option 附近；不要在 template 顶部堆整段业务说明。
+- Vue 3 Composition API：复杂 composable 调用、watch 副作用、跨组件 provide/inject、异步请求和类型化 props/emits 在 `<script setup>` 对应语句附近说明。
+- React：组件用途写在组件导出或函数定义上方；复杂 props 契约写在 props type/interface 字段附近；复杂 Hook、副作用、memoization、ref、context 边界写在对应 hook 附近；JSX 内只保留非显然分支、可访问性或兼容注释。
+- 测试文件注释解释场景、夹具来源和回归原因；不要注释每一步点击和断言。
+- 如果注释必须跨文件解释，优先把契约沉淀到类型、props、emits、slot、hook、composable、README/Story 示例或测试用例中，不用散落的长注释替代清晰 API。
 
 ## 状态、路由与接口
 
@@ -119,10 +156,16 @@
 ## 参考资料
 
 - Vue 3 Guide: https://vuejs.org/guide/introduction.html
+- Vue Components Basics: https://vuejs.org/guide/essentials/component-basics
+- Vue Style Guide: https://vuejs.org/style-guide/
 - Vue 3 Composition API FAQ: https://vuejs.org/guide/extras/composition-api-faq
 - Vue 2 Guide: https://v2.vuejs.org/v2/guide/
+- Vue School Slots Guide: https://vueschool.io/articles/vuejs-tutorials/the-complete-guide-to-vue-slots/
 - React Learn: https://react.dev/learn
+- React Passing Props: https://react.dev/learn/passing-props-to-a-component
+- React Sharing State: https://react.dev/learn/sharing-state-between-components
 - React Hooks: https://react.dev/reference/react/hooks
+- Airbnb React/JSX Style Guide: https://javascript.airbnb.tech/react/
 - Vite Guide: https://vite.dev/guide/
 - Vite Env and Modes: https://vite.dev/guide/env-and-mode
 - Vue Test Utils v2: https://test-utils.vuejs.org/guide/

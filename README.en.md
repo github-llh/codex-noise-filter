@@ -66,6 +66,8 @@ references/
 - Frontend projects must first identify `package.json`, lockfile, `packageManager`, Node version, and build tool. Do not mix npm/yarn/pnpm/bun.
 - Vue projects must distinguish Vue 2 from Vue 3 first: Vue 2 defaults to Options API and Vue Test Utils v1, while Vue 3 can use Composition API, `<script setup>`, Pinia, and Vue Test Utils v2.
 - React projects must first identify React/React DOM versions, framework, and TypeScript/JSX configuration. Hooks must only run at the top level of components or custom hooks; effects belong in `useEffect`, and pure derived values should not be stored as extra state.
+- Before creating Vue/React components, confirm ownership, reuse value, public contract, and test/example entry points. When using components, prefer existing project components and keep props/slots/children/API boundaries small and stable.
+- Comment rules apply across stacks: place comments at the natural contract location for each technology, such as Java service interfaces, Python docstrings, Vue props/emits/slots, React components/hooks/types, and SQL/config definitions.
 - Vue/React edits should run existing `lint`, `typecheck`, `test`, `build`, or targeted test commands. For interaction and layout changes, verify key pages in a browser.
 - Before creating files, confirm the target module, layer responsibility, package path, existing peer files, and dependency direction. Interfaces, implementations, entities, and contracts may live in different modules.
 - Prefer business enums for stable fixed sets such as status, type, source, action, phase, and result values. Avoid scattered magic strings and numbers.
