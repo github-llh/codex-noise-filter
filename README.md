@@ -12,7 +12,7 @@
 ![Languages](https://img.shields.io/badge/Stacks-Java%20%7C%20Python%20%7C%20Vue%2FReact%20%7C%20MiniProgram-7c3aed)
 [![License](https://img.shields.io/badge/License-Apache--2.0-blue)](LICENSE)
 
-[快速开始](#快速开始) · [使用方式](#使用方式) · [能力概览](#能力概览) · [结构](#结构) · [协议](#协议) · [English](README.en.md)
+[快速开始](#快速开始) · [为什么用](#为什么用) · [使用方式](#使用方式) · [触发示例](#触发示例) · [能力概览](#能力概览) · [结构](#结构) · [协议](#协议) · [English](README.en.md)
 
 </div>
 
@@ -25,6 +25,17 @@
 - 编写、修改、调试、排查、重构、迁移、解释代码。
 - 多文件排查、跨模块调用链分析、后端构建、前端页面修复、小程序原生/uni-app/Taro 治理、Python 脚本/服务/包/测试治理。
 - 用户要求减少 token、压缩噪音、简洁可追溯或可复盘。
+
+## 为什么用
+
+很多编程任务失败不是因为不会写代码，而是因为上下文太散、调用链没闭环、规则只约束了新增代码、已有代码继续失控。`codex-noise-filter` 把这些容易遗漏的步骤固化为 skill 入口，让 Codex 在动手前先确认“读哪些规则、碰哪些文件、不碰哪些边界、怎么验证”。
+
+| 不使用时 | 使用后 |
+| --- | --- |
+| 容易全仓扫描，token 被日志和无关文件吃掉。 | 先读 `references/00-index.md`，只加载当前任务需要的 reference。 |
+| 只改眼前代码，漏掉 Controller/Service/DTO/Entity 的调用链影响。 | 修改前确认触碰范围、调用链和不影响范围。 |
+| 新增代码遵守规范，已有触碰代码继续堆业务逻辑、硬编码和重复 set/if。 | 新增和已有触碰代码同等执行局部规则对齐。 |
+| Plan/Goal、续跑或跨窗口后容易忘记规则。 | Plan/Goal/上下文恢复都必须走索引和 Context Capsule。 |
 
 ## 使用方式
 
@@ -111,6 +122,36 @@ JetBrains 项目优先使用 JetBrains MCP / IDE 工具；搜索优先 rg。
 
 如果没有触发，常见原因是任务没有代码上下文、skill 未放在当前 Codex 可扫描目录、同名 skill 冲突、或 Codex 会话尚未重启。
 
+## 触发示例
+
+这些 prompt 可以直接复制使用：
+
+```text
+$codex-noise-filter 检查这个 Controller 是否写了业务逻辑，并把应下沉的逻辑迁到 Service 实现层。
+```
+
+```text
+$codex-noise-filter 按 Maven 多模块 root 构建规则，找到当前模块的最小验证命令。
+```
+
+```text
+$codex-noise-filter 修改这个 Service 时同步检查接口注释、事务边界、枚举/配置外置化和重复 if/set。
+```
+
+```text
+$codex-noise-filter 处理这个 Vue/React 组件问题，先确认框架版本、组件归属、状态契约和验证命令。
+```
+
+```text
+$codex-noise-filter 处理这个 Python 测试失败，先识别虚拟环境、依赖管理器、定向测试和 lint/type check。
+```
+
+```text
+$codex-noise-filter 检查这个小程序页面，先识别原生/uni-app/Taro，再确认分包、依赖边界和模拟器验证方式。
+```
+
+更多场景见 [`examples/`](examples/)；团队接入模板见 [`templates/`](templates/)。
+
 ## 能力概览
 
 | 能力 | 说明 |
@@ -126,6 +167,9 @@ JetBrains 项目优先使用 JetBrains MCP / IDE 工具；搜索优先 rg。
 
 ```text
 SKILL.md
+CHANGELOG.md
+examples/
+templates/
 references/
   00-index.md
   01-global-engineering-rules.md

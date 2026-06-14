@@ -12,7 +12,7 @@ Reduce context noise · enforce call-chain checks · load rules progressively ·
 ![Stacks](https://img.shields.io/badge/Stacks-Java%20%7C%20Python%20%7C%20Vue%2FReact%20%7C%20MiniProgram-7c3aed)
 [![License](https://img.shields.io/badge/License-Apache--2.0-blue)](LICENSE)
 
-[Quick Start](#quick-start) · [Usage](#usage) · [Capabilities](#capabilities) · [Layout](#layout) · [License](#license) · [简体中文](README.md)
+[Quick Start](#quick-start) · [Why Use It](#why-use-it) · [Usage](#usage) · [Activation Examples](#activation-examples) · [Capabilities](#capabilities) · [Layout](#layout) · [License](#license) · [简体中文](README.md)
 
 </div>
 
@@ -25,6 +25,17 @@ Use it for:
 - Coding, debugging, refactoring, migration, and code explanation tasks.
 - Multi-file investigation, cross-module backend analysis, Maven builds, frontend fixes, Mini Program native/uni-app/Taro work, and Python script/service/package/test work.
 - Requests that ask for lower token usage, concise evidence, or reproducible reasoning.
+
+## Why Use It
+
+Many coding-task failures are not caused by missing coding ability. They come from scattered context, incomplete call-chain checks, rules that apply only to new code, and existing touched code that keeps accumulating business logic or hardcoded values. `codex-noise-filter` turns those checks into the skill entrypoint so Codex confirms which rules to read, which files to touch, which boundaries to avoid, and how to validate before editing.
+
+| Without it | With it |
+| --- | --- |
+| Repository-wide scanning can consume context with unrelated files and logs. | Read `references/00-index.md` first and load only task-relevant references. |
+| Edits may ignore Controller/Service/DTO/Entity call-chain impact. | Confirm touched scope, call chain, and unaffected contracts before changes. |
+| New code follows rules while existing touched code keeps business logic, hardcoding, and repeated setters/ifs. | Apply local rule alignment to both new code and existing touched code. |
+| Plan/Goal, resume, or cross-window work can forget constraints. | Plan/Goal/context restoration must still use indexed rules and Context Capsules. |
 
 ## Usage
 
@@ -111,6 +122,36 @@ Tell me whether this task triggers codex-noise-filter. If yes, list the referenc
 
 If it does not trigger, common causes are missing code context, the skill not being in a scanned skills directory, a same-name skill conflict, or a Codex session that needs a restart.
 
+## Activation Examples
+
+You can copy these prompts directly:
+
+```text
+$codex-noise-filter check whether this Controller contains business logic and move logic that belongs in the Service implementation.
+```
+
+```text
+$codex-noise-filter use Maven multi-module root build rules to find the smallest validation command for this module.
+```
+
+```text
+$codex-noise-filter when editing this Service, also check interface comments, transaction boundaries, enum/config extraction, and repeated if/set blocks.
+```
+
+```text
+$codex-noise-filter fix this Vue/React component issue after confirming framework version, component ownership, state contract, and validation commands.
+```
+
+```text
+$codex-noise-filter investigate this Python test failure after identifying the virtual environment, dependency manager, targeted test, and lint/type-check path.
+```
+
+```text
+$codex-noise-filter inspect this Mini Program page after identifying native/uni-app/Taro, subpackage boundaries, dependency ownership, and simulator validation.
+```
+
+More scenarios are in [`examples/`](examples/). Team rollout templates are in [`templates/`](templates/).
+
 ## Capabilities
 
 | Capability | Description |
@@ -126,6 +167,9 @@ If it does not trigger, common causes are missing code context, the skill not be
 
 ```text
 SKILL.md
+CHANGELOG.md
+examples/
+templates/
 references/
   00-index.md
   01-global-engineering-rules.md

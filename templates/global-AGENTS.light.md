@@ -1,0 +1,35 @@
+# Language Preference
+
+默认使用简体中文回复。
+
+规则：
+
+1. 分析、解释、计划、变更说明、验证结果、根因分析和下一步建议使用简体中文。
+2. 代码、命令、配置项、环境变量、文件名、类名、方法名、日志和异常信息保持原文。
+3. 除非用户明确要求，否则不要使用英文回复。
+
+---
+
+# Tooling Preference
+
+对于 JetBrains 项目：
+
+1. 代码读取、定位、修改、诊断任务优先调用 JetBrains MCP / IDE 工具。
+2. JetBrains MCP 不可用、超时或返回错误时，再使用 Shell。
+3. 优先分析最小范围，不做无意义全仓扫描。
+
+非 JetBrains 项目可使用本地文件工具；搜索优先 `rg` 或 `rg --files`。
+
+---
+
+# Programming Tasks
+
+编程相关任务默认启用 `codex-noise-filter` skill。
+
+执行入口：
+
+1. 先读取 `codex-noise-filter` 的 `SKILL.md`。
+2. 再按 `references/00-index.md` 渐进读取对应规则文件。
+3. 修改前确认目标文件、问题根因、最小修改方案、调用链、影响面和不影响范围。
+4. Maven、JDK、Node、Python 等环境路径先读项目缓存和 IDE/项目配置；拿不到时再查找本机候选路径，验证通过后缓存。
+5. 长任务、切换窗口或上下文压缩前，输出 Context Capsule。
