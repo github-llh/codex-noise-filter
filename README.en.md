@@ -12,7 +12,7 @@ Reduce context noise · enforce call-chain checks · load rules progressively ·
 ![Stacks](https://img.shields.io/badge/Stacks-Java%20%7C%20Python%20%7C%20Vue%2FReact%20%7C%20MiniProgram-7c3aed)
 [![License](https://img.shields.io/badge/License-Apache--2.0-blue)](LICENSE)
 
-[Quick Start](#quick-start) · [Capabilities](#capabilities) · [Layout](#layout) · [License](#license) · [简体中文](README.md)
+[Quick Start](#quick-start) · [Usage](#usage) · [Capabilities](#capabilities) · [Layout](#layout) · [License](#license) · [简体中文](README.md)
 
 </div>
 
@@ -25,6 +25,91 @@ Use it for:
 - Coding, debugging, refactoring, migration, and code explanation tasks.
 - Multi-file investigation, cross-module backend analysis, Maven builds, frontend fixes, Mini Program native/uni-app/Taro work, and Python script/service/package/test work.
 - Requests that ask for lower token usage, concise evidence, or reproducible reasoning.
+
+## Usage
+
+Codex skills can be used from the Codex App, CLI, and IDE extension. Invocation can be explicit by mentioning `$codex-noise-filter`, or implicit when Codex matches a coding task to the `description` in `SKILL.md`.
+
+### Repository Scope
+
+Use this when a team should share the same engineering rules.
+
+```text
+<repo>/.agents/skills/codex-noise-filter/
+  SKILL.md
+  references/
+```
+
+Start Codex from the repository root or a subdirectory. For forced invocation, mention the skill directly:
+
+```text
+$codex-noise-filter inspect and fix this Maven backend issue using the indexed workflow.
+```
+
+### User Scope
+
+Use this when the skill should apply across multiple repositories. Put this directory in the user-level skills directory supported by your Codex setup. If you use `CODEX_HOME`, place it under that profile's skills directory. Restart Codex if the skill does not appear in the selector.
+
+### Codex App
+
+1. Open the Codex App and select the project directory. Prefer Local mode for local code work.
+2. Describe the coding task normally, or mention `$codex-noise-filter` explicitly.
+3. To verify activation, ask Codex to print the matched skill, selected references, touched scope, and validation checks first.
+
+Example:
+
+```text
+$codex-noise-filter move business logic out of this Controller and list the references you read.
+```
+
+### Terminal / CLI
+
+Start Codex from the project root:
+
+```bash
+codex
+```
+
+In the interactive CLI, use `/skills` to select `codex-noise-filter`, or mention it directly in the prompt:
+
+```text
+$codex-noise-filter read the minimum indexed references and review this Java Service change.
+```
+
+For longer work, combine it with `/plan` or `/goal`. Plan/Goal mode still must follow this skill's indexing, call-chain, and local-alignment rules.
+
+### IDE Extension
+
+In VS Code, JetBrains IDEs, or similar IDE surfaces, make sure Codex is attached to the target project. For JetBrains projects, this skill prefers JetBrains MCP / IDE tools before Shell. You can start with:
+
+```text
+$codex-noise-filter use IDE context to locate the call chain; avoid broad repository scans.
+```
+
+### Lightweight Global AGENTS Fallback
+
+The global `AGENTS.md` does not need to duplicate this skill. Keep it small:
+
+```md
+# Language Preference
+Use Simplified Chinese by default.
+
+# Tooling Preference
+Prefer JetBrains MCP / IDE tools in JetBrains projects; prefer rg for search.
+
+# Programming Tasks
+Use codex-noise-filter for coding tasks; read SKILL.md and references/00-index.md first.
+```
+
+### Verify Activation
+
+After installation, test with:
+
+```text
+Tell me whether this task triggers codex-noise-filter. If yes, list the references you will read, the touched scope, the out-of-scope areas, and validation checks.
+```
+
+If it does not trigger, common causes are missing code context, the skill not being in a scanned skills directory, a same-name skill conflict, or a Codex session that needs a restart.
 
 ## Capabilities
 

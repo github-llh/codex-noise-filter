@@ -12,7 +12,7 @@
 ![Languages](https://img.shields.io/badge/Stacks-Java%20%7C%20Python%20%7C%20Vue%2FReact%20%7C%20MiniProgram-7c3aed)
 [![License](https://img.shields.io/badge/License-Apache--2.0-blue)](LICENSE)
 
-[快速开始](#快速开始) · [能力概览](#能力概览) · [结构](#结构) · [协议](#协议) · [English](README.en.md)
+[快速开始](#快速开始) · [使用方式](#使用方式) · [能力概览](#能力概览) · [结构](#结构) · [协议](#协议) · [English](README.en.md)
 
 </div>
 
@@ -25,6 +25,91 @@
 - 编写、修改、调试、排查、重构、迁移、解释代码。
 - 多文件排查、跨模块调用链分析、后端构建、前端页面修复、小程序原生/uni-app/Taro 治理、Python 脚本/服务/包/测试治理。
 - 用户要求减少 token、压缩噪音、简洁可追溯或可复盘。
+
+## 使用方式
+
+Codex skills 可用于 Codex App、CLI 和 IDE 扩展。触发方式分两类：显式点名 `$codex-noise-filter`，或让 Codex 根据 `SKILL.md` 的 `description` 自动匹配编程任务。
+
+### 仓库级使用
+
+适合团队共享同一套工程规则。
+
+```text
+<repo>/.agents/skills/codex-noise-filter/
+  SKILL.md
+  references/
+```
+
+在仓库根目录或子目录启动 Codex 后，直接提出编程任务即可；如果要强制触发，提示中写：
+
+```text
+$codex-noise-filter 按这个 skill 检查并修改当前 Maven 后端问题。
+```
+
+### 个人级使用
+
+适合把规则用于多个仓库。把本目录放到当前 Codex 支持的用户级 skills 目录；若当前环境使用 `CODEX_HOME`，则放到对应 profile 下的 skills 目录。更新后如果选择器里没有出现，重启 Codex。
+
+### Codex App
+
+1. 打开 Codex App 并选择项目目录，优先使用 Local 模式处理本机代码。
+2. 在任务里直接描述编程目标，或显式写 `$codex-noise-filter`。
+3. 需要确认是否触发时，要求 Codex 先输出“命中的 skill、读取的 reference、触碰范围和验证项”。
+
+示例：
+
+```text
+$codex-noise-filter 修复这个 Controller 的业务逻辑下沉问题，并说明读取了哪些 reference。
+```
+
+### 终端 / CLI
+
+在项目根目录启动 Codex：
+
+```bash
+codex
+```
+
+交互式 CLI 中可使用 `/skills` 选择 `codex-noise-filter`，也可在 prompt 中直接点名：
+
+```text
+$codex-noise-filter 按索引读取最小规则集，检查这个 Java Service 改动。
+```
+
+长任务建议搭配 `/plan` 或 `/goal`，但 Plan/Goal 也不能绕过本 skill 的索引、调用链和局部规则对齐。
+
+### IDE 扩展
+
+在 VS Code、JetBrains 等 IDE 里使用时，先确保 Codex 当前工作目录是目标项目。JetBrains 项目会优先走 JetBrains MCP / IDE 工具；如果 IDE 工具不可用，才回退 Shell。可在任务开头写：
+
+```text
+$codex-noise-filter 使用 IDE 上下文定位调用链，不要全仓无意义扫描。
+```
+
+### 全局 AGENTS 轻量兜底
+
+全局 `AGENTS.md` 不需要复制本 skill 的全部内容，只建议保留三类轻量指引：
+
+```md
+# Language Preference
+默认使用简体中文回复。
+
+# Tooling Preference
+JetBrains 项目优先使用 JetBrains MCP / IDE 工具；搜索优先 rg。
+
+# Programming Tasks
+编程任务默认启用 codex-noise-filter，先读 SKILL.md 和 references/00-index.md。
+```
+
+### 触发验证
+
+首次接入后，可用以下 prompt 验证：
+
+```text
+请说明当前任务是否触发 codex-noise-filter；如果触发，请列出将读取的 reference、触碰范围、禁止触碰范围和验证项。
+```
+
+如果没有触发，常见原因是任务没有代码上下文、skill 未放在当前 Codex 可扫描目录、同名 skill 冲突、或 Codex 会话尚未重启。
 
 ## 能力概览
 
