@@ -16,11 +16,11 @@
 
 - 默认打开 `00-index.md` + 1 个主 reference。
 - Java 后端修改通常打开 `02` + `07`，只有命中枚举、校验、Lombok、Optional、重复逻辑时再加 `08`。
-- Python 修改通常打开 `02` + `10`，只有命中环境路径发现时再加 `06`，命中跨服务/后端调用链时再加对应 reference。
+- Python 修改通常打开 `02` + `10`；需要运行、测试、lint 或 type check 前先按 `06` 验证并复用环境缓存，命中跨服务/后端调用链时再加对应 reference。
 - 涉及事务、高并发、幂等、异步、批量时，在 `07` 基础上加 `09`。
-- 涉及 Maven 构建但不改代码时，优先 `03`，需要路径发现时才加 `06`。
+- 涉及 Maven 构建但不改代码时，优先 `03`，执行前先按 `06` 验证并复用 Maven/JDK 缓存。
 - 涉及通用前端布局/表单/状态契约时优先 `04`；涉及 Vue/React/Vite/测试/构建时优先 `11`，接口契约或后端联动明确时再加后端 reference。
-- 涉及小程序原生、uni-app、Taro、分包、模拟器、`project.config.json`、`app.json`、`pages.json` 或 `app.config.*` 时优先 `12`；uni-app/Taro 命中 Vue/React 语法再加 `11`，环境路径未知再加 `06`。
+- 涉及小程序原生、uni-app、Taro、分包、模拟器、`project.config.json`、`app.json`、`pages.json` 或 `app.config.*` 时优先 `12`；uni-app/Taro 命中 Vue/React 语法再加 `11`，运行、预览、构建或发布前校验时先按 `06` 验证并复用环境缓存。
 - 不为了“保险”一次性读取所有 reference；如果执行中发现触碰范围扩大，再按关键词追加读取。
 
 约束保真：
@@ -97,6 +97,7 @@
 - 失败回退：`02-noise-filter-workflow.md#失败处理`
 - Maven 发行版与本地仓库：`03-maven-backend-build.md#本地-maven-环境`
 - Maven/IDE 配置智能发现：`06-environment-discovery.md#发现顺序`
+- 自动环境缓存维护：`06-environment-discovery.md#自动环境缓存维护`
 - 环境缓存结构：`06-environment-discovery.md#缓存结构`
 - 环境缓存策略：`06-environment-discovery.md#缓存策略`
 - 多模块构建 root 节点：`03-maven-backend-build.md#多层-maven-结构构建`
@@ -121,12 +122,12 @@
 | Java 事务/并发/批量/异步 | `02` + `07` + `09` | 需要构建验证时加 `03` |
 | Java 枚举/配置/校验/Lombok/重复 if-set | `02` + `01` + `08` | 只问规则可省略 `02`；涉及分层或接口注释加 `07` |
 | 文件归属/目录位置/依赖边界/生成目录 | `02` + `01` | 只问规则可省略 `02`；Java 加 `07`，Python 加 `10`，Vue/React 加 `11`，小程序加 `12` |
-| 环境/运行/命令/包管理器/root/workspace | `02` + `01` | 只问规则或只查命令可省略 `02`；路径未知加 `06`，再按技术栈加 `03`/`10`/`11`/`12` |
-| 测试/验证/lint/typecheck/build/模拟器 | `02` + `01` | 只问规则或只跑命令可省略 `02`；按技术栈追加 `03`/`04`/`10`/`11`/`12` |
+| 环境/运行/命令/包管理器/root/workspace | `02` + `01` + `06` | 只问规则可省略 `02`；执行工具链命令前用 `06` 验证/复用缓存，再按技术栈加 `03`/`10`/`11`/`12` |
+| 测试/验证/lint/typecheck/build/模拟器 | `02` + `01` + `06` | 只问规则可省略 `02`；执行工具链命令前用 `06` 验证/复用缓存，再按技术栈追加 `03`/`04`/`10`/`11`/`12` |
 | 密钥/权限/租户/审计/外部调用/上传下载/动态内容 | `02` + `01` | 只问规则可省略 `02`；并发副作用加 `09`，再按技术栈追加对应 reference |
-| Python 语法/脚本/服务/包/测试 | `02` + `10` | 环境路径未知加 `06`，跨系统调用再加对应 reference |
-| Maven 构建/测试/多模块 root | `03` | Maven/JDK 路径未知时加 `06` |
-| 环境路径发现/缓存 | `06` | 需要构建命令时加 `03` |
+| Python 语法/脚本/服务/包/测试 | `02` + `10` | 运行/测试/lint/type check 前加 `06`，跨系统调用再加对应 reference |
+| Maven 构建/测试/多模块 root | `06` + `03` | 先验证/复用 Maven/JDK 缓存，再执行 Maven 命令 |
+| 环境路径发现/缓存/忽略规则 | `06` | 需要构建命令时加 `03`；涉及代码修改时加 `02` |
 | 前端页面/布局/表单/状态契约 | `02` + `04` | 涉及 Vue/React 语法或构建测试加 `11` |
 | Vue/React/Vite/组件测试/前端构建 | `02` + `11` | 通用布局状态加 `04`，环境路径未知加 `06` |
 | 小程序原生/uni-app/Taro/分包/模拟器 | `02` + `12` | uni-app/Taro 语法加 `11`，通用布局状态加 `04`，开发者工具路径未知加 `06` |
@@ -153,7 +154,7 @@
 - `新增代码`、`修改已有代码`、`旧代码`、`自动续跑`、`跨窗口`、`不可绕过`、`强制执行`：先读 `02-noise-filter-workflow.md#不可绕过执行门禁`。
 - `Controller`、`Service`、`接口层`、`实现层`、`I*Service`、`返回实体`、`数据库实体`、`VO`、`DTO`、`DO`、`PO`、`Entity`、`业务代码下沉`、`URL 填充`、`列表加工`、`业务抽象`、`扩展性`、`可维护`、`健壮性`、`策略`、`handler map`、`Assembler`、`Converter`、`领域组件`、`事务`、`@Transactional`、`rollbackFor`、`module 归属`、`新建文件放哪`、`注释`：读 `07-java-backend-architecture.md`。
 - `新建文件`、`文件归属`、`目录位置`、`放哪`、`module 归属`、`package`、`workspace`、`生成目录`、`构建产物`、`dist`、`build`、`target`、`unpackage/dist`、`miniprogram_npm`、`依赖方向`、`循环依赖`、`接口和实现分离`、`测试目录`：先读 `01-global-engineering-rules.md#跨技术栈文件归属与依赖边界`；Java 追加 `07`，Python 追加 `10`，Vue/React 追加 `11`，小程序追加 `12`。
-- `环境`、`命令`、`运行`、`包管理器`、`lockfile`、`root`、`workspace`、`filter`、`版本`、`JDK`、`Maven`、`Node`、`Python`、`虚拟环境`、`模拟器`、`开发者工具`、`CLI`、`全局安装`：先读 `01-global-engineering-rules.md#跨技术栈环境与命令`；本机路径未知再读 `06`，并按技术栈追加 `03`/`10`/`11`/`12`。
+- `环境`、`命令`、`运行`、`包管理器`、`lockfile`、`root`、`workspace`、`filter`、`版本`、`JDK`、`Maven`、`Node`、`Python`、`虚拟环境`、`模拟器`、`开发者工具`、`CLI`、`全局安装`：先读 `01-global-engineering-rules.md#跨技术栈环境与命令`；只要准备执行工具链命令就追加 `06` 验证/复用缓存，并按技术栈追加 `03`/`10`/`11`/`12`。
 - `测试`、`验证`、`lint`、`format`、`typecheck`、`build`、`unit test`、`e2e`、`pytest`、`mvn test`、`Vitest`、`Jest`、`Playwright`、`Cypress`、`模拟器验证`、`真机验证`、`无法验证`：先读 `01-global-engineering-rules.md#跨技术栈验证策略`，再按技术栈追加 `03`/`04`/`10`/`11`/`12`。
 - `密钥`、`token`、`secret`、`生产地址`、`appid`、`私钥`、`白名单`、`权限`、`认证`、`授权`、`租户`、`审计`、`脱敏`、`上传`、`下载`、`外部 API`、`超时`、`重试`、`动态 URL`、`富文本`、`eval`、`exec`、`反序列化`、`不可回滚副作用`：先读 `01-global-engineering-rules.md#跨技术栈安全与外部边界`；涉及异步、幂等、事务副作用追加 `09`，再按技术栈追加对应 reference。
 - `硬编码`、`魔法值`、`magic string`、`magic number`、`固定值`、`常量`、`枚举`、`Enum`、`状态值`、`类型值`、`来源值`、`协议`、`模式`、`渠道`、`格式`、`默认值`、`阈值`、`时间窗`、`content-type`、`media type`、`平台编码`、`字典`：先读 `01-global-engineering-rules.md#跨技术栈硬编码治理`；Java 落地追加 `08`，Python 追加 `10`，Vue/React 追加 `11`，小程序追加 `12`。
@@ -166,7 +167,7 @@
 - `Taro`、`@tarojs`、`Taro.`、`app.config.js`、`app.config.ts`、`page.config.*`、`config/index.js`、`config/index.ts`、`TARO_ENV`、`dev:weapp`、`build:weapp`、`taro build --type weapp`：读 `12-miniprogram-development.md`；涉及 React/Vue 语法继续读 `11-frontend-vue-react.md`。
 - `注释位置`、`注释原则`、`docstring`、`Javadoc`、`props 注释`、`slot 注释`、`hook 注释`、`配置注释`、`SQL 注释`：读 `01-global-engineering-rules.md#跨技术栈注释原则`，再按技术栈追加对应 reference。
 - `高并发`、`幂等`、`死锁`、`异步`、`MQ`、`事件`、`线程池`、`虚拟线程`、`批量`、`用户上下文`、`创建人`、`修改人`：读 `09-concurrency-async-batch.md`。
-- `mvn`、`pom.xml`、`-pl`、`-am`、`多模块构建`、`测试命令`：读 `03-maven-backend-build.md`。
-- `MAVEN_HOME`、`JAVA_HOME`、`Node`、`pnpm`、`IDE 配置路径`、`.codex/local-environment.json`：读 `06-environment-discovery.md`。
+- `mvn`、`pom.xml`、`-pl`、`-am`、`多模块构建`、`测试命令`：先读 `06-environment-discovery.md#自动环境缓存维护`，再读 `03-maven-backend-build.md`。
+- `MAVEN_HOME`、`JAVA_HOME`、`Node`、`pnpm`、`IDE 配置路径`、`.codex/local-environment.json`、`local-environment.json`、`.codex/`、`.gitignore`、`check-ignore`、`环境缓存`、`缓存失效`、`验证路径`、`本机候选路径`：读 `06-environment-discovery.md#自动环境缓存维护`。
 - `flex`、`grid`、`组件`、`页面`、`路由守卫`、`加载/空状态`：读 `04-frontend-rules.md`。
 - `Context Capsule`、`最终回复`、`记忆管理`、`会话切换`：读 `05-delivery-templates.md`。

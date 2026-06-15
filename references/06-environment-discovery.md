@@ -12,6 +12,7 @@
 ## 目录
 
 - [发现顺序](#发现顺序)
+- [自动环境缓存维护](#自动环境缓存维护)
 - [公共验证矩阵](#公共验证矩阵)
 - [缓存结构](#缓存结构)
 - [缓存策略](#缓存策略)
@@ -51,6 +52,59 @@
 5. 找到候选后执行最小验证。
 6. 验证通过后写入 `.codex/local-environment.json`，下次优先复用。
 
+## 自动环境缓存维护
+
+只要任务需要使用 Maven/JDK/Node/Python/小程序开发者工具等本机工具链执行构建、编译、测试、运行、预览、打包、发布前校验或代码生成，就自动前置执行本流程；不需要等用户显式提出维护 `.codex/local-environment.json`。
+
+触发场景：
+
+- 即将执行 `mvn`、`java`、`node`、`npm`、`pnpm`、`yarn`、`bun`、`python`、`pytest`、`uv`、`poetry`、`tox`、`nox`、微信开发者工具 CLI、`miniprogram-ci`、Taro/uni-app 构建命令等。
+- 构建、编译、测试、运行命令失败，且失败原因可能是工具路径、版本、`JAVA_HOME`、本地 Maven 仓库、包管理器、虚拟环境、开发者工具路径或工作目录不匹配。
+- 任务目标直接涉及强化、补齐或更新 `.codex/local-environment.json`。
+
+执行步骤：
+
+1. 定位工作区根：
+   - 优先使用当前任务路径所在的 Git root：`git rev-parse --show-toplevel`。
+   - 如果不是 Git 仓库，使用用户给定路径向上查找项目根标志，例如 `pom.xml`、`package.json`、`pyproject.toml`、`project.config.json`。
+2. 读取 `<workspace>/.codex/local-environment.json`：
+   - 文件存在且 JSON 可解析时，逐项验证已记录的 `executable`、`home`、`localRepository`、`devtoolsCli` 等路径。
+   - 已验证且仍可用的值直接复用，不重复查找本机候选。
+   - 已有缓存满足当前命令所需工具链时，直接用缓存中的路径重新组装命令并执行原构建/编译/测试/运行任务。
+   - 路径缺失、命令失败、项目配置变化或工具版本明显不匹配时，标记该项失效并重新发现；不要继续用失效路径盲跑。
+3. 读取项目配置并选择最贴近项目的环境：
+   - Maven 项目读取 `pom.xml`、`.mvn/*` 和 IDE 配置；若 `pom.xml` 声明 `java.version`，优先验证匹配版本的 JDK，同时可记录当前 Maven 实际使用的 JDK。
+   - Node/Python/小程序项目只读取对应技术栈配置，不为了补全缓存扫描无关技术栈。
+4. 查找本机候选：
+   - 只在缓存或项目配置无法提供可用路径时执行。
+   - 只查当前任务需要的候选路径，不全盘扫描。
+5. 执行最小验证：
+   - Maven/JDK、Node、Python、小程序开发者工具按 [公共验证矩阵](#公共验证矩阵) 验证。
+   - Maven 后端若项目声明 Java 8，但默认 `mvn -version` 使用更高 JDK，应优先尝试带 `JAVA_HOME=<project-jdk>` 的验证命令，并把项目目标 Java 版本和验证 JDK 分开记录。
+6. 写回缓存：
+   - 只写验证通过的字段。
+   - 更新 `updatedAt`、`workspaceRoot`，能确认 Maven 聚合 root 时写入 `mavenRoot`。
+   - 不写入密钥、token、上传凭证、生产白名单、临时失败日志或未验证猜测。
+7. 重试原任务命令：
+   - 缓存更新后，使用新缓存路径重新执行原本要跑的构建、编译、测试、运行或预览命令。
+   - Maven 命令必须使用缓存中的 `maven.executable` 和 `maven.localRepository`；项目需要特定 JDK 时带上已验证的 `JAVA_HOME`。
+   - Node/Python/小程序命令必须使用项目声明的包管理器、解释器、虚拟环境或开发者工具路径，不回退到未验证全局命令。
+   - 若重试仍失败，先区分环境问题、项目历史失败、依赖缺失和本次改动问题，不继续无限重试。
+8. 自动检查忽略文件：
+   - 在 Git root 检查 `.gitignore` 是否已经忽略 `.codex/`：优先用 `git check-ignore -v .codex/local-environment.json .codex/` 验证。
+   - 若未忽略，读取根 `.gitignore`；存在则追加 `/.codex/`，不存在则新建根 `.gitignore` 并写入 `/.codex/`。
+   - 不修改子目录 `.gitignore` 来替代根忽略规则，除非项目本身不是 Git 仓库且用户只给了子项目目录。
+   - 写入后再次用 `git check-ignore -v` 验证。
+
+完成后必须汇报：
+
+- 复用了哪些缓存项。
+- 新发现并验证了哪些路径。
+- 更新了哪些缓存字段。
+- 是否已使用缓存路径执行或重试原构建、编译、测试、运行命令。
+- `.codex/` 是否已被根忽略文件覆盖，是否新增或修改了 `.gitignore`。
+- 哪些路径或工具未找到、未验证或因项目配置不需要而未处理。
+
 ## 公共验证矩阵
 
 只验证当前任务实际需要的工具；不要为了补全缓存而安装、扫描或验证无关技术栈。
@@ -84,6 +138,8 @@
   "version": 1,
   "updatedAt": "YYYY-MM-DDTHH:mm:ssZ",
   "scope": "workspace",
+  "workspaceRoot": "/path/to/workspace",
+  "mavenRoot": "/path/to/workspace/module-root",
   "maven": {
     "source": "project-config|ide-config|verified-local-candidate|cache",
     "executable": "/path/to/mvn",
@@ -112,6 +168,11 @@
     "outputRoot": "dist|unpackage/dist/dev/mp-weixin",
     "devtoolsCli": "/path/to/devtools-cli",
     "verified": true
+  },
+  "git": {
+    "ignoreFile": "/path/to/workspace/.gitignore",
+    "codexIgnored": true,
+    "ignorePattern": "/.codex/"
   }
 }
 ```

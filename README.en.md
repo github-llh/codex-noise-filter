@@ -161,7 +161,7 @@ More scenarios are in [`examples/`](examples/). Team rollout templates are in [`
 | Cross-stack shared governance | Every stack first checks shared rules for file ownership, commands, validation, security boundaries, hardcoded values, repeated logic, and comment placement, then applies stack-specific implementation details. |
 | Java backend governance | Keeps controllers thin, requires service-interface comments, aligns entity Lombok usage, and checks transactions, enums, config, validation, and repeated logic. |
 | Frontend and Mini Programs | Covers general frontend, Vue 2/3, React, Vite, native Mini Programs, uni-app, Taro, subpackages, simulators, and tests. |
-| Environment discovery | Maven/JDK/Node/Python/Mini Program tools are discovered from project config and cache first, then validated into `.codex/local-environment.json`. |
+| Environment discovery | For builds, compilation, tests, runs, previews, or pre-release checks, validate `.codex/local-environment.json` automatically; if it does not satisfy the command, discover local tools, update the cache, retry the original command, and protect it with a root `/.codex/` ignore rule. |
 | Context management | Uses Context Capsules for long tasks so goals, evidence, changes, rollback points, and next steps survive context switches. |
 
 ## Layout
@@ -200,7 +200,7 @@ references/
 - Python rules live in `10-python-development.md` and should be opened only for `.py`, Python syntax, virtual environments, dependencies, running commands, tests, linting, type checking, or Python performance work.
 - Vue/React rules live in `11-frontend-vue-react.md` and should be opened only for Vue 2/3, React, Vite, component syntax, package management, running commands, tests, linting, type checking, or frontend builds.
 - Mini Program rules live in `12-miniprogram-development.md` and should be opened only for native WeChat Mini Programs, uni-app, Taro, subpackages, official simulators, `project.config.json`, `app.json`, `pages.json`, `app.config.*`, builds, releases, or tests.
-- Maven builds use `03-maven-backend-build.md`; environment discovery uses `06-environment-discovery.md`. `06` only handles discovery, minimal validation, and local caching, not each stack's full runbook.
+- Maven builds use `03-maven-backend-build.md`; environment discovery uses `06-environment-discovery.md`. `06` only handles discovery, minimal validation, local caching, and `.codex/` ignore maintenance, not each stack's full runbook.
 - Routing should cross-check keywords, user intent, and impact area to preserve accuracy without reading every rule file.
 - `SKILL.md` hard constraints are always in force. Index performance tuning may reduce unrelated reference reads, but must not reduce mandatory constraints.
 - Common tasks should use the quick-decision minimum set first, for example Java Controller/Service edits default to `02 + 07`, and add `08` only when enums, validation, Lombok, Optional, or repeated logic are involved.
@@ -219,8 +219,9 @@ references/
 - Plan stages must also use the skill index. Plans must list applicable references, touched scope, local-alignment items, and acceptance checks.
 - Global/Goal mode must also use the skill index. Each round must restore the goal, applicable references, touched scope, local-alignment items, acceptance checks, and Context Capsule.
 - Rules apply to both new code and existing-code edits. Every touched method, class, DTO, SQL, test, and direct call chain must be locally aligned with the rules.
-- Discover Maven from `.codex/local-environment.json`, IDE/project configuration, and verified local candidates.
-- Do not hardcode personal Maven executable or local-repository paths. On first use, discover them from the current machine and project configuration, validate them, write them to this workspace's `.codex/local-environment.json`, and reuse that cache later.
+- Before Maven backend builds, compilation, tests, or runs, automatically read and validate `.codex/local-environment.json`, IDE/project configuration, and verified local candidates.
+- Do not hardcode personal Maven executable or local-repository paths. Use the cache directly when it satisfies the current command; discover local candidates only when the cache is missing, invalid, or mismatched with project configuration, then write validated values back and retry the original build/test/run command with the new cache.
+- After updating `.codex/local-environment.json`, automatically check whether the Git root `.gitignore` covers `/.codex/`; add it when missing and verify it with `git check-ignore -v`.
 - Build multi-module Maven projects from the aggregation root with `-pl <module> -am`.
 - File ownership, commands, validation strategy, security boundaries, hardcoded values, repeated logic, and comment placement are shared across stacks. Judge them through `01-global-engineering-rules.md` first, then apply Java/Python/Vue/React/Mini Program syntax and project conventions.
 - For Python projects, first confirm `requires-python`, `.python-version`, IDE interpreter, `.venv`, or lock files. Reuse the project's existing uv, poetry, pipenv, venv, tox, or nox workflow instead of installing dependencies into global pip.
@@ -268,11 +269,11 @@ references/
 
 ## Environment Discovery
 
-- On first use of Maven, JDK, Node, Python, or package managers, read IDE/project configuration first.
-- If configuration does not provide a usable path, search common local candidate paths.
-- Validate discovered paths with a minimal command, such as `mvn -version`.
-- After validation, write the result to `.codex/local-environment.json` and reuse it later.
-- If the cache is invalid or project configuration changes, rediscover and update the cache.
+- For builds, compilation, tests, runs, previews, or pre-release checks, first identify the workspace root and `.codex/local-environment.json`.
+- If an existing cache still passes minimal validation and satisfies the current command, reuse it without searching local paths again.
+- If the cache is missing, invalid, or project configuration changed, search common local candidate paths.
+- Validate discovered paths with a minimal command, such as `mvn -version` or `JAVA_HOME=<jdk> mvn -version` for Maven projects with a target JDK.
+- After validation, write the result to `.codex/local-environment.json`, retry the original command with the new cache, and ensure the root `.gitignore` contains `/.codex/`.
 
 ## Codex Context Management
 

@@ -2,7 +2,7 @@
 name: codex-noise-filter
 description: |
   专用于编程相关、写代码/读代码/改代码/调试/重构/构建/测试/代码规范治理场景。
-  识别到 Java 后端 Controller/Service/DTO/Entity、Maven 多模块、事务并发、Python、Vue/React、小程序、文件归属、环境命令、验证策略、安全边界、硬编码、重复逻辑、Plan/Goal、上下文压缩、减少 token 或调用链确认等编程任务时自动启用。
+  识别到 Java 后端 Controller/Service/DTO/Entity、Maven 多模块、事务并发、Python、Vue/React、小程序、文件归属、环境命令、local-environment 缓存、.codex 忽略规则、验证策略、安全边界、硬编码、重复逻辑、Plan/Goal、上下文压缩、减少 token 或调用链确认等编程任务时自动启用。
   执行时先读索引、收敛上下文、确认触碰范围和调用链，先按跨技术栈公共规则判断，再按对应技术栈落地；默认压缩噪音与冗余输出，并内置用户全局 AGENTS 规则，避免切换会话或窗口后规则丢失。
 ---
 
@@ -36,7 +36,7 @@ description: |
 - Vue/React 语法、版本、环境、运行、测试和构建：`references/11-frontend-vue-react.md`
 - 小程序原生/uni-app/Taro 语法、分包、运行、模拟器和测试：`references/12-miniprogram-development.md`
 - 输出格式、交付清单、上下文胶囊：`references/05-delivery-templates.md`
-- IDE、Maven、Node 等本机环境发现与缓存：`references/06-environment-discovery.md`
+- IDE、Maven、Node 等本机环境发现、缓存与 `.codex/` 忽略规则：`references/06-environment-discovery.md`
 - Java 后端架构、归属地、分层和注释：`references/07-java-backend-architecture.md`
 - Java 代码风格、枚举、校验、Lombok、Optional、去重复：`references/08-java-style-patterns.md`
 - Python 语法、环境、运行、测试、lint、类型和性能：`references/10-python-development.md`
@@ -57,7 +57,9 @@ description: |
 - 触碰任何技术栈代码时都必须检查硬编码值：固定闭合集合优先沉淀为该技术栈合适的枚举/联合类型/字典对象，技术标准或单点复用值用集中常量，环境或运维可变值走配置，运行期业务可维护值走字典/数据库/配置中心；不要按变量名前缀机械判断。
 - 对 JetBrains 项目，优先使用 JetBrains MCP / IDE 工具读取、定位、修改和诊断；只有明确不可用、超时或错误时才使用 Shell。
 - 不修改无关文件，不随意重构，不新增依赖，不改 API、DTO、数据库字段、权限、路由、配置键和公共契约，除非用户明确批准。
-- 后端 Maven 多模块项目默认从聚合 root 节点构建；Maven 可执行文件和本地仓库先按环境发现规则读取缓存或 IDE 配置，未命中时再查找本机候选路径。
+- 后端 Maven 多模块项目默认从聚合 root 节点构建；执行 Maven/JDK/Node/Python/小程序工具链相关的构建、编译、测试、运行、预览或发布前校验时，必须先读取并验证 `.codex/local-environment.json`。
+- `.codex/local-environment.json` 已满足当前命令需求时直接使用缓存路径执行；缓存缺失、失效或不满足项目配置时才查找本机候选，验证通过后写回缓存，并用新缓存路径重试原构建、编译、测试或运行命令。
+- 更新 `.codex/local-environment.json` 后，必须自动确认项目根 `.gitignore` 是否包含 `/.codex/`，没有则补齐。
 - 当前 Codex home 下的全局 `AGENTS.md` 建议保留为轻量兜底；本 skill 已内化编程规则，编程任务优先按 skill 索引执行。
 
 ## 执行节奏
