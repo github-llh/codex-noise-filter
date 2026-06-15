@@ -4,6 +4,8 @@
 
 ## 枚举与常量
 
+先按 `01-global-engineering-rules.md#跨技术栈硬编码治理` 判断值的类型，再选择 Java 落地方式。不要只看变量名是否以 `STATUS_`、`SOURCE_`、`FORMAT_` 开头；图片中这类 `PLATFORM_WECOM = "wecom"`、`FORMAT_MARKDOWN = "markdown"`、`MediaType.parse("application/json; charset=utf-8")` 都属于触碰时必须检查的硬编码值。
+
 状态值、类型值、来源值、动作值、阶段值、结果值等明确不变且有固定集合的常量，优先使用业务 Enum，方便查看、跳转、复用和约束。
 
 优先使用 Enum：
@@ -29,8 +31,10 @@
 常量处理边界：
 
 - 固定业务集合：优先 Enum。
-- 环境 URL、密钥、开关、阈值、时间窗、外部系统协议/地址：优先配置属性类，不写死在 Service。
-- 单一技术常量且不会跨层传递：可保留 `private static final`，但要命名清晰并说明来源。
+- 外部平台、消息格式、通知渠道、支付方式、登录来源、任务动作、导入导出类型等闭合集合：优先业务 Enum；如果只在前端/接口契约层使用，也要放到对应 contract/api module，而不是散在 Service 实现。
+- HTTP header、content type、media type、charset、时间单位、状态码等技术标准值：优先使用 Spring/JDK/第三方 SDK 已有常量；没有可用常量时，集中到协议常量类或私有常量，并保留来源说明。
+- 环境 URL、密钥、开关、阈值、时间窗、外部系统地址、超时、重试、线程池、缓存 TTL：优先配置属性类，不写死在 Service。
+- 单一技术常量且不会跨层传递：可保留 `private static final`，但要命名清晰、靠近使用点并说明来源。
 - 本次修改触碰到固定常量时，至少检查是否已有同类 Enum/配置；有则复用，没有则给出是否沉淀的判断。
 
 ## 配置外置化

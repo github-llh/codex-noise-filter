@@ -158,6 +158,7 @@ More scenarios are in [`examples/`](examples/). Team rollout templates are in [`
 | --- | --- |
 | Indexed routing | Read `00-index.md` first and open only the required reference files for the task. |
 | Non-bypass gates | New code, existing-code edits, Plan, Global/Goal, resumes, and cross-window work must confirm touched scope, call chains, and local alignment. |
+| Cross-stack hardcoding control | Every stack checks magic strings/numbers and routes values to enums, constants, configuration, or dynamic dictionaries by semantics. |
 | Java backend governance | Keeps controllers thin, requires service-interface comments, aligns entity Lombok usage, and checks transactions, enums, config, validation, and repeated logic. |
 | Frontend and Mini Programs | Covers general frontend, Vue 2/3, React, Vite, native Mini Programs, uni-app, Taro, subpackages, simulators, and tests. |
 | Environment discovery | Maven/JDK/Node/Python/Mini Program tools are discovered from project config and cache first, then validated into `.codex/local-environment.json`. |
@@ -234,6 +235,7 @@ references/
 - Mini Program npm packages, plugins, subpackages, independent subpackages, preload rules, permissions, login, payment, subscribe messages, and web-view usage must follow target-platform official limits while preserving secrets, appids, upload credentials, and allowlist boundaries.
 - Mini Program validation should reuse existing `miniprogram-simulate`, `miniprogram-ci`, HBuilderX/uni-app automated tests, Taro/Jest/Vitest/Testing Library, or official simulator checks. High-risk platform capabilities should state whether device validation is still needed.
 - Comment rules apply across stacks: place comments at the natural contract location for each technology, such as Java service interfaces, Python docstrings, Vue props/emits/slots, React components/hooks/types, and SQL/config definitions.
+- Hardcoding rules apply across stacks: fixed closed sets use the stack's enum/union/dictionary pattern, technical standards use framework constants, environment or operations-variable values use configuration, and runtime-maintained business values use dictionaries, database tables, or configuration centers.
 - Vue/React edits should run existing `lint`, `typecheck`, `test`, `build`, or targeted test commands. For interaction and layout changes, verify key pages in a browser.
 - Before creating files, confirm the target module, layer responsibility, package path, existing peer files, and dependency direction. Interfaces, implementations, entities, and contracts may live in different modules.
 - Prefer business enums for stable fixed sets such as status, type, source, action, phase, and result values. Avoid scattered magic strings and numbers.

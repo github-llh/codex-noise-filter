@@ -9,6 +9,7 @@
 - 新增 `examples/` 五个典型场景：Java Controller/Service、Maven 多模块、Vue/React、Python、小程序。
 - 新增 `templates/` 三个团队接入模板：轻量全局 AGENTS、仓库安装片段、触发检查 prompt。
 - 新增本 `CHANGELOG.md`，并按真实 `git log` 和 tag 重新整理历史记录。
+- 强化跨技术栈硬编码治理，明确什么时候使用枚举、常量、配置或动态字典，并补充 Java、Python、Vue/React、小程序落地规则。
 
 ## 1.0.1 - 2026-06-14
 

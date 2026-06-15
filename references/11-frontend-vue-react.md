@@ -15,6 +15,7 @@
 - [React 规则](#react-规则)
 - [组件注释位置](#组件注释位置)
 - [状态、路由与接口](#状态路由与接口)
+- [枚举、常量与配置](#枚举常量与配置)
 - [环境与依赖](#环境与依赖)
 - [运行与构建](#运行与构建)
 - [测试与验证](#测试与验证)
@@ -110,6 +111,25 @@
 - 表单状态、校验、提交中、重复提交防护和错误提示必须按项目已有组件库/表单库处理。
 - 固定状态、类型、来源、动作、阶段、结果等闭合集合优先集中为 enum/常量/字典映射；不要在模板和 JSX 中散写魔法字符串。
 - 跨多个页面复用的展示组装、字段映射、字典翻译、权限过滤、下载/上传流程，应抽到 composable、hook、store、service 或 mapper。
+
+## 枚举、常量与配置
+
+Vue/React 任务也必须执行 `01-global-engineering-rules.md#跨技术栈硬编码治理`。模板、JSX、store、api client、hook/composable、测试和 mock 中都不能散写同一类魔法字符串或数字。
+
+优先选择：
+
+- TypeScript 项目：固定闭合集合优先使用项目既有风格的 `enum`、字符串联合类型、`as const` 对象或 `Record` 映射；需要运行期遍历、展示、反查时优先 `as const` 对象 + 类型推导或集中字典对象。
+- JavaScript 项目：使用冻结常量对象、集中 `constants`/`dict`/`enum` 模块或项目已有字典体系；不要在组件内散写 `"wecom"`、`"markdown"`、`1`、`2`。
+- 接口契约值：状态、类型、平台、消息格式、权限 code、路由 name、feature flag key、错误码等放到 api/contract、model、store 或领域 constants，不放在页面模板里。
+- 技术标准值：HTTP method、header、content type、storage key、事件名、route name、query key 优先复用项目 api client、router、query key factory 或 SDK 常量。
+- 环境变量：base URL、开关、第三方 key、构建模式走 Vite/webpack/框架环境变量规则；客户端 bundle 不得暴露 secret。
+
+处理要求：
+
+- 如果后端已经有枚举或字典接口，前端不要自行创造不兼容 code；优先复用生成类型、OpenAPI 类型、字典接口或项目已有 mapper。
+- 展示文案和 code 分离：不要用中文展示文案当业务判断值；i18n 项目把文案放翻译资源。
+- 常量抽取不能制造跨业务域依赖；页面私有值可在页面局部集中，跨页面复用才上升到共享模块。
+- 测试和 mock 使用同一套 contract 常量，避免测试里写旧 code 导致误判。
 
 ## 环境与依赖
 
