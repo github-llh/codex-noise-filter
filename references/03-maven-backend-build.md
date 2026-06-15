@@ -1,6 +1,6 @@
 # Maven 与后端构建
 
-本文件只处理 Maven 环境、构建、验证和多模块定位。Java 后端分层、注释、新建文件归属地见 `07-java-backend-architecture.md`；枚举、参数校验、Lombok、Optional 和去重复逻辑见 `08-java-style-patterns.md`。
+本文件只处理 Maven 环境、构建、验证和多模块定位。通用环境命令、验证策略和安全边界先按 `01-global-engineering-rules.md` 判断；Java 后端分层、注释、新建文件归属地见 `07-java-backend-architecture.md`；枚举、参数校验、Lombok、Optional 和去重复逻辑见 `08-java-style-patterns.md`。
 
 ## 本地 Maven 环境
 
@@ -59,6 +59,8 @@ repo-root/
 ```
 
 ## 后端构建与验证
+
+先执行 `01-global-engineering-rules.md#跨技术栈验证策略`，再选择 Maven 落地命令。
 
 按风险选择最轻量验证：
 

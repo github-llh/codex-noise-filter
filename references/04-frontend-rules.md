@@ -1,6 +1,6 @@
 # 前端规则
 
-本文件只处理通用前端布局、状态契约、安全和验证。涉及 Vue 2、Vue 3、React、Vite、组件语法、包管理、运行、测试、lint/format/type check 或前端构建时，继续读取 `11-frontend-vue-react.md`；涉及微信小程序、uni-app、Taro、分包、开发者工具模拟器、`project.config.json`、`app.json`、`pages.json` 或 `app.config.*` 时，继续读取 `12-miniprogram-development.md`。
+本文件只处理通用前端布局、状态契约和前后端协同。文件归属、环境命令、验证策略、安全边界、硬编码和重复逻辑先按 `01-global-engineering-rules.md` 判断；涉及 Vue 2、Vue 3、React、Vite、组件语法、包管理、运行、测试、lint/format/type check 或前端构建时，继续读取 `11-frontend-vue-react.md`；涉及微信小程序、uni-app、Taro、分包、开发者工具模拟器、`project.config.json`、`app.json`、`pages.json` 或 `app.config.*` 时，继续读取 `12-miniprogram-development.md`。
 
 ## 基本原则
 
@@ -22,6 +22,8 @@
 
 ## 状态契约与安全
 
+先执行 `01-global-engineering-rules.md#跨技术栈安全与外部边界`，再处理前端展示和交互层保护。
+
 - 保留鉴权、权限按钮、路由守卫、租户隔离相关逻辑。
 - 保留分页、搜索条件、排序、筛选、刷新、加载、错误和空状态。
 - 前端字段、类型、枚举、分页参数必须与后端契约一致。
@@ -38,6 +40,8 @@
 - 注释只解释复杂业务原因、兼容边界、魔法值来源和风险，不重复 UI 行为。
 
 ## 前端验证
+
+先执行 `01-global-engineering-rules.md#跨技术栈验证策略`，再按项目栈选择最轻量验证。
 
 按项目栈选择最轻量验证：
 

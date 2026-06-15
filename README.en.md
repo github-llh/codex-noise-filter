@@ -158,7 +158,7 @@ More scenarios are in [`examples/`](examples/). Team rollout templates are in [`
 | --- | --- |
 | Indexed routing | Read `00-index.md` first and open only the required reference files for the task. |
 | Non-bypass gates | New code, existing-code edits, Plan, Global/Goal, resumes, and cross-window work must confirm touched scope, call chains, and local alignment. |
-| Cross-stack hardcoding control | Every stack checks magic strings/numbers by semantics, routes values to enums/constants/config/dictionaries, and consolidates repeated branching, mapping, validation, and assignment. |
+| Cross-stack shared governance | Every stack first checks shared rules for file ownership, commands, validation, security boundaries, hardcoded values, repeated logic, and comment placement, then applies stack-specific implementation details. |
 | Java backend governance | Keeps controllers thin, requires service-interface comments, aligns entity Lombok usage, and checks transactions, enums, config, validation, and repeated logic. |
 | Frontend and Mini Programs | Covers general frontend, Vue 2/3, React, Vite, native Mini Programs, uni-app, Taro, subpackages, simulators, and tests. |
 | Environment discovery | Maven/JDK/Node/Python/Mini Program tools are discovered from project config and cache first, then validated into `.codex/local-environment.json`. |
@@ -192,7 +192,7 @@ references/
 ## Efficiency Strategy
 
 - Keep each reference file topic-focused instead of allowing one file to grow to several hundred lines.
-- `01-global-engineering-rules.md` only contains globally shared rules.
+- `01-global-engineering-rules.md` only contains globally shared rules, including file ownership, commands, validation, security boundaries, hardcoded values, repeated logic, and comment placement.
 - Java backend architecture rules live in `07-java-backend-architecture.md` and should be opened only for layering, file placement, comments, or call chains.
 - Java style rules live in `08-java-style-patterns.md` and should be opened only for enums, validation, Lombok, Optional, functional style, or repeated logic.
 - Concurrency, async, and batch rules live in `09-concurrency-async-batch.md` and should be opened only for high concurrency, idempotency, deadlocks, events, middleware, thread pools, virtual threads, or user-context propagation.
@@ -221,6 +221,7 @@ references/
 - Discover Maven from `.codex/local-environment.json`, IDE/project configuration, and verified local candidates.
 - Do not hardcode personal Maven executable or local-repository paths. On first use, discover them from the current machine and project configuration, validate them, write them to this workspace's `.codex/local-environment.json`, and reuse that cache later.
 - Build multi-module Maven projects from the aggregation root with `-pl <module> -am`.
+- File ownership, commands, validation strategy, security boundaries, hardcoded values, repeated logic, and comment placement are shared across stacks. Judge them through `01-global-engineering-rules.md` first, then apply Java/Python/Vue/React/Mini Program syntax and project conventions.
 - For Python projects, first confirm `requires-python`, `.python-version`, IDE interpreter, `.venv`, or lock files. Reuse the project's existing uv, poetry, pipenv, venv, tox, or nox workflow instead of installing dependencies into global pip.
 - Python code should follow existing `pyproject.toml`, Ruff/Black/isort/mypy/pyright/pytest configuration. Add type hints and necessary docstrings for public functions, complex return values, cross-module DTOs, and configuration objects.
 - Prefer project commands, `python -m ...`, `uv run ...`, or `poetry run ...` for Python execution. Prefer targeted tests such as `python -m pytest path::test` or existing `tox/nox` commands.

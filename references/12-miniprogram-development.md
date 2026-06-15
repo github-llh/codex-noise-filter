@@ -1,6 +1,6 @@
 # 小程序开发规则
 
-本文件按需读取。只有任务涉及微信小程序、其他平台小程序、原生小程序、uni-app、Taro、`project.config.json`、`app.json`、`pages.json`、`app.config.*`、分包、开发者工具模拟器、`miniprogram-ci`、`miniprogram-simulate`、小程序构建产物或小程序测试时打开。通用前端布局、状态契约、安全见 `04-frontend-rules.md`；Vue/React 语法复用 `11-frontend-vue-react.md`；Node 和开发者工具路径发现见 `06-environment-discovery.md`；不可绕过门禁仍见 `02-noise-filter-workflow.md`。
+本文件按需读取。只有任务涉及微信小程序、其他平台小程序、原生小程序、uni-app、Taro、`project.config.json`、`app.json`、`pages.json`、`app.config.*`、分包、开发者工具模拟器、`miniprogram-ci`、`miniprogram-simulate`、小程序构建产物或小程序测试时打开。文件归属、环境命令、验证策略、安全边界、硬编码、重复逻辑和注释的跨技术栈判断先按 `01-global-engineering-rules.md` 执行；通用前端布局、状态契约和前后端协同见 `04-frontend-rules.md`；Vue/React 语法复用 `11-frontend-vue-react.md`；Node 和开发者工具路径发现见 `06-environment-discovery.md`；不可绕过门禁仍见 `02-noise-filter-workflow.md`。
 
 参考来源：微信小程序官方文档、微信开发者工具与 `miniprogram-ci`/`miniprogram-simulate`、uni-app 官方文档、Taro 官方文档、项目实际脚本和配置。
 
@@ -46,6 +46,8 @@
 - 框架项目不绕过框架：uni-app 不直接长期维护生成后的 `mp-weixin` 代码；Taro 不直接把构建产物当源码改；原生项目不引入框架语法片段。
 
 ## 文件归属与依赖边界
+
+先执行 `01-global-engineering-rules.md#跨技术栈文件归属与依赖边界`，再按小程序项目形态确认主包、分包、源码目录和生成目录。
 
 - 新建页面前先确认是否属于主包、已有分包、独立分包或跨端共享模块；页面配置、路由配置和实际目录必须一致。
 - 新建组件前先查当前分包、业务域组件、全局组件、第三方组件库和框架组件库；只在复用价值、职责隔离或公开契约清晰时新建。
@@ -100,6 +102,8 @@
 
 ## 环境与运行
 
+先执行 `01-global-engineering-rules.md#跨技术栈环境与命令`，路径未知时再读 `06-environment-discovery.md`。
+
 - 首先读取项目脚本和配置：`package.json`、lockfile、`project.config.json`、`project.private.config.json`、`pages.json`、`manifest.json`、`config/index.*`。
 - 原生微信小程序：优先用微信开发者工具模拟器打开 `project.config.json` 所在工程；使用 npm 时先执行项目安装和开发者工具/CI 的构建 npm 流程。
 - uni-app：HBuilderX 项目优先使用 HBuilderX 的“运行到小程序模拟器”；CLI 项目优先使用项目已有 `dev:mp-weixin`、`build:mp-weixin` 或 `dev:custom`/`build:custom` 脚本，再打开输出目录。
@@ -117,6 +121,8 @@
 
 ## 测试与验证
 
+先执行 `01-global-engineering-rules.md#跨技术栈验证策略`，再选择小程序框架和目标平台的验证方式。
+
 - 原生组件单测优先使用项目已有 Jest + `miniprogram-simulate`；它适合组件级模拟，不等价于完整小程序集成测试。
 - 原生小程序构建验证优先使用微信开发者工具、`miniprogram-ci` 或项目已有 CLI 脚本完成编译、预览或上传前校验。
 - uni-app 测试优先使用项目已有 HBuilderX 自动化测试、uni-app CLI 测试、Vitest/Jest 或页面级自动化；目标端为微信小程序时需要覆盖生成后在开发者工具中的关键路径。
@@ -125,6 +131,8 @@
 - 无法运行官方模拟器或 CI 时，说明缺少的开发者工具路径、登录态、密钥、权限或平台账号，不用假验证替代。
 
 ## 性能、限制与安全
+
+先执行 `01-global-engineering-rules.md#跨技术栈安全与外部边界`，再处理小程序平台限制和审核边界。
 
 - 优先控制主包体积、首屏资源、同步初始化、全局依赖和首次 `setData` 数据量。
 - 大图、视频、富文本、地图、图表、编辑器、模型文件等资源优先 CDN、懒加载、分包或按需加载；不要把重资源塞进主包。

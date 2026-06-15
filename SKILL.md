@@ -2,8 +2,8 @@
 name: codex-noise-filter
 description: |
   专用于编程相关、写代码/读代码/改代码/调试/重构/构建/测试/代码规范治理场景。
-  识别到 Java 后端 Controller/Service/DTO/Entity、Maven 多模块、事务并发、Python、Vue/React、小程序、Plan/Goal、上下文压缩、减少 token 或调用链确认等编程任务时自动启用。
-  执行时先读索引、收敛上下文、确认触碰范围和调用链，再做最小修改；默认压缩噪音与冗余输出，并内置用户全局 AGENTS 规则，避免切换会话或窗口后规则丢失。
+  识别到 Java 后端 Controller/Service/DTO/Entity、Maven 多模块、事务并发、Python、Vue/React、小程序、文件归属、环境命令、验证策略、安全边界、硬编码、重复逻辑、Plan/Goal、上下文压缩、减少 token 或调用链确认等编程任务时自动启用。
+  执行时先读索引、收敛上下文、确认触碰范围和调用链，先按跨技术栈公共规则判断，再按对应技术栈落地；默认压缩噪音与冗余输出，并内置用户全局 AGENTS 规则，避免切换会话或窗口后规则丢失。
 ---
 
 # codex-noise-filter
@@ -29,7 +29,7 @@ description: |
 
 最常用路由：
 
-- 通用工程规则、语言、工具、修改前后约束：`references/01-global-engineering-rules.md`
+- 通用工程规则、文件归属、环境命令、验证策略、安全边界、硬编码、重复逻辑、注释原则：`references/01-global-engineering-rules.md`
 - 上下文预算、调用链确认、失败回退：`references/02-noise-filter-workflow.md`
 - Maven、本地仓库、后端多模块构建：`references/03-maven-backend-build.md`
 - 前端代码规范、布局、状态、验证：`references/04-frontend-rules.md`
@@ -50,6 +50,7 @@ description: |
 - Plan/计划阶段也必须走索引：计划中要列出适用 reference、触碰范围、局部对齐项和验收检查；没有这些内容的计划不能直接进入实现。
 - Global/Goal/目标追踪模式也必须走索引：每轮开始先恢复目标、适用 reference、触碰范围、局部对齐项、验收检查和 Context Capsule。
 - 本规则同时适用于新增代码和已有代码修改；凡本次触碰的方法、类、DTO、SQL、测试和调用链，必须在触碰范围内局部对齐规则，不能只让新增代码遵守。
+- 触碰任何技术栈代码、配置、脚本、测试或模板时，都必须先执行跨技术栈公共判断：文件归属和依赖边界、环境与命令来源、验证策略、安全与外部边界、硬编码治理、重复逻辑治理和注释位置；再按 Java、Python、Vue/React、小程序等技术栈语法落地。
 - 触碰 Java 后端 Controller 时必须执行分层检查：Controller 只保留路由、权限、校验触发、Service 调用和响应转换；返回数据补全、列表遍历加工、状态流转、跨系统取值、数据库/缓存访问等业务逻辑必须迁到 Service 实现层、Assembler 或项目既有业务组件。
 - 触碰 Java 后端接口、实现、返回实体、数据库实体、DTO/VO 时必须同步检查注释与 Lombok：Service 接口类和对外方法、重要实现方法、关键实体字段要补齐必要注释；项目已有 Lombok 时不手写无意义 getter/setter，实体按项目风格优先使用 Lombok，允许并优先复用项目既有 `@Data` 实体范式。
 - 业务逻辑出现稳定扩展点、多状态/多类型分支、跨系统差异、重复流程、重复校验、重复组装、重复字段映射或未来明显会继续增加规则时，必须评估抽象到业务方法、领域组件、策略、枚举行为、Assembler/Converter、配置属性或项目已有扩展点，避免继续堆 if/else、switch、setter 和复制代码。

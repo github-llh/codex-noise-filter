@@ -1,6 +1,6 @@
 # Java 后端架构规则
 
-本文件按需读取。只有任务涉及 Java 后端分层、新建文件归属地、Controller/Service/DAO/DTO/Entity、接口契约、注释和调用链时打开。Java 代码风格、枚举、参数校验、Lombok、Optional、去重复逻辑见 `08-java-style-patterns.md`。
+本文件按需读取。只有任务涉及 Java 后端分层、新建文件归属地、Controller/Service/DAO/DTO/Entity、接口契约、注释和调用链时打开。文件归属、验证、安全边界、硬编码、重复逻辑和注释的跨技术栈判断先看 `01-global-engineering-rules.md`；本文件只写 Java 后端落地方式。Java 代码风格、枚举、参数校验、Lombok、Optional、去重复逻辑见 `08-java-style-patterns.md`。
 
 ## 后端分层
 
@@ -155,6 +155,8 @@ Result result = transactionTemplate.execute(status -> {
 高并发、幂等、异步事件、中间件、批量多线程、虚拟线程、用户上下文传播和死锁规避见 `09-concurrency-async-batch.md`。
 
 ## 新建文件归属地
+
+先执行 `01-global-engineering-rules.md#跨技术栈文件归属与依赖边界`，再按 Java 后端分层确认 module、package 和依赖方向。
 
 新建任何源文件前必须先回答：
 
