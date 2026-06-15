@@ -37,6 +37,7 @@ Many coding-task failures are not caused by missing coding ability. They come fr
 | Repository-wide scanning can consume context with unrelated files and logs. | Read `references/00-index.md` first and load only task-relevant references. |
 | Edits may ignore Controller/Service/DTO/Entity call-chain impact. | Confirm touched scope, call chain, and unaffected contracts before changes. |
 | New code follows rules while existing touched code keeps business logic, hardcoding, and repeated setters/ifs. | Apply local rule alignment to both new code and existing touched code. |
+| Obvious hardcoding, repeated logic, or layering issues in screenshots, snippets, or call-chain-related files may get blocked by an over-narrow "minimal change" reading. | Judge call-chain depth, file count, contract risk, and validation path automatically; when the closure is low-risk, write it into the task capsule, apply the matching reference, and fix it locally. |
 | Plan/Goal, resume, or cross-window work can forget constraints. | Plan/Goal/context restoration must still use indexed rules and Context Capsules. |
 
 ## Usage
@@ -179,6 +180,7 @@ More scenarios are in [`examples/`](examples/). Team rollout templates are in [`
 | Indexed routing | Read `00-index.md` first and open only the required reference files for the task. |
 | Intent inference | Infer debugging, fixing, validation, or explanation intent from logs, stack traces, screenshots, paths, command output, code snippets, and ambiguous Chinese prompts without requiring repeated skill mentions. |
 | Non-bypass gates | New code, existing-code edits, Plan, Global/Goal, resumes, and cross-window work must confirm touched scope, call chains, and local alignment. |
+| Strong-rule auto escalation | When the touched scope, direct call chain, or related files that must be read for the task already hit hardcoding, repeated logic, hardcoded config, layering mistakes, missing comments, or security-boundary gaps, judge whether a low-risk closure exists; write it into the task capsule and fix it directly when it does, and record risk only when it does not. |
 | Cross-stack shared governance | Every stack first checks shared rules for file ownership, commands, validation, security boundaries, hardcoded values, repeated logic, and comment placement, then applies stack-specific implementation details. |
 | Java backend governance | Keeps controllers thin, requires service-interface comments, aligns entity Lombok usage, and checks transactions, enums, config, validation, and repeated logic. |
 | Frontend and Mini Programs | Covers general frontend, Vue 2/3, React, Vite, native Mini Programs, uni-app, Taro, subpackages, simulators, and tests. |
@@ -236,6 +238,7 @@ references/
 - Prefer JetBrains MCP / IDE tools for JetBrains projects.
 - Before editing, confirm target files, root cause, minimal fix, and unaffected contracts.
 - Confirm call chains and impact before code changes.
+- Minimal change is not a reason to ignore strong-rule hits. If hardcoding, repeated logic, hardcoded config, layering mistakes, or comment/security gaps are already inside the touched scope, direct call chain, or related files that must be read for the task, judge low-risk closure first, write it into the task capsule, and fix locally when it holds.
 - Regardless of whether the work is new code, an existing-code edit, Plan, Global/Goal mode, auto-resume, context restoration, cross-window continuation, a local patch, or a follow-up fix, coding tasks must run through the skill index, touched-scope confirmation, call-chain confirmation, and local rule alignment.
 - Plan stages must also use the skill index. Plans must list applicable references, touched scope, local-alignment items, and acceptance checks.
 - Global/Goal mode must also use the skill index. Each round must restore the goal, applicable references, touched scope, local-alignment items, acceptance checks, and Context Capsule.
@@ -301,6 +304,7 @@ references/
 - Keep `SKILL.md` small and route details through `references/00-index.md`.
 - For long tasks, use the sequence: task capsule, call-chain confirmation, minimal edit, lightweight validation, Context Capsule.
 - When editing existing code, locally align the touched scope. Do not refactor the whole module, but do not apply the rules only to newly added lines.
+- When a code snippet, IDE screenshot, or call-chain read exposes an obvious rule violation, locate the real file and direct call chain first. If impact is shallow, file count is small, and compatibility is clear, write it into the task capsule, apply the matching reference, and fix it instead of only listing a follow-up.
 - In Global/Goal mode, restore the Context Capsule before each round. Goal pursuit must not bypass indexing, call-chain checks, or touched-scope alignment.
 - Before switching windows or compacting context, emit a Context Capsule so goals, evidence, rollback points, and next steps are preserved.
 - When the user inserts a new goal, treat it as an incremental task first and do not reset confirmed call chains by default.
