@@ -1,14 +1,19 @@
 # 环境发现与缓存
 
-用于 Maven、JDK、Node、Python、包管理器、IDE 配置路径等本机环境。目标是避免每次硬编码路径或重复全盘查找。
+用于 Maven、JDK、Node、Python、包管理器、IDE 配置路径、小程序开发者工具等本机环境。目标是提供跨技术栈统一的“发现、验证、缓存”机制，避免硬编码路径或重复全盘查找。
+
+本文件只管环境路径和工具可用性，不替代各技术栈的运行、构建、测试规则：
+
+- Maven 构建和多模块命令见 `03-maven-backend-build.md`。
+- Python 依赖、运行、测试、lint/type check 见 `10-python-development.md`。
+- Vue/React 包管理、运行、构建、测试见 `11-frontend-vue-react.md`。
+- 小程序原生/uni-app/Taro 的源码/产物目录、模拟器、构建和发布见 `12-miniprogram-development.md`。
 
 ## 目录
 
 - [发现顺序](#发现顺序)
-- [Maven 验证](#maven-验证)
-- [Node / 前端验证](#node--前端验证)
-- [小程序验证](#小程序验证)
-- [Python 验证](#python-验证)
+- [公共验证矩阵](#公共验证矩阵)
+- [缓存结构](#缓存结构)
 - [缓存策略](#缓存策略)
 - [写入边界](#写入边界)
 - [与长期记忆的关系](#与长期记忆的关系)
@@ -16,30 +21,13 @@
 ## 发现顺序
 
 1. 读取工作区缓存：`.codex/local-environment.json`。
-2. 读取 IDE/项目配置：
-   - JetBrains：`.idea/misc.xml`、`.idea/workspace.xml`、`.idea/compiler.xml`、`.idea/jarRepositories.xml`。
-   - Maven 项目：`.mvn/maven.config`、`.mvn/jvm.config`、`.mvn/wrapper/maven-wrapper.properties`、`pom.xml`。
-   - 前端项目：`package.json`、`pnpm-lock.yaml`、`yarn.lock`、`package-lock.json`、`bun.lockb`、`bun.lock`、`.nvmrc`、`.node-version`、`.tool-versions`、`.npmrc`、`.yarnrc.yml`、`vite.config.*`、`vue.config.js`、`next.config.*`。
-   - 小程序项目：`project.config.json`、`project.private.config.json`、`app.json`、`sitemap.json`、`pages.json`、`manifest.json`、`app.config.js`、`app.config.ts`、`config/index.js`、`config/index.ts`、`miniprogram_npm/`、`unpackage/dist/`、`dist/`。
-   - Python 项目：`pyproject.toml`、`requirements.txt`、`requirements-dev.txt`、`uv.lock`、`poetry.lock`、`Pipfile.lock`、`tox.ini`、`noxfile.py`、`pytest.ini`、`.python-version`、`.tool-versions`、`.venv/pyvenv.cfg`。
-3. 读取 shell 环境和常见命令：
-   - `JAVA_HOME`
-   - `MAVEN_HOME`
-   - `M2_HOME`
-   - `PATH`
-   - `which mvn`
-   - `which node`
-   - `which pnpm`
-   - `which yarn`
-   - `which npm`
-   - `which bun`
-   - `which corepack`
-   - 微信开发者工具 CLI 候选路径
-   - `which python`
-   - `which python3`
-   - `which uv`
-   - `which poetry`
-   - `which pytest`
+2. 读取 IDE/项目配置，按当前项目实际命中的技术栈选择，不一次性读取所有配置：
+   - IDE：`.idea/misc.xml`、`.idea/workspace.xml`、`.idea/compiler.xml`、`.idea/jarRepositories.xml`。
+   - Java/Maven：`.mvn/maven.config`、`.mvn/jvm.config`、`.mvn/wrapper/maven-wrapper.properties`、`pom.xml`。
+   - Node/前端：`package.json`、lockfile、`.nvmrc`、`.node-version`、`.tool-versions`、`.npmrc`、`.yarnrc.yml`、构建工具配置。
+   - 小程序：`project.config.json`、`project.private.config.json`、`app.json`、`pages.json`、`manifest.json`、`app.config.*`、`config/index.*`。
+   - Python：`pyproject.toml`、`requirements*.txt`、`uv.lock`、`poetry.lock`、`Pipfile.lock`、`tox.ini`、`noxfile.py`、`pytest.ini`、`.python-version`、`.tool-versions`、`.venv/pyvenv.cfg`。
+3. 读取 shell 环境和常见命令，只查当前任务需要的候选：`JAVA_HOME`、`MAVEN_HOME`、`M2_HOME`、`PATH`、`which mvn/node/npm/pnpm/yarn/bun/corepack/python/python3/uv/poetry/pytest`、微信开发者工具 CLI 候选路径。
 4. 查找本机常见路径，只做小范围候选，不全盘扫描：
    - 用户明确提供过的 Maven 路径和本地仓库路径。
    - `~/dev/maven-*/bin/mvn`
@@ -63,151 +51,25 @@
 5. 找到候选后执行最小验证。
 6. 验证通过后写入 `.codex/local-environment.json`，下次优先复用。
 
-## Maven 验证
+## 公共验证矩阵
 
-Maven 可执行文件必须通过：
+只验证当前任务实际需要的工具；不要为了补全缓存而安装、扫描或验证无关技术栈。
 
-```bash
-<mavenExecutable> -version
-```
+| 场景 | 最小验证 | 记录要点 | 差异规则 |
+| --- | --- | --- | --- |
+| Maven/JDK | `<mavenExecutable> -version`，必要时验证 `JAVA_HOME` | `maven.executable`、`maven.localRepository`、`java.home`、版本、来源 | 构建命令和多模块 root 见 `03` |
+| Node/前端 | `node --version`，项目实际包管理器 `--version` | `node.executable`、`packageManager`、lockfile、版本、来源 | 包管理、运行、测试、构建见 `11` |
+| Python | `<pythonExecutable> --version`，项目实际管理器或测试工具 `--version` | `python.executable`、`manager`、项目配置文件、版本、来源 | 依赖、运行、测试、lint/type check 见 `10` |
+| 小程序 | `<wechatDevtoolsCli> --help` 或项目实际 CLI/CI 可用性检查 | `framework`、`platform`、`sourceRoot`、`outputRoot`、`devtoolsCli`、来源 | 原生/uni-app/Taro 构建、模拟器、发布见 `12` |
 
-Maven 本地仓库必须是存在的目录，且构建命令使用：
+公共约束：
 
-```bash
--Dmaven.repo.local=<localRepository>
-```
+- 工具路径、版本、来源和验证命令必须对应同一个工作区。
+- 只把验证通过的候选写入缓存。
+- 不把临时全局安装、错误目录下的 lockfile 判断、未验证解释器、未验证开发者工具路径写入缓存。
+- 不把密钥文件内容、CI 上传凭证、真实 appid 私钥、机器人编号、生产白名单写入缓存或长期记忆。
 
-缓存示例使用占位路径；实际值必须来自当前工作区发现和验证结果：
-
-```json
-{
-  "maven": {
-    "source": "verified-local-candidate",
-    "executable": "/path/to/mvn",
-    "home": "/path/to/maven",
-    "localRepository": "/path/to/local-repository",
-    "verifiedCommand": "/path/to/mvn -version",
-    "verified": true
-  }
-}
-```
-
-不要把某个用户机器上的绝对路径写进 skill 文档或 README；只能写入当前工作区本地缓存 `.codex/local-environment.json`。
-
-## Node / 前端验证
-
-前端项目先从 `package.json` 判断包管理器：
-
-- `packageManager` 明确指定时优先使用该工具和版本。
-- 存在 `pnpm-lock.yaml` 用 pnpm。
-- 存在 `yarn.lock` 用 yarn。
-- 存在 `package-lock.json` 用 npm。
-- 存在 `bun.lock` 或 `bun.lockb` 用 bun。
-
-Node 和包管理器至少验证：
-
-```bash
-node --version
-npm --version
-pnpm --version
-yarn --version
-bun --version
-corepack --version
-```
-
-只验证项目实际使用的工具；不要为了验证而安装新包管理器。若 `corepack` 已启用且项目声明 `packageManager`，优先按项目声明执行。
-
-前端项目缓存建议记录：
-
-```json
-{
-  "node": {
-    "source": "project-config",
-    "executable": "/path/to/node",
-    "version": "vX.Y.Z",
-    "packageManager": "pnpm|npm|yarn|bun",
-    "packageManagerVersion": "X.Y.Z",
-    "lockfile": "pnpm-lock.yaml",
-    "verified": true
-  }
-}
-```
-
-不把临时全局安装、未验证 Node、错误目录下的 lockfile 判断写入缓存。
-
-## 小程序验证
-
-小程序项目先识别项目形态和源码/输出目录：
-
-- 原生微信小程序：`project.config.json`、`app.json`、`app.js`、`app.wxss`、`pages/**`、`components/**`、`miniprogram_npm/`。
-- uni-app：`pages.json`、`manifest.json`、`App.vue`、`main.js`/`main.ts`、`uni_modules/`、`unpackage/dist/dev/mp-*` 或 `unpackage/dist/build/mp-*`。
-- Taro：`config/index.js`/`config/index.ts`、`src/app.config.*`、`@tarojs/*` 依赖、`dist/`、`taro build --type weapp` 或项目脚本。
-
-运行到微信小程序时，优先使用项目已有脚本生成目标小程序工程，再用微信开发者工具模拟器打开输出目录。不要直接修改 `dist/`、`unpackage/dist/` 这类构建产物，除非任务明确是排查构建结果。
-
-微信开发者工具 CLI 至少验证：
-
-```bash
-<wechatDevtoolsCli> --help
-```
-
-项目若使用 `miniprogram-ci`，优先读项目已有上传/预览脚本和密钥路径配置，只能验证命令、构建和本地预览能力；不得提交或暴露上传密钥、真实 `appid` 私钥、机器人编号或 IP 白名单配置。
-
-小程序缓存建议记录：
-
-```json
-{
-  "miniprogram": {
-    "source": "project-config",
-    "framework": "native-weapp|uni-app|taro|other",
-    "platform": "weapp|alipay|tt|swan|qq|jd|ks|other",
-    "sourceRoot": "src|.",
-    "outputRoot": "dist|unpackage/dist/dev/mp-weixin",
-    "devtoolsCli": "/Applications/wechatwebdevtools.app/Contents/MacOS/cli",
-    "verifiedCommand": "<wechatDevtoolsCli> --help",
-    "verified": true
-  }
-}
-```
-
-不把未验证开发者工具路径、密钥文件内容、CI 上传凭证、构建产物临时路径写入长期记忆。
-
-## Python 验证
-
-Python 解释器必须通过：
-
-```bash
-<pythonExecutable> --version
-```
-
-如果项目已有虚拟环境、uv、poetry、pipenv、tox 或 nox，优先验证项目工具链：
-
-```bash
-uv --version
-poetry --version
-<pythonExecutable> -m pip --version
-<pythonExecutable> -m pytest --version
-```
-
-Python 项目缓存建议记录：
-
-```json
-{
-  "python": {
-    "source": "project-venv",
-    "executable": "<workspace>/.venv/bin/python",
-    "version": "Python X.Y.Z",
-    "manager": "uv|poetry|pipenv|venv|conda|system",
-    "projectFile": "pyproject.toml",
-    "verifiedCommand": "<workspace>/.venv/bin/python --version",
-    "verified": true
-  }
-}
-```
-
-不把未验证解释器、全局 pip 安装结果、临时虚拟环境路径写入缓存。
-
-## 缓存策略
+## 缓存结构
 
 缓存文件路径：
 
@@ -223,15 +85,40 @@ Python 项目缓存建议记录：
   "updatedAt": "YYYY-MM-DDTHH:mm:ssZ",
   "scope": "workspace",
   "maven": {
-    "source": "verified-local-candidate",
+    "source": "project-config|ide-config|verified-local-candidate|cache",
     "executable": "/path/to/mvn",
-    "home": "/path/to/maven",
     "localRepository": "/path/to/repository",
     "verifiedCommand": "/path/to/mvn -version",
+    "verified": true
+  },
+  "node": {
+    "source": "project-config|verified-local-candidate|cache",
+    "executable": "/path/to/node",
+    "packageManager": "pnpm|npm|yarn|bun",
+    "lockfile": "pnpm-lock.yaml",
+    "verified": true
+  },
+  "python": {
+    "source": "project-venv|project-config|verified-local-candidate|cache",
+    "executable": "/path/to/python",
+    "manager": "uv|poetry|pipenv|venv|conda|system",
+    "verified": true
+  },
+  "miniprogram": {
+    "source": "project-config|verified-local-candidate|cache",
+    "framework": "native-weapp|uni-app|taro|other",
+    "platform": "weapp|alipay|tt|swan|qq|jd|ks|other",
+    "sourceRoot": "src|.",
+    "outputRoot": "dist|unpackage/dist/dev/mp-weixin",
+    "devtoolsCli": "/path/to/devtools-cli",
     "verified": true
   }
 }
 ```
+
+只写当前工作区已验证且当前任务需要的字段，不为了补齐 schema 写入空值、猜测值或其他技术栈字段。
+
+## 缓存策略
 
 缓存规则：
 

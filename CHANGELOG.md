@@ -11,6 +11,7 @@
 - 新增本 `CHANGELOG.md`，并按真实 `git log` 和 tag 重新整理历史记录。
 - 强化跨技术栈硬编码和重复逻辑治理，明确什么时候使用枚举、常量、配置、动态字典、mapper、converter、schema、策略或 helper，并将通用判断从 Java 专属规则抽到全局规则。
 - 继续抽取各技术栈公共规则到 `01-global-engineering-rules.md`，覆盖文件归属、环境命令、验证策略和安全边界；`03`、`04`、`07`、`09`、`10`、`11`、`12` 只保留技术栈落地差异。
+- 收敛 `02-noise-filter-workflow.md` 和 `06-environment-discovery.md`：`02` 只保留跨技术栈执行门禁与局部对齐流程，`06` 只保留环境发现、最小验证和缓存结构，技术栈差异下沉到对应 reference。
 
 ## 1.0.1 - 2026-06-14
 

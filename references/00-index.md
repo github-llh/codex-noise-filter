@@ -97,7 +97,8 @@
 - 失败回退：`02-noise-filter-workflow.md#失败处理`
 - Maven 发行版与本地仓库：`03-maven-backend-build.md#本地-maven-环境`
 - Maven/IDE 配置智能发现：`06-environment-discovery.md#发现顺序`
-- 环境缓存：`06-environment-discovery.md#缓存策略`
+- 环境缓存结构：`06-environment-discovery.md#缓存结构`
+- 环境缓存策略：`06-environment-discovery.md#缓存策略`
 - 多模块构建 root 节点：`03-maven-backend-build.md#多层-maven-结构构建`
 - 后端验证命令：`03-maven-backend-build.md#后端构建与验证`
 - 前端布局与组件：`04-frontend-rules.md#布局与组件`
@@ -137,6 +138,8 @@
 
 - 主文件只负责触发和路由；细节只在需要时打开。
 - 先做主题判别，再读文件；同一任务默认只打开 1 个主 reference，跨层任务最多打开 2 到 3 个。
+- `02` 只承载跨技术栈执行门禁、上下文预算、调用链和局部对齐流程；技术栈差异不要回填到 `02`，按索引进入 `07`、`08`、`09`、`10`、`11`、`12`。
+- `06` 只承载跨技术栈环境发现、最小验证和缓存结构；运行、构建、测试命令细节不要回填到 `06`，按索引进入 `03`、`10`、`11`、`12`。
 - 路由采用“关键词 + 任务意图 + 影响面”三者交叉确认，避免只凭单个词误读。
 - 修改已有代码时，先读 `02-noise-filter-workflow.md#既有代码修改一致性`，再读对应主题规则。
 - 优先 `rg --files`、符号检索、局部窗口读取，不做全仓无目的扫描。
