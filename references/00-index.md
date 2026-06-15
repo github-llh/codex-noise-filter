@@ -37,6 +37,7 @@
 - 修改前检查：`01-global-engineering-rules.md#修改前确认`
 - 跨技术栈注释原则：`01-global-engineering-rules.md#跨技术栈注释原则`
 - 跨技术栈硬编码治理：`01-global-engineering-rules.md#跨技术栈硬编码治理`
+- 跨技术栈重复逻辑治理：`01-global-engineering-rules.md#跨技术栈重复逻辑治理`
 - 高风险变更：`01-global-engineering-rules.md#高风险变更`
 - AGENTS 演进建议：`01-global-engineering-rules.md#项目演进规则`
 - Plan 阶段门禁：`02-noise-filter-workflow.md#plan-阶段门禁`
@@ -83,7 +84,7 @@
 - Java 枚举与常量：`08-java-style-patterns.md#枚举与常量`
 - 配置外置化：`08-java-style-patterns.md#配置外置化`
 - DTO 参数校验：`08-java-style-patterns.md#参数校验分层`
-- 去硬编码与重复逻辑：`08-java-style-patterns.md#去硬编码与重复逻辑`
+- Java 去硬编码与重复逻辑落地：`08-java-style-patterns.md#去硬编码与重复逻辑`
 - 判空与函数式风格：`08-java-style-patterns.md#判空与函数式风格`
 - Lombok 使用标准：`08-java-style-patterns.md#lombok-使用标准`
 - token 预算与读取窗口：`02-noise-filter-workflow.md#上下文预算`
@@ -113,7 +114,7 @@
 | Plan/Global/Goal/续跑/上下文恢复 | `02` | 涉及代码层再加对应业务 reference |
 | Java Controller/Service/Entity/DTO 修改 | `02` + `07` | 枚举/校验/Lombok/Optional/重复逻辑加 `08` |
 | Java 事务/并发/批量/异步 | `02` + `07` + `09` | 需要构建验证时加 `03` |
-| Java 枚举/配置/校验/Lombok/重复 if-set | `02` + `08` | 涉及分层或接口注释加 `07` |
+| Java 枚举/配置/校验/Lombok/重复 if-set | `02` + `01` + `08` | 只问规则可省略 `02`；涉及分层或接口注释加 `07` |
 | Python 语法/脚本/服务/包/测试 | `02` + `10` | 环境路径未知加 `06`，跨系统调用再加对应 reference |
 | Maven 构建/测试/多模块 root | `03` | Maven/JDK 路径未知时加 `06` |
 | 环境路径发现/缓存 | `06` | 需要构建命令时加 `03` |
@@ -140,8 +141,9 @@
 - `Global`、`Goal`、`目标追踪`、`长期推进`、`自动续跑`、`跨轮推进`：先读 `02-noise-filter-workflow.md#globalgoal-模式门禁`。
 - `新增代码`、`修改已有代码`、`旧代码`、`自动续跑`、`跨窗口`、`不可绕过`、`强制执行`：先读 `02-noise-filter-workflow.md#不可绕过执行门禁`。
 - `Controller`、`Service`、`接口层`、`实现层`、`I*Service`、`返回实体`、`数据库实体`、`VO`、`DTO`、`DO`、`PO`、`Entity`、`业务代码下沉`、`URL 填充`、`列表加工`、`业务抽象`、`扩展性`、`可维护`、`健壮性`、`策略`、`handler map`、`Assembler`、`Converter`、`领域组件`、`事务`、`@Transactional`、`rollbackFor`、`module 归属`、`新建文件放哪`、`注释`：读 `07-java-backend-architecture.md`。
-- `硬编码`、`魔法值`、`magic string`、`magic number`、`固定值`、`常量`、`枚举`、`Enum`、`状态值`、`类型值`、`来源值`、`协议`、`模式`、`渠道`、`格式`、`默认值`、`阈值`、`时间窗`、`content-type`、`media type`、`平台编码`、`字典`：先读 `01-global-engineering-rules.md#跨技术栈硬编码治理`，再按技术栈追加 `08`、`10`、`11` 或 `12`。
-- `Enum`、`常量`、`固定值`、`状态值`、`类型值`、`来源值`、`协议`、`默认值`、`阈值`、`时间窗`、`yml`、`properties`、`@ConfigurationProperties`、`@Value`、`配置外置`、`参数校验`、`Bean Validation`、`Lombok`、`@Data`、`getter/setter`、`Optional`、`Stream`、`重复 if/set`、`硬编码`、`函数式`：Java 项目读 `08-java-style-patterns.md`。
+- `硬编码`、`魔法值`、`magic string`、`magic number`、`固定值`、`常量`、`枚举`、`Enum`、`状态值`、`类型值`、`来源值`、`协议`、`模式`、`渠道`、`格式`、`默认值`、`阈值`、`时间窗`、`content-type`、`media type`、`平台编码`、`字典`：先读 `01-global-engineering-rules.md#跨技术栈硬编码治理`；Java 落地追加 `08`，Python 追加 `10`，Vue/React 追加 `11`，小程序追加 `12`。
+- `重复 if`、`重复 set`、`重复赋值`、`重复映射`、`重复转换`、`字段不同逻辑相同`、`默认值填充`、`策略`、`handler map`、`mapper`、`converter`、`adapter`：先读 `01-global-engineering-rules.md#跨技术栈重复逻辑治理`；Java 落地追加 `08`，其他技术栈按文件类型追加对应 reference。
+- `Enum`、`yml`、`properties`、`@ConfigurationProperties`、`@Value`、`Bean Validation`、`Lombok`、`@Data`、`getter/setter`、`Optional`、`Stream`、`MapStruct`、`BeanUtils`、`BiConsumer`、`Function`：Java 项目读 `08-java-style-patterns.md`。
 - `Python`、`.py`、`pyproject.toml`、`requirements.txt`、`setup.py`、`tox.ini`、`noxfile.py`、`Pipfile`、`poetry.lock`、`uv.lock`、`pytest`、`unittest`、`ruff`、`black`、`isort`、`mypy`、`pyright`、`venv`、`.venv`、`typing`、`dataclass`、`asyncio`、`脚本`、`包管理`、`虚拟环境`：读 `10-python-development.md`。
 - `Vue`、`Vue2`、`Vue 2`、`Vue3`、`Vue 3`、`.vue`、`SFC`、`Composition API`、`Options API`、`script setup`、`defineProps`、`defineEmits`、`props`、`emits`、`slots`、`Vuex`、`Pinia`、`Vue Router`、`React`、`JSX`、`TSX`、`Hooks`、`children`、`render prop`、`useState`、`useEffect`、`Vite`、`Vitest`、`Jest`、`Testing Library`、`Vue Test Utils`、`Cypress`、`Playwright`、`组件创建`、`组件使用`、`组件注释`、`package.json`、`pnpm`、`yarn`、`npm`、`bun`：读 `11-frontend-vue-react.md`。
 - `小程序`、`微信小程序`、`weapp`、`mp-weixin`、`mini program`、`project.config.json`、`project.private.config.json`、`app.json`、`app.wxss`、`app.js`、`sitemap.json`、`wxml`、`wxss`、`wxs`、`wx:`、`setData`、`Component`、`Page`、`Behavior`、`miniprogramRoot`、`miniprogram_npm`、`subPackages`、`subpackages`、`preloadRule`、`independent`、`分包`、`主包`、`独立分包`、`分包预下载`、`分包异步化`、`模拟器`、`微信开发者工具`、`miniprogram-ci`、`miniprogram-simulate`：读 `12-miniprogram-development.md`。
