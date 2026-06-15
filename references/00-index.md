@@ -8,7 +8,7 @@
 
 读取顺序按三段执行：
 
-1. 先判定运行门禁：涉及读取、修改、构建、测试、重构、Plan、Global/Goal、自动续跑、上下文恢复时，读 `02-noise-filter-workflow.md` 对应章节。
+1. 先判定运行门禁和意图证据：涉及读取、修改、构建、测试、重构、报错日志、异常堆栈、构建/测试失败、Plan、Global/Goal、自动续跑、上下文恢复时，读 `02-noise-filter-workflow.md` 对应章节。
 2. 再判定业务域：Java 后端读 `07`，Java 风格读 `08`，Python 读 `10`，Vue/React 读 `11`，小程序读 `12`，通用前端读 `04`，并发/异步/批量读 `09`，构建读 `03`，环境发现读 `06`。
 3. 最后按需补充：只在需要交付模板、Context Capsule、语言/工具细则、高风险说明时读 `05` 或 `01`。
 
@@ -32,6 +32,7 @@
 ## 任务到文件映射
 
 - 不可绕过执行门禁：`02-noise-filter-workflow.md#不可绕过执行门禁`
+- 自动意图识别：`02-noise-filter-workflow.md#自动意图识别`
 - 语言与标题规范：`01-global-engineering-rules.md#语言偏好`
 - JetBrains 项目工具优先级：`01-global-engineering-rules.md#工具优先级`
 - 修改前检查：`01-global-engineering-rules.md#修改前确认`
@@ -117,6 +118,7 @@
 | 任务形态 | 默认读取 | 追加条件 |
 | --- | --- | --- |
 | 只问规则、解释 skill、优化索引 | `00` + 目标 reference | 需要同步说明时加 README |
+| 报错日志/异常堆栈/构建失败/测试失败/启动失败 | `02` | 按日志识别技术栈：Maven 加 `06` + `03`，Python 加 `06` + `10`，Vue/React/Node 加 `06` + `11`，小程序加 `06` + `12`；触碰代码再加 `01` 和对应业务 reference |
 | Plan/Global/Goal/续跑/上下文恢复 | `02` | 涉及代码层再加对应业务 reference |
 | Java Controller/Service/Entity/DTO 修改 | `02` + `07` | 枚举/校验/Lombok/Optional/重复逻辑加 `08` |
 | Java 事务/并发/批量/异步 | `02` + `07` + `09` | 需要构建验证时加 `03` |
@@ -152,6 +154,7 @@
 - `Plan`、`计划`、`执行计划`、`分步实现`：先读 `02-noise-filter-workflow.md#plan-阶段门禁`。
 - `Global`、`Goal`、`目标追踪`、`长期推进`、`自动续跑`、`跨轮推进`：先读 `02-noise-filter-workflow.md#globalgoal-模式门禁`。
 - `新增代码`、`修改已有代码`、`旧代码`、`自动续跑`、`跨窗口`、`不可绕过`、`强制执行`：先读 `02-noise-filter-workflow.md#不可绕过执行门禁`。
+- `报错`、`报错了`、`失败了`、`不行`、`还是这样`、`处理一下`、`看下这个`、`Exception`、`Caused by`、`Traceback`、`Error:`、`BUILD FAILURE`、`Failed to execute goal`、`Compilation failure`、`npm ERR`、`pnpm ERR`、`yarn error`、`pytest`、`AssertionError`、`TypeError`、`ReferenceError`、`NullPointerException`、`SQLSyntaxErrorException`、`HTTP 500`、`启动失败`、`测试失败`、`构建失败`：先读 `02-noise-filter-workflow.md#自动意图识别`，再按日志中的文件、命令、框架和工具链追加对应 reference。
 - `Controller`、`Service`、`接口层`、`实现层`、`I*Service`、`返回实体`、`数据库实体`、`VO`、`DTO`、`DO`、`PO`、`Entity`、`业务代码下沉`、`URL 填充`、`列表加工`、`业务抽象`、`扩展性`、`可维护`、`健壮性`、`策略`、`handler map`、`Assembler`、`Converter`、`领域组件`、`事务`、`@Transactional`、`rollbackFor`、`module 归属`、`新建文件放哪`、`注释`：读 `07-java-backend-architecture.md`。
 - `新建文件`、`文件归属`、`目录位置`、`放哪`、`module 归属`、`package`、`workspace`、`生成目录`、`构建产物`、`dist`、`build`、`target`、`unpackage/dist`、`miniprogram_npm`、`依赖方向`、`循环依赖`、`接口和实现分离`、`测试目录`：先读 `01-global-engineering-rules.md#跨技术栈文件归属与依赖边界`；Java 追加 `07`，Python 追加 `10`，Vue/React 追加 `11`，小程序追加 `12`。
 - `环境`、`命令`、`运行`、`包管理器`、`lockfile`、`root`、`workspace`、`filter`、`版本`、`JDK`、`Maven`、`Node`、`Python`、`虚拟环境`、`模拟器`、`开发者工具`、`CLI`、`全局安装`：先读 `01-global-engineering-rules.md#跨技术栈环境与命令`；只要准备执行工具链命令就追加 `06` 验证/复用缓存，并按技术栈追加 `03`/`10`/`11`/`12`。

@@ -23,8 +23,9 @@ Reduce context noise · enforce call-chain checks · load rules progressively ·
 Use it for:
 
 - Coding, debugging, refactoring, migration, and code explanation tasks.
+- Pasted error logs, stack traces, build/test failures, IDE screenshots, code snippets, or diffs where Codex should infer whether to debug, fix, or validate.
 - Multi-file investigation, cross-module backend analysis, Maven builds, frontend fixes, Mini Program native/uni-app/Taro work, and Python script/service/package/test work.
-- Requests that ask for lower token usage, concise evidence, or reproducible reasoning.
+- Signals that the task needs lower token usage, concise evidence, reproducible reasoning, narrower file reads, or preserved evidence chains.
 
 ## Why Use It
 
@@ -32,6 +33,7 @@ Many coding-task failures are not caused by missing coding ability. They come fr
 
 | Without it | With it |
 | --- | --- |
+| After pasting an error log, you still have to explain "debug/fix this" repeatedly. | Infer a debugging task from logs, stack traces, paths, commands, and the current repository, then find the root cause before applying the smallest fix and validation. |
 | Repository-wide scanning can consume context with unrelated files and logs. | Read `references/00-index.md` first and load only task-relevant references. |
 | Edits may ignore Controller/Service/DTO/Entity call-chain impact. | Confirm touched scope, call chain, and unaffected contracts before changes. |
 | New code follows rules while existing touched code keeps business logic, hardcoding, and repeated setters/ifs. | Apply local rule alignment to both new code and existing touched code. |
@@ -39,7 +41,7 @@ Many coding-task failures are not caused by missing coding ability. They come fr
 
 ## Usage
 
-Codex skills can be used from the Codex App, CLI, and IDE extension. Invocation can be explicit by mentioning `$codex-noise-filter`, or implicit when Codex matches a coding task to the `description` in `SKILL.md`.
+Codex skills can be used from the Codex App, CLI, and IDE extension. Invocation can be explicit by mentioning `$codex-noise-filter`, or implicit when Codex matches a coding task to the `description` in `SKILL.md`. Prefer implicit day-to-day use: code, logs, stack traces, command output, screenshots with errors, paths, or project structure should be enough for the skill to treat the request as a coding task.
 
 ### Repository Scope
 
@@ -122,9 +124,27 @@ Tell me whether this task triggers codex-noise-filter. If yes, list the referenc
 
 If it does not trigger, common causes are missing code context, the skill not being in a scanned skills directory, a same-name skill conflict, or a Codex session that needs a restart.
 
+### Automatic Activation Signals
+
+These inputs should enter the indexed workflow without asking the user to explicitly mention the skill:
+
+- Java/Maven: `Exception`, `Caused by`, `BUILD FAILURE`, `Failed to execute goal`, `Compilation failure`, `NullPointerException`.
+- Python: `Traceback`, `pytest`, `AssertionError`, `ModuleNotFoundError`, `ImportError`.
+- Node/Vue/React: `npm ERR`, `pnpm ERR`, `yarn error`, `TypeError`, `ReferenceError`, `vite`, `webpack`.
+- Mini Programs: `project.config.json`, `miniprogram-ci`, `setData`, `app.json`, `pages.json`, `TARO_ENV`, `mp-weixin`.
+- Ambiguous but contextual Chinese prompts: `报错了`, `失败了`, `为什么不行`, `还是这样`, `处理一下`, `看下这个`.
+
 ## Activation Examples
 
 You can copy these prompts directly:
+
+```text
+I pasted a Maven BUILD FAILURE. Find the root cause directly; if this repository has enough context, apply the smallest fix and rerun the smallest validation command.
+```
+
+```text
+What is causing this Python Traceback? Use the current project's virtual environment and test configuration, and fix it if the cause is clear.
+```
 
 ```text
 $codex-noise-filter check whether this Controller contains business logic and move logic that belongs in the Service implementation.
@@ -157,6 +177,7 @@ More scenarios are in [`examples/`](examples/). Team rollout templates are in [`
 | Capability | Description |
 | --- | --- |
 | Indexed routing | Read `00-index.md` first and open only the required reference files for the task. |
+| Intent inference | Infer debugging, fixing, validation, or explanation intent from logs, stack traces, screenshots, paths, command output, code snippets, and ambiguous Chinese prompts without requiring repeated skill mentions. |
 | Non-bypass gates | New code, existing-code edits, Plan, Global/Goal, resumes, and cross-window work must confirm touched scope, call chains, and local alignment. |
 | Cross-stack shared governance | Every stack first checks shared rules for file ownership, commands, validation, security boundaries, hardcoded values, repeated logic, and comment placement, then applies stack-specific implementation details. |
 | Java backend governance | Keeps controllers thin, requires service-interface comments, aligns entity Lombok usage, and checks transactions, enums, config, validation, and repeated logic. |
