@@ -44,6 +44,7 @@
 - 跨技术栈环境与命令：`01-global-engineering-rules.md#跨技术栈环境与命令`
 - 跨技术栈验证策略：`01-global-engineering-rules.md#跨技术栈验证策略`
 - 跨技术栈安全与外部边界：`01-global-engineering-rules.md#跨技术栈安全与外部边界`
+- 跨技术栈编码风格智能化门禁：`01-global-engineering-rules.md#跨技术栈编码风格智能化门禁`
 - 跨技术栈硬编码治理：`01-global-engineering-rules.md#跨技术栈硬编码治理`
 - 跨技术栈重复逻辑治理：`01-global-engineering-rules.md#跨技术栈重复逻辑治理`
 - 高风险变更：`01-global-engineering-rules.md#高风险变更`
@@ -136,6 +137,7 @@
 | 环境/运行/命令/包管理器/root/workspace | `02` + `01` + `06` + `14` | 只问规则可省略 `02`；执行工具链命令前按技术栈读取配置、验证/复用缓存，再按技术栈加 `03`/`10`/`11`/`12` |
 | 测试/验证/lint/typecheck/build/模拟器 | `02` + `01` + `06` + `14` | 只问规则可省略 `02`；执行工具链命令前按技术栈读取配置、验证/复用缓存，再按技术栈追加 `03`/`04`/`10`/`11`/`12` |
 | 密钥/权限/租户/审计/外部调用/上传下载/动态内容 | `02` + `01` | 只问规则可省略 `02`；并发副作用加 `09`，再按技术栈追加对应 reference |
+| 编码风格智能化/魔法值/常量放置/抽象边界 | `02` + `01` | Java 加 `08`，Python 加 `10`，Vue/React 加 `11`，小程序加 `12`；触碰后端分层或业务抽象再加 `07` |
 | Python 语法/脚本/服务/包/测试 | `02` + `10` | 运行/测试/lint/type check 前加 `06`，跨系统调用再加对应 reference |
 | Maven 构建/测试/多模块 root | `06` + `14` + `03` | 先验证/复用 Maven/JDK 缓存，再执行 Maven 命令 |
 | 环境路径发现/缓存/忽略规则 | `06` | 需要栈级缓存细节时加 `14`，需要构建命令时加 `03`；涉及代码修改时加 `02` |
@@ -172,7 +174,7 @@
 - `环境`、`命令`、`运行`、`包管理器`、`lockfile`、`root`、`workspace`、`filter`、`版本`、`版本不匹配`、`构建失败后重算`、`JDK`、`Maven`、`Node`、`Python`、`虚拟环境`、`模拟器`、`开发者工具`、`CLI`、`全局安装`：先读 `01-global-engineering-rules.md#跨技术栈环境与命令`；只要准备执行工具链命令就追加 `06` 按技术栈读取配置、验证/复用缓存，并按技术栈追加 `03`/`10`/`11`/`12`。
 - `测试`、`验证`、`lint`、`format`、`typecheck`、`build`、`unit test`、`e2e`、`pytest`、`mvn test`、`Vitest`、`Jest`、`Playwright`、`Cypress`、`浏览器点击`、`电脑屏幕`、`Browser`、`Computer Use`、`模拟器验证`、`真机验证`、`无法验证`：先读 `01-global-engineering-rules.md#跨技术栈验证策略`，再按技术栈追加 `03`/`04`/`10`/`11`/`12`。
 - `密钥`、`token`、`secret`、`生产地址`、`appid`、`私钥`、`白名单`、`权限`、`认证`、`授权`、`租户`、`审计`、`脱敏`、`上传`、`下载`、`外部 API`、`超时`、`重试`、`动态 URL`、`富文本`、`eval`、`exec`、`反序列化`、`不可回滚副作用`：先读 `01-global-engineering-rules.md#跨技术栈安全与外部边界`；涉及异步、幂等、事务副作用追加 `09`，再按技术栈追加对应 reference。
-- `硬编码`、`魔法值`、`magic string`、`magic number`、`固定值`、`常量`、`枚举`、`Enum`、`状态值`、`类型值`、`来源值`、`协议`、`模式`、`渠道`、`格式`、`默认值`、`阈值`、`时间窗`、`content-type`、`media type`、`平台编码`、`字典`：先读 `01-global-engineering-rules.md#跨技术栈硬编码治理`；Java 落地追加 `08`，Python 追加 `10`，Vue/React 追加 `11`，小程序追加 `12`。
+- `编码风格智能化`、`写代码风格`、`魔法值`、`magic string`、`magic number`、`固定值`、`字面量`、`抽常量`、`常量`、`枚举`、`Enum`、`状态值`、`类型值`、`来源值`、`协议`、`模式`、`渠道`、`格式`、`默认值`、`阈值`、`时间窗`、`content-type`、`media type`、`平台编码`、`字典`：先读 `01-global-engineering-rules.md#跨技术栈编码风格智能化门禁` 和 `01-global-engineering-rules.md#跨技术栈硬编码治理`；Java 落地追加 `08`，Python 追加 `10`，Vue/React 追加 `11`，小程序追加 `12`。
 - `重复 if`、`重复 set`、`重复赋值`、`重复映射`、`重复转换`、`字段不同逻辑相同`、`默认值填充`、`策略`、`handler map`、`mapper`、`converter`、`adapter`：先读 `01-global-engineering-rules.md#跨技术栈重复逻辑治理`；Java 落地追加 `08`，其他技术栈按文件类型追加对应 reference。
 - `Enum`、`yml`、`properties`、`@ConfigurationProperties`、`@Value`、`Bean Validation`、`Lombok`、`@Data`、`getter/setter`、`Optional`、`Stream`、`MapStruct`、`BeanUtils`、`BiConsumer`、`Function`：Java 项目读 `08-java-style-patterns.md`。
 - `Python`、`.py`、`pyproject.toml`、`requirements.txt`、`requirements-dev.txt`、`setup.py`、`tox.ini`、`noxfile.py`、`Pipfile`、`poetry.lock`、`uv.lock`、`.python-version`、`.venv/pyvenv.cfg`、`pytest`、`unittest`、`ruff`、`black`、`isort`、`mypy`、`pyright`、`venv`、`.venv`、`typing`、`dataclass`、`asyncio`、`脚本`、`包管理`、`虚拟环境`：读 `10-python-development.md`；执行命令前追加 `14-environment-cache-by-stack.md#python-环境缓存`。

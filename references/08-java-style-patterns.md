@@ -4,7 +4,15 @@
 
 ## 枚举与常量
 
-先按 `01-global-engineering-rules.md#跨技术栈硬编码治理` 判断值的类型，再选择 Java 落地方式。不要只看变量名前缀；只要代码中出现参与业务判断、外部协议、消息格式、平台/渠道编码、序列化、持久化、HTTP header/content type/media type、默认值、阈值或时间窗的字符串/数字，触碰时都必须检查是否应使用 Java enum、集中常量、配置属性或动态字典。
+先按 `01-global-engineering-rules.md#跨技术栈编码风格智能化门禁` 和 `01-global-engineering-rules.md#跨技术栈硬编码治理` 判断值的类型，再选择 Java 落地方式。不要只看变量名前缀；只要代码中出现参与业务判断、外部协议、消息格式、平台/渠道编码、序列化、持久化、HTTP header/content type/media type、默认值、阈值或时间窗的字符串/数字，触碰时都必须检查是否应使用 Java enum、集中常量、配置属性或动态字典。
+
+写 Java 前先做本地风格预检：
+
+- 新增 `if/switch` 前先确认分支条件是否来自固定业务状态、类型、来源、平台、动作或结果；是固定集合时优先业务 Enum、枚举行为、策略表或 handler map。
+- 新增字符串/数字常量前先查同包、同模块、contract/api module、配置属性类、SDK 常量和项目统一字典；有现成定义必须复用。
+- 新增 `private static final` 只适合局部技术常量或当前类私有协议值；跨层传递、持久化、序列化、展示或多处判断的值不能藏在 Service 实现类里。
+- 不新建无业务域的 `Constants`、`CommonConstants`、`StatusEnum`；常量类或枚举名必须表达业务归属。
+- 测试中的状态、类型、错误码和 fixture key 若与生产协议相关，也要复用同一枚举/常量或测试 fixture builder。
 
 状态值、类型值、来源值、动作值、阶段值、结果值等明确不变且有固定集合的常量，优先使用业务 Enum，方便查看、跳转、复用和约束。
 

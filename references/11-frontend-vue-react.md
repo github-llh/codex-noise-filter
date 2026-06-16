@@ -116,7 +116,14 @@
 
 ## 枚举、常量与配置
 
-Vue/React 任务也必须执行 `01-global-engineering-rules.md#跨技术栈硬编码治理`。模板、JSX、store、api client、hook/composable、测试和 mock 中都不能散写同一类魔法字符串或数字。
+Vue/React 任务也必须执行 `01-global-engineering-rules.md#跨技术栈编码风格智能化门禁` 和 `01-global-engineering-rules.md#跨技术栈硬编码治理`。模板、JSX、store、api client、hook/composable、测试和 mock 中都不能散写同一类魔法字符串或数字。
+
+写 Vue/React 前先做本地风格预检：
+
+- 模板、JSX、computed、selector、hook/composable、store 和 api client 中新增业务判断前，先确认状态/类型/来源/权限/路由/事件/storage key 是否已有 contract、model、router、query key factory、字典或生成类型。
+- 固定展示映射优先集中为 `Record`、`as const` 字典、mapper、computed/selector 或 i18n 资源；不要在模板/JSX 里用裸字符串判断并直接展示文案。
+- 页面私有值可以在页面局部集中，跨页面复用才上升到共享模块；不要为了一个页面私有常量引入跨业务域依赖。
+- 测试、mock、fixture 与生产 contract 使用同一套 code；不要在测试里复制旧状态字符串导致误判。
 
 优先选择：
 

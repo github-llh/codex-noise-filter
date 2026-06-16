@@ -45,7 +45,14 @@
 
 ## 枚举、常量与配置
 
-Python 任务也必须执行 `01-global-engineering-rules.md#跨技术栈硬编码治理`。不要因为是脚本或测试就把平台编码、状态值、外部协议、content type、路径、超时和阈值散写在多个函数里。
+Python 任务也必须执行 `01-global-engineering-rules.md#跨技术栈编码风格智能化门禁` 和 `01-global-engineering-rules.md#跨技术栈硬编码治理`。不要因为是脚本或测试就把平台编码、状态值、外部协议、content type、路径、超时和阈值散写在多个函数里。
+
+写 Python 前先做本地风格预检：
+
+- 新增字符串/数字字面量前先判断是否为状态、类型、来源、协议、路径、错误码、配置 key、超时、重试、批量大小或阈值；不是短小局部值时必须集中。
+- 先查同包 `constants.py`、`enums.py`、`settings.py`、配置对象、SDK 常量和测试 fixture builder；有现成定义必须复用。
+- 跨模块或跨接口使用的固定集合优先 `Enum/StrEnum` 或项目既有枚举范式；只做类型收窄且无运行期反查时才用 `Literal` 或 `Final` 常量。
+- 脚本参数、路径、URL、token、超时、重试和批量大小优先配置或命令行参数，不写成函数内部魔法值。
 
 优先选择：
 

@@ -4,6 +4,7 @@
 
 ## Unreleased
 
+- 强化编码风格智能化门禁：写代码前先分类字面量、魔法值、状态/类型/来源、阈值、配置 key、路由/事件/storage key 和重复映射；优先复用既有枚举、常量、配置、字典、SDK 常量、生成类型和设计 token，并把风格预检写入任务胶囊、索引路由和各技术栈落地规则。
 - 拆分过大的 reference：新增 `13-read-expansion-and-history.md` 承接读取完整性、智能扩窗和 Git 历史防回归；新增 `14-environment-cache-by-stack.md` 承接 Maven/Java、Node/前端、Python、小程序栈级环境缓存细则。`02` 和 `06` 保留旧锚点转发，避免既有链接断裂。
 - 扩展 `SKILL.md` 的 `description`，补充 Java 后端、Maven 多模块、事务并发、Python、Vue/React、小程序、Plan/Goal、上下文压缩、减少 token 和调用链确认等高频编程触发词。
 - 补充中英文 README 的 `为什么用 / Why Use It`、Before/After 对比和可复制触发示例。

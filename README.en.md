@@ -4,7 +4,7 @@
 
 **A Codex skill for coding-task noise reduction and indexed rule routing**
 
-Reduce context noise · enforce call-chain checks · load rules progressively · align new and existing code
+Reduce context noise · enforce call-chain checks · load rules progressively · align new and existing code · prevent magic values proactively
 
 ![Skill](https://img.shields.io/badge/Codex%20Skill-codex--noise--filter-2563eb)
 ![Routing](https://img.shields.io/badge/Routing-indexed%20references-16a34a)
@@ -37,6 +37,7 @@ Many coding-task failures are not caused by missing coding ability. They come fr
 | Repository-wide scanning can consume context with unrelated files and logs. | Read `references/00-index.md` first and load only task-relevant references. |
 | Edits may ignore Controller/Service/DTO/Entity call-chain impact. | Confirm touched scope, call chain, and unaffected contracts before changes. |
 | New code follows rules while existing touched code keeps business logic, hardcoding, and repeated setters/ifs. | Apply local rule alignment to both new code and existing touched code. |
+| Strings, numbers, statuses, and thresholds may be written first and extracted only after review. | Run a style precheck before writing code: classify literals, reuse existing enums/constants/config/dictionaries/SDK constants, then decide whether a local literal is acceptable. |
 | Obvious hardcoding, repeated logic, or layering issues in screenshots, snippets, or call-chain-related files may get blocked by an over-narrow "minimal change" reading. | Judge call-chain depth, file count, contract risk, and validation path automatically; when the closure is low-risk, write it into the task capsule, apply the matching reference, and fix it locally. |
 | Build commands may be guessed from habit, such as `npm run build`, system `python`, or the current shell's `mvn`, then require manual environment hints after failure. | Match toolchains, commands, and cache entries from Java/Maven, Python, Node/frontend, and Mini Program project configuration; if a failure looks environment-related, recompute the cache and retry once. |
 | Plan/Goal, resume, or cross-window work can forget constraints. | Plan/Goal/context restoration must still use indexed rules and Context Capsules. |
@@ -184,6 +185,7 @@ More scenarios are in [`examples/`](examples/). Team rollout templates are in [`
 | Smart window expansion | When editing code or judging strong-rule issues, local read windows are only the starting point; automatically expand by each stack's syntax for Java, Python, Vue/React, Mini Programs, SQL, config, scripts, and tests to cover full semantic units, contracts, direct calls, and nearby peer patterns. |
 | Git history regression guard | When edits touch old logic, public contracts, historical compatibility, or high-risk boundaries, read the smallest useful git history evidence to compare commit intent, blame ranges, and key-token evolution before changing behavior. |
 | Strong-rule auto escalation | When the touched scope, direct call chain, or related files that must be read for the task already hit hardcoding, repeated logic, hardcoded config, layering mistakes, missing comments, or security-boundary gaps, judge whether a low-risk closure exists; write it into the task capsule and fix it directly when it does, and record risk only when it does not. |
+| Intelligent coding style gate | Before writing code, proactively identify magic strings, magic numbers, status/type/source values, thresholds, time windows, config keys, route/event/storage keys, and repeated mappings; prefer existing enums, constants, config, dictionaries, generated types, SDK constants, and design tokens. |
 | Cross-stack shared governance | Every stack first checks shared rules for file ownership, commands, validation, security boundaries, hardcoded values, repeated logic, and comment placement, then applies stack-specific implementation details. |
 | Java backend governance | Keeps controllers thin, requires service-interface comments, aligns entity Lombok usage, and checks transactions, enums, config, validation, and repeated logic. |
 | Default validation across stacks | Java, Python, frontend, Mini Programs, and other stacks default to non-interactive syntax, compile, type-check, or build validation, without browser clicking, desktop operations, simulators, real devices, or external-system integration. |
@@ -256,6 +258,7 @@ references/
 - After updating `.codex/local-environment.json`, automatically check whether the Git root `.gitignore` covers `/.codex/`; add it when missing and verify it with `git check-ignore -v`.
 - Build multi-module Maven projects from the aggregation root with `-pl <module> -am`.
 - File ownership, commands, validation strategy, security boundaries, hardcoded values, repeated logic, and comment placement are shared across stacks. Judge them through `01-global-engineering-rules.md` first, then apply Java/Python/Vue/React/Mini Program syntax and project conventions.
+- Before writing code, run the intelligent style precheck: classify new or retained strings, numbers, statuses, types, sources, protocol fields, error codes, config keys, route/event/storage keys, thresholds, time windows, and repeated mappings, then decide whether they belong in enums, constants, config, dictionaries, SDK constants, generated types, design tokens, or local literals.
 - For Python projects, first confirm `requires-python`, `.python-version`, IDE interpreter, `.venv`, or lock files, and write or reuse the Python environment cache. Reuse the project's existing uv, poetry, pipenv, venv, tox, or nox workflow instead of installing dependencies into global pip.
 - Python code should follow existing `pyproject.toml`, Ruff/Black/isort/mypy/pyright/pytest configuration. Add type hints and necessary docstrings for public functions, complex return values, cross-module DTOs, and configuration objects.
 - Prefer project commands, `python -m ...`, `uv run ...`, or `poetry run ...` for Python execution. Prefer targeted tests such as `python -m pytest path::test` or existing `tox/nox` commands.
