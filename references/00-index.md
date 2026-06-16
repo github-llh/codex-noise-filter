@@ -33,6 +33,7 @@
 
 - 不可绕过执行门禁：`02-noise-filter-workflow.md#不可绕过执行门禁`
 - 强规则命中后的自动升级：`02-noise-filter-workflow.md#强规则命中后的自动升级`
+- 读取完整性与智能扩窗：`02-noise-filter-workflow.md#读取完整性与智能扩窗`
 - 自动意图识别：`02-noise-filter-workflow.md#自动意图识别`
 - 语言与标题规范：`01-global-engineering-rules.md#语言偏好`
 - JetBrains 项目工具优先级：`01-global-engineering-rules.md#工具优先级`
@@ -152,7 +153,8 @@
 - 路由采用“关键词 + 任务意图 + 影响面”三者交叉确认，避免只凭单个词误读。
 - 修改已有代码时，先读 `02-noise-filter-workflow.md#既有代码修改一致性`，再读对应主题规则。
 - 优先 `rg --files`、符号检索、局部窗口读取，不做全仓无目的扫描。
-- 默认读取 200 到 300 行窗口；关键段最多 500 行。
+- 默认读取 200 到 300 行窗口只是起点；修改代码时必须按 `02#读取完整性与智能扩窗` 判断是否需要扩读完整方法、完整组件/类声明区、字段/常量/import、直接调用点和同文件相邻范式。
+- 关键段最多 500 行是常规窗口，不是硬上限；若符号完整体或低风险强规则判断必须跨过该窗口，可分段读取同一文件的相邻区间，直到能证明触碰单元已闭环。
 - 工具输出只保留结论、文件路径、行号和关键片段，不搬运大段日志。
 
 ## 高精度路由
@@ -160,6 +162,7 @@
 - `Plan`、`计划`、`执行计划`、`分步实现`：先读 `02-noise-filter-workflow.md#plan-阶段门禁`。
 - `Global`、`Goal`、`目标追踪`、`长期推进`、`自动续跑`、`跨轮推进`：先读 `02-noise-filter-workflow.md#globalgoal-模式门禁`。
 - `新增代码`、`修改已有代码`、`旧代码`、`自动续跑`、`跨窗口`、`不可绕过`、`强制执行`、`不可容忍`、`最小改动冲突`、`为什么没有更改`、`调用链深不深`、`涉及文件没几个`、`调用链相关文件`、`列入计划`、`任务胶囊`、`当前任务清单`、`同步修改`、`同时修改`：先读 `02-noise-filter-workflow.md#不可绕过执行门禁` 和 `02-noise-filter-workflow.md#强规则命中后的自动升级`。
+- `读取行数`、`行数限制`、`窗口不足`、`只读了局部`、`没读到`、`漏判`、`漏修`、`智能扩窗`、`扩读`、`完整方法`、`完整类`、`完整组件`、`符号完整体`、`局部规则扫描`、`未读区域`、`读到某些代码`：先读 `02-noise-filter-workflow.md#读取完整性与智能扩窗`，再按命中的技术栈追加 `07`/`08`/`10`/`11`/`12`。
 - `报错`、`报错了`、`失败了`、`不行`、`还是这样`、`处理一下`、`看下这个`、`Exception`、`Caused by`、`Traceback`、`Error:`、`BUILD FAILURE`、`Failed to execute goal`、`Compilation failure`、`npm ERR`、`pnpm ERR`、`yarn error`、`pytest`、`AssertionError`、`TypeError`、`ReferenceError`、`NullPointerException`、`SQLSyntaxErrorException`、`HTTP 500`、`启动失败`、`测试失败`、`构建失败`：先读 `02-noise-filter-workflow.md#自动意图识别`，再按日志中的文件、命令、框架和工具链追加对应 reference。
 - `Controller`、`Service`、`接口层`、`实现层`、`I*Service`、`返回实体`、`数据库实体`、`VO`、`DTO`、`DO`、`PO`、`Entity`、`业务代码下沉`、`URL 填充`、`列表加工`、`业务抽象`、`扩展性`、`可维护`、`健壮性`、`策略`、`handler map`、`Assembler`、`Converter`、`领域组件`、`事务`、`@Transactional`、`rollbackFor`、`module 归属`、`新建文件放哪`、`注释`：读 `07-java-backend-architecture.md`。
 - `新建文件`、`文件归属`、`目录位置`、`放哪`、`module 归属`、`package`、`workspace`、`生成目录`、`构建产物`、`dist`、`build`、`target`、`unpackage/dist`、`miniprogram_npm`、`依赖方向`、`循环依赖`、`接口和实现分离`、`测试目录`：先读 `01-global-engineering-rules.md#跨技术栈文件归属与依赖边界`；Java 追加 `07`，Python 追加 `10`，Vue/React 追加 `11`，小程序追加 `12`。
