@@ -13,6 +13,7 @@
 - 新增 `private static final` 只适合局部技术常量或当前类私有协议值；跨层传递、持久化、序列化、展示或多处判断的值不能藏在 Service 实现类里。
 - 不新建无业务域的 `Constants`、`CommonConstants`、`StatusEnum`；常量类或枚举名必须表达业务归属。
 - 测试中的状态、类型、错误码和 fixture key 若与生产协议相关，也要复用同一枚举/常量或测试 fixture builder。
+- 看到一组 `private static final String` 时逐项分类，不把“已抽常量”当作自动合格：`*_KEY`、`*_FIELD`、`*_HEADER`、`*_PARAM` 多数是协议字段名，可保留为常量；`*_CUSTOM`、`*_TYPE_*`、`*_STATUS_*`、`*_SOURCE_*`、`*_MODE_*` 这类固定业务取值，若参与判断、跨层传递、序列化或未来会扩展，优先业务 Enum 或字典。
 
 状态值、类型值、来源值、动作值、阶段值、结果值等明确不变且有固定集合的常量，优先使用业务 Enum，方便查看、跳转、复用和约束。
 
@@ -39,10 +40,19 @@
 
 - 固定业务集合：优先 Enum。
 - 外部平台、消息格式、通知渠道、支付方式、登录来源、任务动作、导入导出类型等闭合集合：优先业务 Enum；如果只在前端/接口契约层使用，也要放到对应 contract/api module，而不是散在 Service 实现。
+- JSON 字段名、模板参数 key、header name、query key、map key 等协议字段名：优先复用 SDK/OpenAPI/生成类型；没有时可集中为协议常量或当前类私有常量，不强行枚举。
+- 字段名对应的固定业务取值：例如接收人来源、通知渠道、消息模板类型、平台 code、动作 code，不能因为只有一个当前值就永远保留字符串常量；若调用链显示存在闭合集合或未来扩展点，应补业务 Enum、按 code 反查并保持序列化兼容。
 - HTTP header、content type、media type、charset、时间单位、状态码等技术标准值：优先使用 Spring/JDK/第三方 SDK 已有常量；没有可用常量时，集中到协议常量类或私有常量，并保留来源说明。
 - 环境 URL、密钥、开关、阈值、时间窗、外部系统地址、超时、重试、线程池、缓存 TTL：优先配置属性类，不写死在 Service。
 - 单一技术常量且不会跨层传递：可保留 `private static final`，但要命名清晰、靠近使用点并说明来源。
 - 本次修改触碰到固定常量时，至少检查是否已有同类 Enum/配置；有则复用，没有则给出是否沉淀的判断。
+
+截图或 diff 判断示例：
+
+- `RECEIVER_SOURCE_KEY = "receiverSource"`：这是 JSON/map 字段名，通常保留为协议 key 常量，不应机械改 Enum。
+- `RECEIVER_PHONES_KEY = "receiverPhones"`、`TEMPLATE_PARAM_MAPPING_KEY = "templateParamMappingJson"`：同样属于字段名或模板参数 key，优先协议常量或 SDK/生成类型。
+- `RECEIVER_SOURCE_CUSTOM = "custom"`：这是接收人来源的固定业务取值；如果调用链中还可能有部门、角色、用户、岗位、字典来源等来源类型，或该值参与判断/序列化/跨层传递，应改为 `ReceiverSource` 这类业务 Enum，而不是只抽成字符串常量。
+- `DEFAULT_ENDPOINT = "dysmsapi.aliyuncs.com"`：外部系统 endpoint，优先查 SDK 常量或配置属性；只有确定是阿里云 SDK 固定默认值且不会随环境变化时，才可保留为命名清晰的私有常量。
 
 ## 配置外置化
 

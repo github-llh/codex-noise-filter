@@ -51,6 +51,7 @@
 - AGENTS 演进建议：`01-global-engineering-rules.md#项目演进规则`
 - Plan 阶段门禁：`02-noise-filter-workflow.md#plan-阶段门禁`
 - Global/Goal 模式门禁：`02-noise-filter-workflow.md#globalgoal-模式门禁`
+- Skill 规则刷新与会话恢复：`02-noise-filter-workflow.md#skill-规则刷新与会话恢复`
 - Java 后端分层：`07-java-backend-architecture.md#后端分层`
 - Controller 业务逻辑迁出：`07-java-backend-architecture.md#后端分层`
 - 业务抽象与扩展性：`07-java-backend-architecture.md#业务抽象与扩展性`
@@ -165,6 +166,7 @@
 
 - `Plan`、`计划`、`执行计划`、`分步实现`：先读 `02-noise-filter-workflow.md#plan-阶段门禁`。
 - `Global`、`Goal`、`目标追踪`、`长期推进`、`自动续跑`、`跨轮推进`：先读 `02-noise-filter-workflow.md#globalgoal-模式门禁`。
+- 上下文恢复、自动续跑、跨窗口继续、存在 Context Capsule、引用上一轮结论、当前工作区 skill/reference 有变更，或出现 `上个会话`、`接着问`、`刚更新 skill`、`更新了skill`、`为什么没触发`、`没触发skill`、`不符合skill约束`、`还是没执行`、`为什么没有改` 等恢复/规则失效信号：先读 `02-noise-filter-workflow.md#skill-规则刷新与会话恢复`，再按当前任务证据、触碰范围和技术栈追加对应 reference。
 - `新增代码`、`修改已有代码`、`旧代码`、`自动续跑`、`跨窗口`、`不可绕过`、`强制执行`、`不可容忍`、`最小改动冲突`、`为什么没有更改`、`调用链深不深`、`涉及文件没几个`、`调用链相关文件`、`列入计划`、`任务胶囊`、`当前任务清单`、`同步修改`、`同时修改`：先读 `02-noise-filter-workflow.md#不可绕过执行门禁` 和 `02-noise-filter-workflow.md#强规则命中后的自动升级`。
 - `git 历史`、`提交记录`、`历史提交`、`git log`、`git blame`、`git show`、`git diff`、`-S`、`-G`、`回归`、`改崩`、`历史兼容`、`原来为什么`、`最近谁改的`、`之前逻辑`、`旧逻辑`、`行为语义`、`演进原因`、`改动原因`、`删除旧逻辑`、`替换旧逻辑`、`最近多次变更`：先读 `13-read-expansion-and-history.md#git-历史对比与回归防护`，再按触碰文件技术栈追加对应 reference。
 - `读取行数`、`行数限制`、`窗口不足`、`只读了局部`、`没读到`、`漏判`、`漏修`、`智能扩窗`、`扩读`、`完整逻辑`、`完整闭环`、`完整方法`、`完整类`、`完整组件`、`完整函数`、`完整模块`、`完整页面`、`完整 SQL`、`语义单元`、`符号完整体`、`局部规则扫描`、`未读区域`、`读到某些代码`、`自动判断`、`不等用户指定`：先读 `13-read-expansion-and-history.md#读取完整性与智能扩窗`，再按命中的技术栈追加 `07`/`08`/`10`/`11`/`12`。
