@@ -22,7 +22,7 @@ Maven 命令选择顺序：
 4. 如果项目已配置 Maven Wrapper 且项目规则要求使用 Wrapper，使用项目内 `./mvnw`。
 5. 否则查找本机候选 Maven，例如 `~/dev/maven-*/bin/mvn`、`~/.sdkman/candidates/maven/*/bin/mvn`、`/opt/homebrew/bin/mvn`、`/usr/local/bin/mvn`、`mvn`。
 6. 找到后执行 `mvn -version` 或 `<path>/mvn -version`，必要时带上匹配的 `JAVA_HOME` 验证，再缓存。
-7. 只有上述路径都不可用时，才让用户确认 Maven 环境。
+7. 只有上述路径都不可用且无法从项目配置、IDE 配置或本机候选验证出可用工具链时，才说明缺口并请求环境信息。
 
 不要擅自修改用户 Maven settings，不新增远程仓库，不执行会写入外部系统的网络发布命令。
 
@@ -70,7 +70,7 @@ repo-root/
 - 改 Service、DAO、Mapper、DTO 映射：跑相关模块编译或构建。
 - 改跨模块调用链：从 root 用 `-pl <module> -am` 编译或构建相关模块。
 - 改公共契约、枚举、配置、SQL：增加调用方模块编译或构建验证。
-- 只有用户明确要求、任务本身是测试修复、或需要复现 bug 时，才跑目标单测、模块测试或集成测试。
+- 只有当前任务目标是测试修复、需要复现 bug，或编译/语法无法覆盖关键风险时，才跑目标单测、模块测试或集成测试。
 
 常用命令：
 

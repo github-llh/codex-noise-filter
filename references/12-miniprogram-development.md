@@ -24,7 +24,7 @@
 - 命中 `app.json`、`app.js`、`app.wxss`、`sitemap.json`、`project.config.json`、`project.private.config.json`、`miniprogramRoot`、`miniprogram_npm`、`wxml`、`wxss`、`wxs`、`wx:`、`setData`、`Component`、`Page`、`Behavior`、`subPackages`、`preloadRule` 时按原生小程序处理。
 - 命中 `pages.json`、`manifest.json`、`App.vue`、`uni.scss`、`uni_modules`、`#ifdef MP`、`#ifdef MP-WEIXIN`、`mp-weixin`、`unpackage/dist` 时按 uni-app 处理。
 - 命中 `@tarojs/*`、`taro`、`Taro.`、`app.config.js`、`app.config.ts`、`page.config.*`、`config/index.*`、`TARO_ENV`、`dev:weapp`、`build:weapp` 时按 Taro 处理。
-- 默认组合：小程序任务读 `02` + `12`。涉及 Vue/React 语法时加 `11`；涉及通用布局、表单、状态契约时加 `04`；执行构建、编译、CI 或发布前校验前加 `06` 并按 `小程序环境缓存` 复用/更新项目配置和 Node 包管理器。只有用户明确要求模拟器、预览、上传或真机验证时，才查开发者工具路径。
+- 默认组合：小程序任务读 `02` + `12`。涉及 Vue/React 语法时加 `11`；涉及通用布局、表单、状态契约时加 `04`；执行构建、编译、CI 或发布前校验前加 `06` 并按 `小程序环境缓存` 复用/更新项目配置和 Node 包管理器。只有当前任务目标本身包含模拟器、预览、上传、真机或发布链路，且权限边界清楚时，才查开发者工具路径。
 - 不因为小程序是前端就一次性读取所有前端、Java、Python reference；触碰接口契约、后端数据或构建链路时再按索引追加。
 
 ## 项目形态识别
@@ -34,7 +34,7 @@
 - 原生微信小程序：根目录或 `miniprogramRoot` 下有 `app.json`、`app.js`、`app.wxss`、页面 `*.wxml/*.wxss/*.js/*.json`，配置来自 `project.config.json`。
 - uni-app：有 `pages.json`、`manifest.json`、`App.vue`、`main.js`/`main.ts`，输出到 `unpackage/dist/dev/mp-*` 或 `unpackage/dist/build/mp-*`，平台语法常见 `#ifdef MP-WEIXIN`。
 - Taro：有 `@tarojs/*` 依赖、`src/app.config.*`、`config/index.*`，通过 `taro build --type weapp` 或项目脚本输出到 `dist`。
-- 其他跨平台框架或低代码生成：先确认框架文档、生成目录和源码目录；只改源码目录，除非任务明确要求分析生成结果。
+- 其他跨平台框架或低代码生成：先确认框架文档、生成目录和源码目录；只改源码目录，除非当前任务目标本身是分析产物或修复生成结果。
 - 多端项目必须确认目标平台：`weapp`、`alipay`、`tt`、`swan`、`qq`、`jd`、`ks` 等平台 API 和配置能力不完全一致，不能把微信专属能力默认扩散到所有端。
 
 ## 语法与框架选择
@@ -122,21 +122,21 @@
 
 - 构建命令必须来自项目 scripts 或框架配置，不凭经验替换包管理器或输出目录。
 - 构建/编译/CI 失败且疑似框架版本、目标平台、包管理器、lockfile、`miniprogramRoot`、`sourceRoot`、`outputRoot`、条件编译、Taro/uni-app 脚本、开发者工具 CLI 或 `miniprogram-ci` 不匹配时，必须重跑 `14-environment-cache-by-stack.md#小程序环境缓存`，更新缓存后用同一目标命令重试一次。
-- 原生小程序发布、预览或上传属于操作性验证/发布链路，只有用户明确要求时才执行；默认只确认构建配置、`appid`、`miniprogramRoot`、`setting`、npm 构建产物和忽略规则。
+- 原生小程序发布、预览或上传属于操作性验证/发布链路，只有当前任务目标本身包含发布、预览、上传或真机链路，且权限边界清楚时才执行；默认只确认构建配置、`appid`、`miniprogramRoot`、`setting`、npm 构建产物和忽略规则。
 - uni-app 发布到微信小程序通常生成 `unpackage/dist/build/mp-weixin`；自动上传依赖 HBuilderX/CI 插件、上传密钥、`appid` 和 IP 白名单，密钥不得提交。
-- Taro 小程序 CI 可复用项目已有 `@tarojs/plugin-mini-ci` 或 `miniprogram-ci` 脚本；不要自行新增上传能力，除非用户明确要求。
+- Taro 小程序 CI 可复用项目已有 `@tarojs/plugin-mini-ci` 或 `miniprogram-ci` 脚本；不要自行新增上传能力，除非当前任务目标已明确授权并完成影响评估。
 - 发布脚本不得在日志或 README 中暴露私钥、机器人编号、生产 `appid` 密钥、上传 token、平台后台截图和白名单信息。
 
 ## 测试与验证
 
 先执行 `01-global-engineering-rules.md#跨技术栈验证策略`，再选择小程序框架和目标平台的验证方式。
 
-- 原生组件单测只在用户明确要求、任务本身是测试修复或需要复现 bug 时运行；可复用项目已有 Jest + `miniprogram-simulate`，但它不等价于完整小程序集成测试。
+- 原生组件单测只在当前任务目标是测试修复、需要复现 bug，或编译/语法无法覆盖关键风险时运行；可复用项目已有 Jest + `miniprogram-simulate`，但它不等价于完整小程序集成测试。
 - 原生小程序默认验收优先使用项目已有 CLI/CI 脚本完成编译或构建；不默认预览、上传、打开模拟器或真机验证。
-- uni-app 默认验收优先使用项目已有 CLI 构建或编译脚本；HBuilderX 自动化测试、页面级自动化、开发者工具关键路径只在用户明确要求时执行。
+- uni-app 默认验收优先使用项目已有 CLI 构建或编译脚本；HBuilderX 自动化测试、页面级自动化、开发者工具关键路径只在当前任务目标本身需要操作性证据且权限边界清楚时执行。
 - Taro 测试优先使用项目已有 Jest/Vitest/Testing Library/框架测试；默认补 `build:weapp` 这类构建验证，不默认开发者工具模拟器预览。
-- 修改分包、路由、启动页、TabBar、登录态、授权、支付、分享、定位、文件上传下载时，默认先做构建/编译验证；模拟器关键路径、真机验证、预览上传只有用户明确要求时才执行。
-- 用户明确要求官方模拟器、真机、预览、上传或 CI 操作但无法运行时，说明缺少的开发者工具路径、登录态、密钥、权限或平台账号，不用假验证替代。
+- 修改分包、路由、启动页、TabBar、登录态、授权、支付、分享、定位、文件上传下载时，默认先做构建/编译验证；模拟器关键路径、真机验证、预览上传只有当前任务目标本身需要操作性证据且权限边界清楚时才执行。
+- 当前任务目标需要官方模拟器、真机、预览、上传或 CI 操作但无法运行时，说明缺少的开发者工具路径、登录态、密钥、权限或平台账号，不用假验证替代。
 
 ## 性能、限制与安全
 

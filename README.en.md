@@ -44,7 +44,7 @@ Many coding-task failures are not caused by missing coding ability. They come fr
 
 ## Usage
 
-Codex skills can be used from the Codex App, CLI, and IDE extension. Invocation can be explicit by mentioning `$codex-noise-filter`, or implicit when Codex matches a coding task to the `description` in `SKILL.md`. Prefer implicit day-to-day use: code, logs, stack traces, command output, screenshots with errors, paths, or project structure should be enough for the skill to treat the request as a coding task.
+Codex skills can be used from the Codex App, CLI, and IDE extension. Day-to-day activation should not depend on mentioning `$codex-noise-filter`; code, logs, stack traces, command output, screenshots with errors, paths, project structure, resume state, or rule-failure signals should be enough for the skill to treat the request as a coding task.
 
 ### Repository Scope
 
@@ -56,7 +56,7 @@ Use this when a team should share the same engineering rules.
   references/
 ```
 
-Start Codex from the repository root or a subdirectory. For forced invocation, mention the skill directly:
+Start Codex from the repository root or a subdirectory. Mentioning the skill is only an additional signal, not an activation prerequisite:
 
 ```text
 $codex-noise-filter inspect and fix this Maven backend issue using the indexed workflow.
@@ -69,7 +69,7 @@ Use this when the skill should apply across multiple repositories. Put this dire
 ### Codex App
 
 1. Open the Codex App and select the project directory. Prefer Local mode for local code work.
-2. Describe the coding task normally, or mention `$codex-noise-filter` explicitly.
+2. Describe the coding task normally. Mentioning `$codex-noise-filter` is optional and only adds another signal.
 3. To verify activation, ask Codex to print the matched skill, selected references, touched scope, and validation checks first.
 
 Example:
@@ -86,7 +86,7 @@ Start Codex from the project root:
 codex
 ```
 
-In the interactive CLI, use `/skills` to select `codex-noise-filter`, or mention it directly in the prompt:
+In the interactive CLI, use `/skills` to select `codex-noise-filter`. Mentioning it in the prompt is only an additional signal:
 
 ```text
 $codex-noise-filter read the minimum indexed references and review this Java Service change.
@@ -129,7 +129,7 @@ If it does not trigger, common causes are missing code context, the skill not be
 
 ### Automatic Activation Signals
 
-These inputs should enter the indexed workflow without asking the user to explicitly mention the skill:
+These inputs should enter the indexed workflow without requiring an explicit skill mention:
 
 - Java/Maven: `Exception`, `Caused by`, `BUILD FAILURE`, `Failed to execute goal`, `Compilation failure`, `NullPointerException`.
 - Python: `Traceback`, `pytest`, `AssertionError`, `ModuleNotFoundError`, `ImportError`.
@@ -180,7 +180,7 @@ More scenarios are in [`examples/`](examples/). Team rollout templates are in [`
 | Capability | Description |
 | --- | --- |
 | Indexed routing | Read `00-index.md` first and open only the required reference files for the task. |
-| Intent inference | Infer debugging, fixing, validation, or explanation intent from logs, stack traces, screenshots, paths, command output, code snippets, and ambiguous Chinese prompts without requiring repeated skill mentions. |
+| Intent inference | Infer debugging, fixing, validation, or explanation intent from logs, stack traces, screenshots, paths, command output, code snippets, resume state, and risk signals from the evidence itself. |
 | Non-bypass gates | New code, existing-code edits, Plan, Global/Goal, resumes, and cross-window work must confirm touched scope, call chains, and local alignment. |
 | Smart window expansion | When editing code or judging strong-rule issues, local read windows are only the starting point; automatically expand by each stack's syntax for Java, Python, Vue/React, Mini Programs, SQL, config, scripts, and tests to cover full semantic units, contracts, direct calls, and nearby peer patterns. |
 | Git history regression guard | When edits touch old logic, public contracts, historical compatibility, or high-risk boundaries, read the smallest useful git history evidence to compare commit intent, blame ranges, and key-token evolution before changing behavior. |
@@ -230,14 +230,14 @@ references/
 - Concurrency, async, and batch rules live in `09-concurrency-async-batch.md` and should be opened only for high concurrency, idempotency, deadlocks, events, middleware, thread pools, virtual threads, or user-context propagation.
 - Python rules live in `10-python-development.md` and should be opened only for `.py`, Python syntax, virtual environments, dependencies, running commands, tests, linting, type checking, or Python performance work.
 - Vue/React rules live in `11-frontend-vue-react.md` and should be opened only for Vue 2/3, React, Vite, component syntax, package management, running commands, tests, linting, type checking, or frontend builds.
-- Mini Program rules live in `12-miniprogram-development.md` and should be opened only for native WeChat Mini Programs, uni-app, Taro, subpackages, `project.config.json`, `app.json`, `pages.json`, `app.config.*`, builds, releases, tests, or explicit simulator/real-device requests.
+- Mini Program rules live in `12-miniprogram-development.md` and should be opened whenever the task evidence involves native WeChat Mini Programs, uni-app, Taro, subpackages, `project.config.json`, `app.json`, `pages.json`, `app.config.*`, builds, releases, tests, or simulator/real-device workflows.
 - Maven builds use `03-maven-backend-build.md`; environment discovery starts with `06-environment-discovery.md`, and stack-specific cache rules live in `14-environment-cache-by-stack.md`. `06` only handles discovery order, minimal validation, local cache structure, and `.codex/` ignore maintenance, not each stack's full runbook.
-- Routing should cross-check keywords, user intent, and impact area to preserve accuracy without reading every rule file.
+- Routing should cross-check task intent, code evidence, impact area, and risk signals to preserve accuracy without waiting for fixed prompt words or reading every rule file.
 - `SKILL.md` hard constraints are always in force. Index performance tuning may reduce unrelated reference reads, but must not reduce mandatory constraints.
 - Common tasks should use the quick-decision minimum set first, for example Java Controller/Service edits default to `02 + 07`, and add `08` only when enums, validation, Lombok, Optional, or repeated logic are involved.
 - Python tasks default to `02 + 10`; before syntax checks, runs, tests, lint, or type checks, add `06 + 14` to create or reuse the Python environment cache. Add other references only when cross-system or frontend/backend call chains require them.
 - General layout/state-contract tasks default to `02 + 04`; Vue/React tasks default to `02 + 11`, and add `06 + 14` before builds, type checks, lint, or tests to create or reuse the Node/frontend environment cache.
-- Mini Program tasks default to `02 + 12`; add `11` when uni-app/Taro touches Vue/React syntax, add `04` for general layout/state contracts, and add `06 + 14` before builds, compilation, or CI to create or reuse the Mini Program environment cache. Discover developer-tool paths only when the user explicitly asks for simulator, preview, or upload workflows.
+- Mini Program tasks default to `02 + 12`; add `11` when uni-app/Taro touches Vue/React syntax, add `04` for general layout/state contracts, and add `06 + 14` before builds, compilation, or CI to create or reuse the Mini Program environment cache. Discover developer-tool paths only when the current task goal itself includes simulator, preview, upload, real-device, or release workflows and the permission boundary is clear.
 - If the touched scope expands during execution, add references through the index. Do not skip non-bypass gates, existing-code local alignment, layering, comments, transactions, concurrency, or business abstraction rules just to read fewer files.
 
 ## Key Rules
@@ -265,15 +265,15 @@ references/
 - Python edits should get the lightest relevant validation: syntax/import checks, targeted tests, and touched-scope lint/format/type checks. If validation cannot run, state why.
 - Frontend projects must first identify `package.json`, lockfile, `packageManager`, Node version, and build tool. Do not mix npm/yarn/pnpm/bun.
 - Before frontend compilation/builds, read the target `package.json` scripts, dependencies, `engines`, `packageManager`, and lockfile, match the Node version, package manager, and build script, then write them to `.codex/local-environment.json`; reuse the cache when it still matches the current package and command. If compilation fails and the failure may be caused by environment, dependency version, or script mismatch, reread project config and local tools, update the cache, and retry once.
-- After Java, Python, frontend, Mini Program, or other stack tasks, do not run runtime, interactive, or screen-level validation by default: do not start a browser, use Browser/Computer Use, click through the desktop, open Mini Program simulators or real devices, or manually call external systems/API pages. Treat passing syntax checks, compilation, type checks, builds, or equivalent non-interactive commands as the default acceptance. Run browser, screenshot, page-click, visual-regression, E2E, simulator, real-device, external-service, or desktop-screen validation only when the user explicitly asks for it.
+- After Java, Python, frontend, Mini Program, or other stack tasks, do not run runtime, interactive, or screen-level validation by default: do not start a browser, use Browser/Computer Use, click through the desktop, open Mini Program simulators or real devices, or manually call external systems/API pages. Treat passing syntax checks, compilation, type checks, builds, or equivalent non-interactive commands as the default acceptance. Run browser, screenshot, page-click, visual-regression, E2E, simulator, real-device, external-service, or desktop-screen validation only when the current task goal itself requires that evidence and the permission boundary is clear.
 - Vue projects must distinguish Vue 2 from Vue 3 first: Vue 2 defaults to Options API and Vue Test Utils v1, while Vue 3 can use Composition API, `<script setup>`, Pinia, and Vue Test Utils v2.
 - React projects must first identify React/React DOM versions, framework, and TypeScript/JSX configuration. Hooks must only run at the top level of components or custom hooks; effects belong in `useEffect`, and pure derived values should not be stored as extra state.
 - Before creating Vue/React components, confirm ownership, reuse value, public contract, and test/example entry points. When using components, prefer existing project components and keep props/slots/children/API boundaries small and stable.
 - Mini Program projects must first identify whether they are native, uni-app, Taro, or another cross-platform framework. Different build modes use different syntax constraints: uni-app/Taro reuse the matching Vue/React rules, while native Mini Programs follow `Page`, `Component`, `wxml`, `wxss`, `setData`, and official API constraints.
-- Mini Program validation should use the environment cache to match framework, platform, source root, output root, Node package manager, and existing CLI/CI build or compile commands by default. Do not open official developer-tool simulators, output directories, or real devices unless explicitly requested.
+- Mini Program validation should use the environment cache to match framework, platform, source root, output root, Node package manager, and existing CLI/CI build or compile commands by default. Do not open official developer-tool simulators, output directories, or real devices unless the current task goal itself requires that operational evidence and the permission boundary is clear.
 - Mini Program subpackages must be evaluated when the main package approaches platform limits, startup slows down, heavy features are local-only, business domains are naturally isolated, or dependencies are only used in one area. Package-size limits must come from current official docs, developer-tool checks, or CI checks, not stale memory.
 - Mini Program npm packages, plugins, subpackages, independent subpackages, preload rules, permissions, login, payment, subscribe messages, and web-view usage must follow target-platform official limits while preserving secrets, appids, upload credentials, and allowlist boundaries.
-- Mini Program validation defaults to passing build/compile checks. Use `miniprogram-simulate`, `miniprogram-ci`, HBuilderX/uni-app automation, official simulators, or real devices only when explicitly requested.
+- Mini Program validation defaults to passing build/compile checks. Use `miniprogram-simulate`, `miniprogram-ci`, HBuilderX/uni-app automation, official simulators, or real devices only when the current task goal itself requires operational evidence and the permission boundary is clear.
 - Comment rules apply across stacks: place comments at the natural contract location for each technology, such as Java service interfaces, Python docstrings, Vue props/emits/slots, React components/hooks/types, and SQL/config definitions.
 - Hardcoding rules apply across stacks: fixed closed sets use the stack's enum/union/dictionary pattern, technical standards use framework constants, environment or operations-variable values use configuration, and runtime-maintained business values use dictionaries, database tables, or configuration centers.
 - Repeated-logic rules apply across stacks: when branches, mappings, validation, defaulting, or display assembly differ only by fields or stable cases, evaluate a stack-native mapper, converter, schema, strategy, hook/composable, or helper.

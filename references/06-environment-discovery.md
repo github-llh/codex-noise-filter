@@ -34,7 +34,7 @@
    - Python：`pyproject.toml`、`requirements*.txt`、`uv.lock`、`poetry.lock`、`Pipfile.lock`、`tox.ini`、`noxfile.py`、`pytest.ini`、`.python-version`、`.tool-versions`、`.venv/pyvenv.cfg`。
 3. 读取 shell 环境和常见命令，只查当前任务需要的候选：`JAVA_HOME`、`MAVEN_HOME`、`M2_HOME`、`PATH`、`which mvn/node/npm/pnpm/yarn/bun/corepack/python/python3/uv/poetry/pytest`、微信开发者工具 CLI 候选路径。
 4. 查找本机常见路径，只做小范围候选，不全盘扫描：
-   - 用户明确提供过的 Maven 路径和本地仓库路径。
+   - 当前任务上下文中已提供且可验证的 Maven 路径和本地仓库路径。
    - `~/dev/maven-*/bin/mvn`
    - `~/.sdkman/candidates/maven/*/bin/mvn`
    - `~/.m2/repository`
@@ -58,7 +58,7 @@
 
 ## 自动环境缓存维护
 
-只要任务需要使用 Maven/JDK/Node/Python/小程序开发者工具等本机工具链执行构建、编译、测试、运行、预览、打包、发布前校验或代码生成，就自动前置执行本流程；不需要等用户显式提出维护 `.codex/local-environment.json`。
+只要任务需要使用 Maven/JDK/Node/Python/小程序开发者工具等本机工具链执行构建、编译、测试、运行、预览、打包、发布前校验或代码生成，就自动前置执行本流程；不需要额外提出维护 `.codex/local-environment.json`。
 
 触发场景：
 
@@ -70,7 +70,7 @@
 
 1. 定位工作区根：
    - 优先使用当前任务路径所在的 Git root：`git rev-parse --show-toplevel`。
-   - 如果不是 Git 仓库，使用用户给定路径向上查找项目根标志，例如 `pom.xml`、`package.json`、`pyproject.toml`、`project.config.json`。
+   - 如果不是 Git 仓库，使用当前工作目录或任务上下文中的路径向上查找项目根标志，例如 `pom.xml`、`package.json`、`pyproject.toml`、`project.config.json`。
 2. 读取 `<workspace>/.codex/local-environment.json`：
    - 文件存在且 JSON 可解析时，逐项验证已记录的 `executable`、`home`、`localRepository`、`devtoolsCli` 等路径。
    - 已验证且仍可用的值直接复用，不重复查找本机候选。
@@ -272,4 +272,4 @@
 
 - 本地缓存记录“这个工作区当前可用的环境路径”。
 - 长期 memory 只记录稳定偏好，例如“优先从 IDE 配置和本地缓存发现 Maven”；不记录某台机器的 Maven、JDK、Node、Python 绝对路径。
-- 如果用户明确要求更新长期 memory，再按 memory 规则写入长期记忆更新请求。
+- 只有存在明确的长期 memory 更新授权时，才按 memory 规则写入长期记忆更新请求。
