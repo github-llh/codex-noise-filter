@@ -212,6 +212,8 @@ references/
   10-python-development.md
   11-frontend-vue-react.md
   12-miniprogram-development.md
+  13-read-expansion-and-history.md
+  14-environment-cache-by-stack.md
 ```
 
 `SKILL.md` is intentionally small. It routes the agent to indexed reference files instead of loading every rule at once.
@@ -220,20 +222,20 @@ references/
 
 - Keep each reference file topic-focused instead of allowing one file to grow to several hundred lines.
 - `01-global-engineering-rules.md` only contains globally shared rules, including file ownership, commands, validation, security boundaries, hardcoded values, repeated logic, and comment placement.
-- `02-noise-filter-workflow.md` only contains cross-stack execution gates, context budgets, call-chain checks, and touched-scope alignment. Stack-specific differences route to the matching reference files.
+- `02-noise-filter-workflow.md` only contains cross-stack execution gates, context budgets, call-chain checks, and touched-scope alignment. Smart read expansion and Git history regression guards live in `13-read-expansion-and-history.md`, while stack-specific differences route to the matching reference files.
 - Java backend architecture rules live in `07-java-backend-architecture.md` and should be opened only for layering, file placement, comments, or call chains.
 - Java style rules live in `08-java-style-patterns.md` and should be opened only for enums, validation, Lombok, Optional, functional style, or repeated logic.
 - Concurrency, async, and batch rules live in `09-concurrency-async-batch.md` and should be opened only for high concurrency, idempotency, deadlocks, events, middleware, thread pools, virtual threads, or user-context propagation.
 - Python rules live in `10-python-development.md` and should be opened only for `.py`, Python syntax, virtual environments, dependencies, running commands, tests, linting, type checking, or Python performance work.
 - Vue/React rules live in `11-frontend-vue-react.md` and should be opened only for Vue 2/3, React, Vite, component syntax, package management, running commands, tests, linting, type checking, or frontend builds.
 - Mini Program rules live in `12-miniprogram-development.md` and should be opened only for native WeChat Mini Programs, uni-app, Taro, subpackages, `project.config.json`, `app.json`, `pages.json`, `app.config.*`, builds, releases, tests, or explicit simulator/real-device requests.
-- Maven builds use `03-maven-backend-build.md`; environment discovery uses `06-environment-discovery.md`. `06` only handles discovery, minimal validation, local caching, and `.codex/` ignore maintenance, not each stack's full runbook.
+- Maven builds use `03-maven-backend-build.md`; environment discovery starts with `06-environment-discovery.md`, and stack-specific cache rules live in `14-environment-cache-by-stack.md`. `06` only handles discovery order, minimal validation, local cache structure, and `.codex/` ignore maintenance, not each stack's full runbook.
 - Routing should cross-check keywords, user intent, and impact area to preserve accuracy without reading every rule file.
 - `SKILL.md` hard constraints are always in force. Index performance tuning may reduce unrelated reference reads, but must not reduce mandatory constraints.
 - Common tasks should use the quick-decision minimum set first, for example Java Controller/Service edits default to `02 + 07`, and add `08` only when enums, validation, Lombok, Optional, or repeated logic are involved.
-- Python tasks default to `02 + 10`; before syntax checks, runs, tests, lint, or type checks, add `06` to create or reuse the Python environment cache. Add other references only when cross-system or frontend/backend call chains require them.
-- General layout/state-contract tasks default to `02 + 04`; Vue/React tasks default to `02 + 11`, and add `06` before builds, type checks, lint, or tests to create or reuse the Node/frontend environment cache.
-- Mini Program tasks default to `02 + 12`; add `11` when uni-app/Taro touches Vue/React syntax, add `04` for general layout/state contracts, and add `06` before builds, compilation, or CI to create or reuse the Mini Program environment cache. Discover developer-tool paths only when the user explicitly asks for simulator, preview, or upload workflows.
+- Python tasks default to `02 + 10`; before syntax checks, runs, tests, lint, or type checks, add `06 + 14` to create or reuse the Python environment cache. Add other references only when cross-system or frontend/backend call chains require them.
+- General layout/state-contract tasks default to `02 + 04`; Vue/React tasks default to `02 + 11`, and add `06 + 14` before builds, type checks, lint, or tests to create or reuse the Node/frontend environment cache.
+- Mini Program tasks default to `02 + 12`; add `11` when uni-app/Taro touches Vue/React syntax, add `04` for general layout/state contracts, and add `06 + 14` before builds, compilation, or CI to create or reuse the Mini Program environment cache. Discover developer-tool paths only when the user explicitly asks for simulator, preview, or upload workflows.
 - If the touched scope expands during execution, add references through the index. Do not skip non-bypass gates, existing-code local alignment, layering, comments, transactions, concurrency, or business abstraction rules just to read fewer files.
 
 ## Key Rules

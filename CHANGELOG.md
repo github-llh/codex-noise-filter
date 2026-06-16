@@ -4,6 +4,7 @@
 
 ## Unreleased
 
+- 拆分过大的 reference：新增 `13-read-expansion-and-history.md` 承接读取完整性、智能扩窗和 Git 历史防回归；新增 `14-environment-cache-by-stack.md` 承接 Maven/Java、Node/前端、Python、小程序栈级环境缓存细则。`02` 和 `06` 保留旧锚点转发，避免既有链接断裂。
 - 扩展 `SKILL.md` 的 `description`，补充 Java 后端、Maven 多模块、事务并发、Python、Vue/React、小程序、Plan/Goal、上下文压缩、减少 token 和调用链确认等高频编程触发词。
 - 补充中英文 README 的 `为什么用 / Why Use It`、Before/After 对比和可复制触发示例。
 - 新增 `examples/` 五个典型场景：Java Controller/Service、Maven 多模块、Vue/React、Python、小程序。

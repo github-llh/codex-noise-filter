@@ -102,20 +102,20 @@
 
 ## 环境与运行
 
-先执行 `01-global-engineering-rules.md#跨技术栈环境与命令`，再按 `06-environment-discovery.md#小程序环境缓存` 读取/复用 `.codex/local-environment.json`、小程序项目配置、框架平台、源码目录、输出目录、构建脚本和必要的 Node 包管理器。
+先执行 `01-global-engineering-rules.md#跨技术栈环境与命令`，再按 `14-environment-cache-by-stack.md#小程序环境缓存` 读取/复用 `.codex/local-environment.json`、小程序项目配置、框架平台、源码目录、输出目录、构建脚本和必要的 Node 包管理器。
 
 - 首先读取项目脚本和配置：`package.json`、lockfile、`project.config.json`、`project.private.config.json`、`pages.json`、`manifest.json`、`config/index.*`。
-- 有 `package.json` 的小程序项目必须同时按 `06-environment-discovery.md#node前端环境缓存` 读取 Node 版本、包管理器、lockfile、`scripts` 和框架依赖版本；缓存命中同一 framework、platform、sourceRoot、outputRoot、packageJson 和构建脚本时直接复用。
+- 有 `package.json` 的小程序项目必须同时按 `14-environment-cache-by-stack.md#node前端环境缓存` 读取 Node 版本、包管理器、lockfile、`scripts` 和框架依赖版本；缓存命中同一 framework、platform、sourceRoot、outputRoot、packageJson 和构建脚本时直接复用。
 - 原生微信小程序：默认优先执行项目已有构建、编译或 CI 脚本；不默认用微信开发者工具模拟器打开工程。
 - uni-app：CLI 项目默认优先使用项目已有 `build:mp-weixin` 或 `build:custom` 脚本；不默认运行到 HBuilderX/小程序模拟器。
 - Taro：默认优先使用项目已有 `build:weapp` 或 `taro build --type weapp`；构建后不默认用微信开发者工具打开输出目录。
-- 首次运行需要开发者工具路径时，按 `06-environment-discovery.md#小程序环境缓存` 从缓存、IDE/项目配置、本机候选路径发现并验证；不要把未验证路径写成长期规则。
+- 首次运行需要开发者工具路径时，按 `14-environment-cache-by-stack.md#小程序环境缓存` 从缓存、IDE/项目配置、本机候选路径发现并验证；不要把未验证路径写成长期规则。
 - 不混用 npm/yarn/pnpm/bun；锁文件和 `packageManager` 按 `11-frontend-vue-react.md` 执行。
 
 ## 构建与发布
 
 - 构建命令必须来自项目 scripts 或框架配置，不凭经验替换包管理器或输出目录。
-- 构建/编译/CI 失败且疑似框架版本、目标平台、包管理器、lockfile、`miniprogramRoot`、`sourceRoot`、`outputRoot`、条件编译、Taro/uni-app 脚本、开发者工具 CLI 或 `miniprogram-ci` 不匹配时，必须重跑 `06-environment-discovery.md#小程序环境缓存`，更新缓存后用同一目标命令重试一次。
+- 构建/编译/CI 失败且疑似框架版本、目标平台、包管理器、lockfile、`miniprogramRoot`、`sourceRoot`、`outputRoot`、条件编译、Taro/uni-app 脚本、开发者工具 CLI 或 `miniprogram-ci` 不匹配时，必须重跑 `14-environment-cache-by-stack.md#小程序环境缓存`，更新缓存后用同一目标命令重试一次。
 - 原生小程序发布、预览或上传属于操作性验证/发布链路，只有用户明确要求时才执行；默认只确认构建配置、`appid`、`miniprogramRoot`、`setting`、npm 构建产物和忽略规则。
 - uni-app 发布到微信小程序通常生成 `unpackage/dist/build/mp-weixin`；自动上传依赖 HBuilderX/CI 插件、上传密钥、`appid` 和 IP 白名单，密钥不得提交。
 - Taro 小程序 CI 可复用项目已有 `@tarojs/plugin-mini-ci` 或 `miniprogram-ci` 脚本；不要自行新增上传能力，除非用户明确要求。

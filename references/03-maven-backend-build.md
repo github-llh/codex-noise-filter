@@ -4,7 +4,7 @@
 
 ## 本地 Maven 环境
 
-Maven 配置不要只依赖硬编码路径。执行 Maven 构建前，先按 `06-environment-discovery.md#mavenjava-环境缓存` 读取缓存、`pom.xml`、`.mvn/*`、wrapper、IDE/项目配置、Java/Maven 版本约束和本机候选路径。
+Maven 配置不要只依赖硬编码路径。执行 Maven 构建前，先按 `14-environment-cache-by-stack.md#mavenjava-环境缓存` 读取缓存、`pom.xml`、`.mvn/*`、wrapper、IDE/项目配置、Java/Maven 版本约束和本机候选路径。
 
 每个使用者的 Maven 安装路径和本地仓库都可能不同，skill 文档不得写死个人目录。构建命令必须使用本工作区 `.codex/local-environment.json` 中已验证的 `maven.executable` 与 `maven.localRepository`；没有缓存时先发现、验证，再写入缓存。
 
@@ -99,7 +99,7 @@ repo-root/
 
 - 依赖缺失时先确认本次使用的 `maven.localRepository` 是否来自缓存、IDE 配置或项目配置。
 - Maven 版本不一致时先确认本次使用的 `maven.executable` 是否已验证并缓存。
-- JDK、`release/source/target`、toolchain 或 Maven Wrapper 不匹配时，必须按 `06-environment-discovery.md#mavenjava-环境缓存` 重新读取 `pom.xml`、`.mvn/*`、wrapper、IDE 配置和本机 JDK/Maven 候选，更新缓存后用同一目标命令重试一次。
+- JDK、`release/source/target`、toolchain 或 Maven Wrapper 不匹配时，必须按 `14-environment-cache-by-stack.md#mavenjava-环境缓存` 重新读取 `pom.xml`、`.mvn/*`、wrapper、IDE 配置和本机 JDK/Maven 候选，更新缓存后用同一目标命令重试一次。
 - 多模块找不到依赖时确认是否加了 `-am`。
 - 指定测试不存在或跨模块时可加 `-Dsurefire.failIfNoSpecifiedTests=false`。
 - 构建失败后先区分是本次改动、历史失败、依赖环境还是测试选择错误，不连续盲改。

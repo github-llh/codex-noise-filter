@@ -212,6 +212,8 @@ references/
   10-python-development.md
   11-frontend-vue-react.md
   12-miniprogram-development.md
+  13-read-expansion-and-history.md
+  14-environment-cache-by-stack.md
 ```
 
 `SKILL.md` 只保留触发、路由和硬约束；执行细则按索引进入对应文件，减少主文件负担。
@@ -220,20 +222,20 @@ references/
 
 - 单个 reference 尽量保持入口化和主题化，避免一个文件堆到数百行。
 - `01-global-engineering-rules.md` 只保留全局共用规则，例如文件归属、环境命令、验证策略、安全边界、硬编码、重复逻辑和注释原则。
-- `02-noise-filter-workflow.md` 只保留跨技术栈执行门禁、上下文预算、调用链和局部对齐流程；技术栈差异通过索引进入对应 reference。
+- `02-noise-filter-workflow.md` 只保留跨技术栈执行门禁、上下文预算、调用链和局部对齐流程；智能扩窗和 Git 历史防回归下沉到 `13-read-expansion-and-history.md`，技术栈差异通过索引进入对应 reference。
 - Java 后端架构规则集中到 `07-java-backend-architecture.md`，只有涉及分层、归属地、注释、调用链时才读取。
 - Java 代码风格规则集中到 `08-java-style-patterns.md`，只有涉及枚举、参数校验、Lombok、Optional、函数式、去重复时才读取。
 - 并发、异步和批量规则集中到 `09-concurrency-async-batch.md`，只有涉及高并发、幂等、死锁、事件、中间件、线程池、虚拟线程、用户上下文传播时才读取。
 - Python 规则集中到 `10-python-development.md`，只有涉及 `.py`、Python 语法、虚拟环境、依赖、运行、测试、lint、类型检查或 Python 性能时才读取。
 - Vue/React 规则集中到 `11-frontend-vue-react.md`，只有涉及 Vue2/Vue3、React、Vite、组件语法、包管理、运行、测试、lint、类型检查或前端构建时才读取。
 - 小程序规则集中到 `12-miniprogram-development.md`，只有涉及原生微信小程序、uni-app、Taro、分包、`project.config.json`、`app.json`、`pages.json`、`app.config.*`、构建、发布、测试，或用户明确要求模拟器/真机时才读取。
-- Maven 构建只读 `03-maven-backend-build.md`；环境路径发现只读 `06-environment-discovery.md`，`06` 只负责发现、最小验证、本地缓存和 `.codex/` 忽略规则维护，不承载各技术栈完整运行手册。
+- Maven 构建只读 `03-maven-backend-build.md`；环境路径发现先读 `06-environment-discovery.md`，栈级缓存细节再读 `14-environment-cache-by-stack.md`。`06` 只负责发现顺序、最小验证、本地缓存结构和 `.codex/` 忽略规则维护，不承载各技术栈完整运行手册。
 - 索引路由用“关键词 + 任务意图 + 影响面”交叉确认，减少误读，同时避免把所有规则一次性读入。
 - `SKILL.md` 硬约束视为常驻规则；优化索引性能时只减少无关 reference 读取，不减少必须执行的约束。
 - 常见任务先按快速决策表读取最小组合，例如 Java Controller/Service 改动默认 `02 + 07`，命中枚举、校验、Lombok、Optional、重复逻辑时再追加 `08`。
-- Python 任务默认读取 `02 + 10`，执行语法检查、运行、测试、lint 或 type check 前追加 `06` 建立/复用 Python 环境缓存；跨系统或前后端调用链明确时再追加对应 reference。
-- 普通布局/状态契约任务默认读取 `02 + 04`；Vue/React 任务默认读取 `02 + 11`，执行构建、typecheck、lint 或测试前追加 `06` 建立/复用 Node 前端环境缓存。
-- 小程序任务默认读取 `02 + 12`；uni-app/Taro 命中 Vue/React 语法时追加 `11`，通用布局状态追加 `04`，执行构建、编译或 CI 前追加 `06` 建立/复用小程序环境缓存，只有用户明确要求模拟器/预览/上传时才查开发者工具路径。
+- Python 任务默认读取 `02 + 10`，执行语法检查、运行、测试、lint 或 type check 前追加 `06 + 14` 建立/复用 Python 环境缓存；跨系统或前后端调用链明确时再追加对应 reference。
+- 普通布局/状态契约任务默认读取 `02 + 04`；Vue/React 任务默认读取 `02 + 11`，执行构建、typecheck、lint 或测试前追加 `06 + 14` 建立/复用 Node 前端环境缓存。
+- 小程序任务默认读取 `02 + 12`；uni-app/Taro 命中 Vue/React 语法时追加 `11`，通用布局状态追加 `04`，执行构建、编译或 CI 前追加 `06 + 14` 建立/复用小程序环境缓存，只有用户明确要求模拟器/预览/上传时才查开发者工具路径。
 - 执行中触碰范围扩大时，按索引追加 reference；不得为了少读文件而跳过不可绕过门禁、既有代码局部对齐、分层、注释、事务、并发和业务抽象规则。
 
 ### 内置重点

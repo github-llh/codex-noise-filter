@@ -37,12 +37,14 @@ description: |
 
 - 通用工程规则、文件归属、环境命令、验证策略、安全边界、硬编码、重复逻辑、注释原则：`references/01-global-engineering-rules.md`
 - 上下文预算、调用链确认、失败回退：`references/02-noise-filter-workflow.md`
+- 读取完整性、智能扩窗、Git 历史防回归：`references/13-read-expansion-and-history.md`
 - Maven、本地仓库、后端多模块构建：`references/03-maven-backend-build.md`
 - 前端代码规范、布局、状态、验证：`references/04-frontend-rules.md`
 - Vue/React 语法、版本、环境、运行、测试和构建：`references/11-frontend-vue-react.md`
 - 小程序原生/uni-app/Taro 语法、分包、运行、模拟器和测试：`references/12-miniprogram-development.md`
 - 输出格式、交付清单、上下文胶囊：`references/05-delivery-templates.md`
-- IDE、Maven、Node 等本机环境发现、缓存与 `.codex/` 忽略规则：`references/06-environment-discovery.md`
+- IDE、本机环境统一发现、缓存结构与 `.codex/` 忽略规则：`references/06-environment-discovery.md`
+- Maven/Java、Node/前端、Python、小程序栈级环境缓存：`references/14-environment-cache-by-stack.md`
 - Java 后端架构、归属地、分层和注释：`references/07-java-backend-architecture.md`
 - Java 代码风格、枚举、校验、Lombok、Optional、去重复：`references/08-java-style-patterns.md`
 - Python 语法、环境、运行、测试、lint、类型和性能：`references/10-python-development.md`
@@ -79,8 +81,8 @@ description: |
 1. 维护原始任务清单和任务胶囊。
 2. 按索引读取最小规则集。
 3. 收敛候选文件和调用链。
-4. 对目标修改单元执行读取完整性检查；局部窗口不足时先智能扩读，再做规则判断。
-5. 对高回归风险或历史语义不清的触碰点执行 git 历史对比，确认旧逻辑意图和最近变更原因。
+4. 按 `13` 对目标修改单元执行读取完整性检查；局部窗口不足时先智能扩读，再做规则判断。
+5. 按 `13` 对高回归风险或历史语义不清的触碰点执行 git 历史对比，确认旧逻辑意图和最近变更原因。
 6. 调用链阅读中发现相关文件强规则违背时，先判断低风险闭环，成立就写入任务胶囊同步处理。
 7. 修改前再次引用任务编号确认目标。
 8. 只做最小闭环改动，并对本次触碰的已有代码做局部规则对齐。
