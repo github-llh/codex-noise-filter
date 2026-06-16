@@ -107,6 +107,7 @@
 - 前端布局与组件：`04-frontend-rules.md#布局与组件`
 - 前端状态与契约：`04-frontend-rules.md#状态契约与安全`
 - 前端验证：`04-frontend-rules.md#前端验证`
+- 各技术栈默认无操作验证：`01-global-engineering-rules.md#跨技术栈验证策略`
 - 交付格式：`05-delivery-templates.md#最终回复结构`
 - Context Capsule：`05-delivery-templates.md#上下文胶囊`
 - Codex 会话上下文管理：`05-delivery-templates.md#codex-上下文管理`
@@ -133,7 +134,7 @@
 | 环境路径发现/缓存/忽略规则 | `06` | 需要构建命令时加 `03`；涉及代码修改时加 `02` |
 | 前端页面/布局/表单/状态契约 | `02` + `04` | 涉及 Vue/React 语法或构建测试加 `11` |
 | Vue/React/Vite/组件测试/前端构建 | `02` + `11` | 通用布局状态加 `04`，环境路径未知加 `06` |
-| 小程序原生/uni-app/Taro/分包/模拟器 | `02` + `12` | uni-app/Taro 语法加 `11`，通用布局状态加 `04`，开发者工具路径未知加 `06` |
+| 小程序原生/uni-app/Taro/分包/模拟器 | `02` + `12` | uni-app/Taro 语法加 `11`，通用布局状态加 `04`，只有用户明确要求模拟器/预览/上传时才加 `06` 查开发者工具路径 |
 | 最终回复/交接/压缩上下文 | `05` | 长任务恢复时加 `02` |
 
 最小组合不是放宽规则；它只是延迟打开无关 reference。执行中一旦触碰范围命中其他规则，立即追加对应 reference。
@@ -159,7 +160,7 @@
 - `Controller`、`Service`、`接口层`、`实现层`、`I*Service`、`返回实体`、`数据库实体`、`VO`、`DTO`、`DO`、`PO`、`Entity`、`业务代码下沉`、`URL 填充`、`列表加工`、`业务抽象`、`扩展性`、`可维护`、`健壮性`、`策略`、`handler map`、`Assembler`、`Converter`、`领域组件`、`事务`、`@Transactional`、`rollbackFor`、`module 归属`、`新建文件放哪`、`注释`：读 `07-java-backend-architecture.md`。
 - `新建文件`、`文件归属`、`目录位置`、`放哪`、`module 归属`、`package`、`workspace`、`生成目录`、`构建产物`、`dist`、`build`、`target`、`unpackage/dist`、`miniprogram_npm`、`依赖方向`、`循环依赖`、`接口和实现分离`、`测试目录`：先读 `01-global-engineering-rules.md#跨技术栈文件归属与依赖边界`；Java 追加 `07`，Python 追加 `10`，Vue/React 追加 `11`，小程序追加 `12`。
 - `环境`、`命令`、`运行`、`包管理器`、`lockfile`、`root`、`workspace`、`filter`、`版本`、`JDK`、`Maven`、`Node`、`Python`、`虚拟环境`、`模拟器`、`开发者工具`、`CLI`、`全局安装`：先读 `01-global-engineering-rules.md#跨技术栈环境与命令`；只要准备执行工具链命令就追加 `06` 验证/复用缓存，并按技术栈追加 `03`/`10`/`11`/`12`。
-- `测试`、`验证`、`lint`、`format`、`typecheck`、`build`、`unit test`、`e2e`、`pytest`、`mvn test`、`Vitest`、`Jest`、`Playwright`、`Cypress`、`模拟器验证`、`真机验证`、`无法验证`：先读 `01-global-engineering-rules.md#跨技术栈验证策略`，再按技术栈追加 `03`/`04`/`10`/`11`/`12`。
+- `测试`、`验证`、`lint`、`format`、`typecheck`、`build`、`unit test`、`e2e`、`pytest`、`mvn test`、`Vitest`、`Jest`、`Playwright`、`Cypress`、`浏览器点击`、`电脑屏幕`、`Browser`、`Computer Use`、`模拟器验证`、`真机验证`、`无法验证`：先读 `01-global-engineering-rules.md#跨技术栈验证策略`，再按技术栈追加 `03`/`04`/`10`/`11`/`12`。
 - `密钥`、`token`、`secret`、`生产地址`、`appid`、`私钥`、`白名单`、`权限`、`认证`、`授权`、`租户`、`审计`、`脱敏`、`上传`、`下载`、`外部 API`、`超时`、`重试`、`动态 URL`、`富文本`、`eval`、`exec`、`反序列化`、`不可回滚副作用`：先读 `01-global-engineering-rules.md#跨技术栈安全与外部边界`；涉及异步、幂等、事务副作用追加 `09`，再按技术栈追加对应 reference。
 - `硬编码`、`魔法值`、`magic string`、`magic number`、`固定值`、`常量`、`枚举`、`Enum`、`状态值`、`类型值`、`来源值`、`协议`、`模式`、`渠道`、`格式`、`默认值`、`阈值`、`时间窗`、`content-type`、`media type`、`平台编码`、`字典`：先读 `01-global-engineering-rules.md#跨技术栈硬编码治理`；Java 落地追加 `08`，Python 追加 `10`，Vue/React 追加 `11`，小程序追加 `12`。
 - `重复 if`、`重复 set`、`重复赋值`、`重复映射`、`重复转换`、`字段不同逻辑相同`、`默认值填充`、`策略`、`handler map`、`mapper`、`converter`、`adapter`：先读 `01-global-engineering-rules.md#跨技术栈重复逻辑治理`；Java 落地追加 `08`，其他技术栈按文件类型追加对应 reference。

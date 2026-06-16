@@ -168,7 +168,7 @@ $codex-noise-filter investigate this Python test failure after identifying the v
 ```
 
 ```text
-$codex-noise-filter inspect this Mini Program page after identifying native/uni-app/Taro, subpackage boundaries, dependency ownership, and simulator validation.
+$codex-noise-filter inspect this Mini Program page after identifying native/uni-app/Taro, subpackage boundaries, dependency ownership, and the default build validation path.
 ```
 
 More scenarios are in [`examples/`](examples/). Team rollout templates are in [`templates/`](templates/).
@@ -183,7 +183,8 @@ More scenarios are in [`examples/`](examples/). Team rollout templates are in [`
 | Strong-rule auto escalation | When the touched scope, direct call chain, or related files that must be read for the task already hit hardcoding, repeated logic, hardcoded config, layering mistakes, missing comments, or security-boundary gaps, judge whether a low-risk closure exists; write it into the task capsule and fix it directly when it does, and record risk only when it does not. |
 | Cross-stack shared governance | Every stack first checks shared rules for file ownership, commands, validation, security boundaries, hardcoded values, repeated logic, and comment placement, then applies stack-specific implementation details. |
 | Java backend governance | Keeps controllers thin, requires service-interface comments, aligns entity Lombok usage, and checks transactions, enums, config, validation, and repeated logic. |
-| Frontend and Mini Programs | Covers general frontend, Vue 2/3, React, Vite, native Mini Programs, uni-app, Taro, subpackages, simulators, and tests. |
+| Default validation across stacks | Java, Python, frontend, Mini Programs, and other stacks default to non-interactive syntax, compile, type-check, or build validation, without browser clicking, desktop operations, simulators, real devices, or external-system integration. |
+| Frontend and Mini Programs | Covers general frontend, Vue 2/3, React, Vite, native Mini Programs, uni-app, Taro, subpackages, builds, and tests. |
 | Environment discovery | For builds, compilation, tests, runs, previews, or pre-release checks, validate `.codex/local-environment.json` automatically; if it does not satisfy the command, discover local tools, update the cache, retry the original command, and protect it with a root `/.codex/` ignore rule. |
 | Context management | Uses Context Capsules for long tasks so goals, evidence, changes, rollback points, and next steps survive context switches. |
 
@@ -222,7 +223,7 @@ references/
 - Concurrency, async, and batch rules live in `09-concurrency-async-batch.md` and should be opened only for high concurrency, idempotency, deadlocks, events, middleware, thread pools, virtual threads, or user-context propagation.
 - Python rules live in `10-python-development.md` and should be opened only for `.py`, Python syntax, virtual environments, dependencies, running commands, tests, linting, type checking, or Python performance work.
 - Vue/React rules live in `11-frontend-vue-react.md` and should be opened only for Vue 2/3, React, Vite, component syntax, package management, running commands, tests, linting, type checking, or frontend builds.
-- Mini Program rules live in `12-miniprogram-development.md` and should be opened only for native WeChat Mini Programs, uni-app, Taro, subpackages, official simulators, `project.config.json`, `app.json`, `pages.json`, `app.config.*`, builds, releases, or tests.
+- Mini Program rules live in `12-miniprogram-development.md` and should be opened only for native WeChat Mini Programs, uni-app, Taro, subpackages, `project.config.json`, `app.json`, `pages.json`, `app.config.*`, builds, releases, tests, or explicit simulator/real-device requests.
 - Maven builds use `03-maven-backend-build.md`; environment discovery uses `06-environment-discovery.md`. `06` only handles discovery, minimal validation, local caching, and `.codex/` ignore maintenance, not each stack's full runbook.
 - Routing should cross-check keywords, user intent, and impact area to preserve accuracy without reading every rule file.
 - `SKILL.md` hard constraints are always in force. Index performance tuning may reduce unrelated reference reads, but must not reduce mandatory constraints.
@@ -253,18 +254,19 @@ references/
 - Prefer project commands, `python -m ...`, `uv run ...`, or `poetry run ...` for Python execution. Prefer targeted tests such as `python -m pytest path::test` or existing `tox/nox` commands.
 - Python edits should get the lightest relevant validation: syntax/import checks, targeted tests, and touched-scope lint/format/type checks. If validation cannot run, state why.
 - Frontend projects must first identify `package.json`, lockfile, `packageManager`, Node version, and build tool. Do not mix npm/yarn/pnpm/bun.
+- After Java, Python, frontend, Mini Program, or other stack tasks, do not run runtime, interactive, or screen-level validation by default: do not start a browser, use Browser/Computer Use, click through the desktop, open Mini Program simulators or real devices, or manually call external systems/API pages. Treat passing syntax checks, compilation, type checks, builds, or equivalent non-interactive commands as the default acceptance. Run browser, screenshot, page-click, visual-regression, E2E, simulator, real-device, external-service, or desktop-screen validation only when the user explicitly asks for it.
 - Vue projects must distinguish Vue 2 from Vue 3 first: Vue 2 defaults to Options API and Vue Test Utils v1, while Vue 3 can use Composition API, `<script setup>`, Pinia, and Vue Test Utils v2.
 - React projects must first identify React/React DOM versions, framework, and TypeScript/JSX configuration. Hooks must only run at the top level of components or custom hooks; effects belong in `useEffect`, and pure derived values should not be stored as extra state.
 - Before creating Vue/React components, confirm ownership, reuse value, public contract, and test/example entry points. When using components, prefer existing project components and keep props/slots/children/API boundaries small and stable.
 - Mini Program projects must first identify whether they are native, uni-app, Taro, or another cross-platform framework. Different build modes use different syntax constraints: uni-app/Taro reuse the matching Vue/React rules, while native Mini Programs follow `Page`, `Component`, `wxml`, `wxss`, `setData`, and official API constraints.
-- Mini Program execution should prefer the official developer-tool simulator or existing CLI/CI workflow. Generate the target platform project first, open the correct output directory, and do not maintain `dist/` or `unpackage/dist/` as source code.
+- Mini Program validation should prefer existing CLI/CI build or compile commands by default. Do not open official developer-tool simulators, output directories, or real devices unless explicitly requested.
 - Mini Program subpackages must be evaluated when the main package approaches platform limits, startup slows down, heavy features are local-only, business domains are naturally isolated, or dependencies are only used in one area. Package-size limits must come from current official docs, developer-tool checks, or CI checks, not stale memory.
 - Mini Program npm packages, plugins, subpackages, independent subpackages, preload rules, permissions, login, payment, subscribe messages, and web-view usage must follow target-platform official limits while preserving secrets, appids, upload credentials, and allowlist boundaries.
-- Mini Program validation should reuse existing `miniprogram-simulate`, `miniprogram-ci`, HBuilderX/uni-app automated tests, Taro/Jest/Vitest/Testing Library, or official simulator checks. High-risk platform capabilities should state whether device validation is still needed.
+- Mini Program validation defaults to passing build/compile checks. Use `miniprogram-simulate`, `miniprogram-ci`, HBuilderX/uni-app automation, official simulators, or real devices only when explicitly requested.
 - Comment rules apply across stacks: place comments at the natural contract location for each technology, such as Java service interfaces, Python docstrings, Vue props/emits/slots, React components/hooks/types, and SQL/config definitions.
 - Hardcoding rules apply across stacks: fixed closed sets use the stack's enum/union/dictionary pattern, technical standards use framework constants, environment or operations-variable values use configuration, and runtime-maintained business values use dictionaries, database tables, or configuration centers.
 - Repeated-logic rules apply across stacks: when branches, mappings, validation, defaulting, or display assembly differ only by fields or stable cases, evaluate a stack-native mapper, converter, schema, strategy, hook/composable, or helper.
-- Vue/React edits should run existing `lint`, `typecheck`, `test`, `build`, or targeted test commands. For interaction and layout changes, verify key pages in a browser.
+- Vue/React edits should run existing `typecheck`, `build`, `lint`, or equivalent syntax/compile commands. Do not verify key pages in a browser or click through the UI by default.
 - Before creating files, confirm the target module, layer responsibility, package path, existing peer files, and dependency direction. Interfaces, implementations, entities, and contracts may live in different modules.
 - Prefer business enums for stable fixed sets such as status, type, source, action, phase, and result values. Avoid scattered magic strings and numbers.
 - Environment- or operations-variable values such as URLs, secrets, toggles, thresholds, time windows, thread pools, cache TTLs, and external-system parameters should live in yml/properties or the configuration center and be injected through typed configuration classes.

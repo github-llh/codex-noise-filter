@@ -64,16 +64,19 @@ repo-root/
 
 按风险选择最轻量验证：
 
-- 只改一个类或方法：优先跑目标单测。
-- 改 Service、DAO、Mapper、DTO 映射：跑相关模块测试。
-- 改跨模块调用链：从 root 用 `-pl <module> -am` 构建相关模块。
-- 改公共契约、枚举、配置、SQL：增加调用方模块验证。
+- 默认验收以编译或构建通过为准，不默认跑接口、集成测试、外部系统联调或手工 API 操作。
+- 只改一个类或方法：优先跑目标模块 `compile` 或 `package -DskipTests`。
+- 改 Service、DAO、Mapper、DTO 映射：跑相关模块编译或构建。
+- 改跨模块调用链：从 root 用 `-pl <module> -am` 编译或构建相关模块。
+- 改公共契约、枚举、配置、SQL：增加调用方模块编译或构建验证。
+- 只有用户明确要求、任务本身是测试修复、或需要复现 bug 时，才跑目标单测、模块测试或集成测试。
 
 常用命令：
 
 ```bash
-<mavenExecutable> -Dmaven.repo.local=<localRepository> -pl <module-path-or-artifact> -am test
+<mavenExecutable> -Dmaven.repo.local=<localRepository> -pl <module-path-or-artifact> -am compile
 <mavenExecutable> -Dmaven.repo.local=<localRepository> -pl <module-path-or-artifact> -am -DskipTests package
+<mavenExecutable> -Dmaven.repo.local=<localRepository> -pl <module-path-or-artifact> -am test
 <mavenExecutable> -Dmaven.repo.local=<localRepository> -pl <module-path-or-artifact> -am -Dtest=ClassNameTest test
 <mavenExecutable> -Dmaven.repo.local=<localRepository> -pl <module-path-or-artifact> -am -Dtest=ClassNameTest#methodName -Dsurefire.failIfNoSpecifiedTests=false test
 ```

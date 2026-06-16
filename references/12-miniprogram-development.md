@@ -24,7 +24,7 @@
 - 命中 `app.json`、`app.js`、`app.wxss`、`sitemap.json`、`project.config.json`、`project.private.config.json`、`miniprogramRoot`、`miniprogram_npm`、`wxml`、`wxss`、`wxs`、`wx:`、`setData`、`Component`、`Page`、`Behavior`、`subPackages`、`preloadRule` 时按原生小程序处理。
 - 命中 `pages.json`、`manifest.json`、`App.vue`、`uni.scss`、`uni_modules`、`#ifdef MP`、`#ifdef MP-WEIXIN`、`mp-weixin`、`unpackage/dist` 时按 uni-app 处理。
 - 命中 `@tarojs/*`、`taro`、`Taro.`、`app.config.js`、`app.config.ts`、`page.config.*`、`config/index.*`、`TARO_ENV`、`dev:weapp`、`build:weapp` 时按 Taro 处理。
-- 默认组合：小程序任务读 `02` + `12`。需要路径发现或模拟器路径时加 `06`；涉及 Vue/React 语法时加 `11`；涉及通用布局、表单、状态契约时加 `04`。
+- 默认组合：小程序任务读 `02` + `12`。涉及 Vue/React 语法时加 `11`；涉及通用布局、表单、状态契约时加 `04`；只有用户明确要求模拟器、预览、上传或真机验证时，才加 `06` 查开发者工具路径。
 - 不因为小程序是前端就一次性读取所有前端、Java、Python reference；触碰接口契约、后端数据或构建链路时再按索引追加。
 
 ## 项目形态识别
@@ -105,16 +105,16 @@
 先执行 `01-global-engineering-rules.md#跨技术栈环境与命令`，路径未知时再读 `06-environment-discovery.md`。
 
 - 首先读取项目脚本和配置：`package.json`、lockfile、`project.config.json`、`project.private.config.json`、`pages.json`、`manifest.json`、`config/index.*`。
-- 原生微信小程序：优先用微信开发者工具模拟器打开 `project.config.json` 所在工程；使用 npm 时先执行项目安装和开发者工具/CI 的构建 npm 流程。
-- uni-app：HBuilderX 项目优先使用 HBuilderX 的“运行到小程序模拟器”；CLI 项目优先使用项目已有 `dev:mp-weixin`、`build:mp-weixin` 或 `dev:custom`/`build:custom` 脚本，再打开输出目录。
-- Taro：优先使用项目已有 `dev:weapp`、`build:weapp`，或 `taro build --type weapp --watch`/`taro build --type weapp`；构建后用微信开发者工具打开输出目录。
+- 原生微信小程序：默认优先执行项目已有构建、编译或 CI 脚本；不默认用微信开发者工具模拟器打开工程。
+- uni-app：CLI 项目默认优先使用项目已有 `build:mp-weixin` 或 `build:custom` 脚本；不默认运行到 HBuilderX/小程序模拟器。
+- Taro：默认优先使用项目已有 `build:weapp` 或 `taro build --type weapp`；构建后不默认用微信开发者工具打开输出目录。
 - 首次运行需要开发者工具路径时，按 `06-environment-discovery.md` 从缓存、IDE/项目配置、本机候选路径发现并验证；不要把未验证路径写成长期规则。
 - 不混用 npm/yarn/pnpm/bun；锁文件和 `packageManager` 按 `11-frontend-vue-react.md` 执行。
 
 ## 构建与发布
 
 - 构建命令必须来自项目 scripts 或框架配置，不凭经验替换包管理器或输出目录。
-- 原生小程序发布前至少确认开发者工具预览/上传配置、`appid`、`miniprogramRoot`、`setting`、npm 构建产物和忽略规则。
+- 原生小程序发布、预览或上传属于操作性验证/发布链路，只有用户明确要求时才执行；默认只确认构建配置、`appid`、`miniprogramRoot`、`setting`、npm 构建产物和忽略规则。
 - uni-app 发布到微信小程序通常生成 `unpackage/dist/build/mp-weixin`；自动上传依赖 HBuilderX/CI 插件、上传密钥、`appid` 和 IP 白名单，密钥不得提交。
 - Taro 小程序 CI 可复用项目已有 `@tarojs/plugin-mini-ci` 或 `miniprogram-ci` 脚本；不要自行新增上传能力，除非用户明确要求。
 - 发布脚本不得在日志或 README 中暴露私钥、机器人编号、生产 `appid` 密钥、上传 token、平台后台截图和白名单信息。
@@ -123,12 +123,12 @@
 
 先执行 `01-global-engineering-rules.md#跨技术栈验证策略`，再选择小程序框架和目标平台的验证方式。
 
-- 原生组件单测优先使用项目已有 Jest + `miniprogram-simulate`；它适合组件级模拟，不等价于完整小程序集成测试。
-- 原生小程序构建验证优先使用微信开发者工具、`miniprogram-ci` 或项目已有 CLI 脚本完成编译、预览或上传前校验。
-- uni-app 测试优先使用项目已有 HBuilderX 自动化测试、uni-app CLI 测试、Vitest/Jest 或页面级自动化；目标端为微信小程序时需要覆盖生成后在开发者工具中的关键路径。
-- Taro 测试优先使用项目已有 Jest/Vitest/Testing Library/框架测试，再补 `build:weapp` 或开发者工具模拟器预览。
-- 修改分包、路由、启动页、TabBar、登录态、授权、支付、分享、定位、文件上传下载时，必须验证模拟器关键路径；高风险能力还要说明是否需要真机验证。
-- 无法运行官方模拟器或 CI 时，说明缺少的开发者工具路径、登录态、密钥、权限或平台账号，不用假验证替代。
+- 原生组件单测只在用户明确要求、任务本身是测试修复或需要复现 bug 时运行；可复用项目已有 Jest + `miniprogram-simulate`，但它不等价于完整小程序集成测试。
+- 原生小程序默认验收优先使用项目已有 CLI/CI 脚本完成编译或构建；不默认预览、上传、打开模拟器或真机验证。
+- uni-app 默认验收优先使用项目已有 CLI 构建或编译脚本；HBuilderX 自动化测试、页面级自动化、开发者工具关键路径只在用户明确要求时执行。
+- Taro 测试优先使用项目已有 Jest/Vitest/Testing Library/框架测试；默认补 `build:weapp` 这类构建验证，不默认开发者工具模拟器预览。
+- 修改分包、路由、启动页、TabBar、登录态、授权、支付、分享、定位、文件上传下载时，默认先做构建/编译验证；模拟器关键路径、真机验证、预览上传只有用户明确要求时才执行。
+- 用户明确要求官方模拟器、真机、预览、上传或 CI 操作但无法运行时，说明缺少的开发者工具路径、登录态、密钥、权限或平台账号，不用假验证替代。
 
 ## 性能、限制与安全
 
