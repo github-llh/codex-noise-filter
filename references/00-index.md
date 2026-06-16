@@ -120,6 +120,7 @@
 - 交付格式：`05-delivery-templates.md#最终回复结构`
 - Context Capsule：`05-delivery-templates.md#上下文胶囊`
 - Codex 会话上下文管理：`05-delivery-templates.md#codex-上下文管理`
+- 上下文压缩恢复与自动胶囊：`05-delivery-templates.md#codex-上下文管理`
 - Codex 记忆管理：`05-delivery-templates.md#codex-记忆管理`
 
 ## 快速决策表
@@ -146,7 +147,7 @@
 | 前端页面/布局/表单/状态契约 | `02` + `04` | 涉及 Vue/React 语法或构建测试加 `11` |
 | Vue/React/Vite/组件测试/前端构建 | `02` + `11` | 通用布局状态加 `04`；执行构建/typecheck/lint/test 前加 `06` |
 | 小程序原生/uni-app/Taro/分包/模拟器 | `02` + `12` | uni-app/Taro 语法加 `11`，通用布局状态加 `04`；执行构建/编译/CI 前加 `06`；只有当前任务目标本身包含模拟器、预览、上传、真机或发布链路，且权限边界清楚时才查开发者工具路径 |
-| 最终回复/交接/压缩上下文 | `05` | 长任务恢复时加 `02` |
+| 最终回复/交接/压缩上下文 | `05` | 长任务恢复、自动续跑、上下文丢失或需要重建任务边界时加 `02` |
 
 最小组合不是放宽规则；它只是延迟打开无关 reference。执行中一旦触碰范围命中其他规则，立即追加对应 reference。
 
@@ -191,4 +192,4 @@
 - `mvn`、`pom.xml`、`.mvn/maven.config`、`.mvn/jvm.config`、`maven-wrapper.properties`、`JAVA_HOME`、`maven.compiler.release`、`java.version`、`-pl`、`-am`、`多模块构建`、`测试命令`：先读 `14-environment-cache-by-stack.md#mavenjava-环境缓存`，再读 `03-maven-backend-build.md`。
 - `MAVEN_HOME`、`JAVA_HOME`、`Node`、`pnpm`、`IDE 配置路径`、`.codex/local-environment.json`、`local-environment.json`、`.codex/`、`.gitignore`、`check-ignore`、`环境缓存`、`缓存失效`、`验证路径`、`本机候选路径`、`项目配置变化`、`工具版本不匹配`：读 `06-environment-discovery.md#自动环境缓存维护`。
 - `flex`、`grid`、`组件`、`页面`、`路由守卫`、`加载/空状态`：读 `04-frontend-rules.md`。
-- `Context Capsule`、`最终回复`、`记忆管理`、`会话切换`：读 `05-delivery-templates.md`。
+- `Context Capsule`、`最终回复`、`记忆管理`、`会话切换`、`上下文压缩`、`压缩窗口`、`自动压缩`、`上下文丢失`、`不丢失重要信息`、`自动胶囊`、`恢复边界`、`证据锚点`、`回滚点丢失`：读 `05-delivery-templates.md`；如果是压缩后继续修改或自动续跑，再追加 `02-noise-filter-workflow.md#skill-规则刷新与会话恢复`。
