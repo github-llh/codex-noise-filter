@@ -65,7 +65,9 @@ description: |
 - 所有技术栈任务结束后，默认不做运行态、交互态或屏幕级操作验证：不启动浏览器，不使用 Browser/Computer Use，不操控电脑屏幕点击，不打开小程序模拟器或真机，不手工调用外部系统/API 页面。默认验收以语法检查、编译、类型检查、构建或该技术栈等价的非交互命令通过为准；只有用户明确要求浏览器、截图、页面点击、视觉回归、端到端交互、模拟器、真机、外部服务联调或电脑屏幕操作时，才执行对应操作验证。
 - 对 JetBrains 项目，优先使用 JetBrains MCP / IDE 工具读取、定位、修改和诊断；只有明确不可用、超时或错误时才使用 Shell。
 - 不修改无关文件，不随意重构，不新增依赖，不改 API、DTO、数据库字段、权限、路由、配置键和公共契约，除非用户明确批准。
-- 后端 Maven 多模块项目默认从聚合 root 节点构建；执行 Maven/JDK/Node/Python/小程序工具链相关的构建、编译、测试、运行、预览或发布前校验时，必须先读取并验证 `.codex/local-environment.json`。
+- 后端 Maven 多模块项目默认从聚合 root 节点构建；执行 Maven/JDK/Node/Python/小程序工具链相关的构建、编译、测试、运行、预览或发布前校验时，必须先按技术栈读取项目配置并验证 `.codex/local-environment.json`。
+- 工具链命令不得依赖经验猜测或用户手动指定：Java/Maven 读取 `pom.xml`、`.mvn/*`、wrapper 和 Java/Maven 版本约束；Python 读取 `pyproject.toml`、锁文件、requirements、tox/nox 和 Python 版本文件；Node/前端读取目标 `package.json`、lockfile、`engines`、`packageManager`、`.nvmrc`/`.node-version`/Volta 和 `scripts`；小程序读取 `project.config.json`、`app.json`、`pages.json`、`manifest.json`、Taro/uni-app 配置和必要的 `package.json`。必须自动匹配最合适的 JDK/Maven、Python/虚拟环境/管理器、Node/包管理器/脚本、小程序框架/平台/构建命令，再写入或复用 `.codex/local-environment.json`。
+- 缓存已满足当前项目配置和命令时直接使用；编译、构建、测试或运行失败且疑似工具路径、版本、依赖、锁文件、脚本、模块路径、workspace/filter、虚拟环境、框架平台或开发者工具不匹配时，重新读取对应技术栈配置和本机候选环境，更新缓存后用同一目标命令重试一次。只有仍无法自动确认时，才说明缺口，不把常规环境匹配转嫁给用户手动指定。
 - `.codex/local-environment.json` 已满足当前命令需求时直接使用缓存路径执行；缓存缺失、失效或不满足项目配置时才查找本机候选，验证通过后写回缓存，并用新缓存路径重试原构建、编译、测试或运行命令。
 - 更新 `.codex/local-environment.json` 后，必须自动确认项目根 `.gitignore` 是否包含 `/.codex/`，没有则补齐。
 - 当前 Codex home 下的全局 `AGENTS.md` 建议保留为轻量兜底；本 skill 已内化编程规则，编程任务优先按 skill 索引执行。

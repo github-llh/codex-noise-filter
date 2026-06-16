@@ -16,6 +16,8 @@
 - 强化自动意图识别：粘贴代码、diff、报错日志、异常堆栈、构建/测试失败、命令输出、IDE 截图或“报错了/失败了/处理一下”等带上下文的模糊指令时，不依赖用户显式点名 skill，自动按排障、修复或验证任务进入索引流程。
 - 强化强规则命中后的自动升级：截图、片段、触碰范围、直接调用链或为完成任务必须读取的相关文件里已出现硬编码、重复逻辑、配置写死、分层错位、注释缺口或安全边界问题时，先判断调用链深度、涉及文件数量、契约风险和验证路径；低风险闭环时写入任务胶囊并直接按对应 reference 局部修复，不把“最小改动”或“非 Plan 模式”当作跳过理由。
 - 强化全技术栈默认验证策略：Java、Python、前端、小程序等默认不做运行态、交互态或屏幕级操作验证，不自动启动浏览器、Browser/Computer Use、桌面点击、模拟器、真机或外部系统联调；默认以语法、编译、类型检查、构建或等价非交互命令通过作为验收，只有用户明确要求时才做操作验证。
+- 强化前端环境缓存：编译/构建前按目标 `package.json`、lockfile、`engines`、`packageManager`、依赖版本和 scripts 匹配 Node、包管理器与构建命令，写入 `.codex/local-environment.json`；缓存命中直接复用，构建失败疑似环境/脚本不匹配时重新发现、更新缓存并重试一次。
+- 强化跨技术栈环境缓存：Java/Maven 按 `pom.xml`、`.mvn/*`、wrapper 和 Java/Maven 版本约束匹配 JDK/Maven/root/module；Python 按 `pyproject.toml`、锁文件、requirements、tox/nox 和虚拟环境匹配解释器/管理器；小程序按 `project.config.json`、`app.json`、`pages.json`、`manifest.json`、Taro/uni-app 配置和必要的 `package.json` 匹配框架/平台/构建脚本。失败疑似环境、依赖、模块、脚本或平台不匹配时自动重算缓存并重试一次，减少用户手动指定。
 
 ## 1.0.1 - 2026-06-14
 

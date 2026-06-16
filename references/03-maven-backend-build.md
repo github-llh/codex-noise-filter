@@ -4,7 +4,7 @@
 
 ## 本地 Maven 环境
 
-Maven 配置不要只依赖硬编码路径。执行 Maven 构建前，先按 `06-environment-discovery.md` 读取缓存、IDE/项目配置和本机候选路径。
+Maven 配置不要只依赖硬编码路径。执行 Maven 构建前，先按 `06-environment-discovery.md#mavenjava-环境缓存` 读取缓存、`pom.xml`、`.mvn/*`、wrapper、IDE/项目配置、Java/Maven 版本约束和本机候选路径。
 
 每个使用者的 Maven 安装路径和本地仓库都可能不同，skill 文档不得写死个人目录。构建命令必须使用本工作区 `.codex/local-environment.json` 中已验证的 `maven.executable` 与 `maven.localRepository`；没有缓存时先发现、验证，再写入缓存。
 
@@ -16,12 +16,13 @@ Maven 配置不要只依赖硬编码路径。执行 Maven 构建前，先按 `06
 
 Maven 命令选择顺序：
 
-1. 读取 `.codex/local-environment.json` 中已验证的 `maven.executable` 和 `maven.localRepository`。
-2. 读取 IDE/项目 Maven 配置，例如 `.idea/misc.xml`、`.idea/workspace.xml`、`.mvn/maven.config`、`.mvn/wrapper/maven-wrapper.properties`。
-3. 如果项目已配置 Maven Wrapper 且项目规则要求使用 Wrapper，使用项目内 `./mvnw`。
-4. 否则查找本机候选 Maven，例如 `~/dev/maven-*/bin/mvn`、`~/.sdkman/candidates/maven/*/bin/mvn`、`/opt/homebrew/bin/mvn`、`/usr/local/bin/mvn`、`mvn`。
-5. 找到后执行 `mvn -version` 或 `<path>/mvn -version` 验证，再缓存。
-6. 只有上述路径都不可用时，才让用户确认 Maven 环境。
+1. 读取当前目标模块和聚合 root 的 `pom.xml`，解析 `modules`、`parent`、`artifactId`、`java.version`、`maven.compiler.release/source/target` 和关键插件。
+2. 读取 `.codex/local-environment.json` 中仍匹配当前 `mavenRoot`、`modulePath`、Java 版本约束、wrapper 和本地仓库的缓存。
+3. 读取 IDE/项目 Maven 配置，例如 `.idea/misc.xml`、`.idea/workspace.xml`、`.mvn/maven.config`、`.mvn/jvm.config`、`.mvn/wrapper/maven-wrapper.properties`。
+4. 如果项目已配置 Maven Wrapper 且项目规则要求使用 Wrapper，使用项目内 `./mvnw`。
+5. 否则查找本机候选 Maven，例如 `~/dev/maven-*/bin/mvn`、`~/.sdkman/candidates/maven/*/bin/mvn`、`/opt/homebrew/bin/mvn`、`/usr/local/bin/mvn`、`mvn`。
+6. 找到后执行 `mvn -version` 或 `<path>/mvn -version`，必要时带上匹配的 `JAVA_HOME` 验证，再缓存。
+7. 只有上述路径都不可用时，才让用户确认 Maven 环境。
 
 不要擅自修改用户 Maven settings，不新增远程仓库，不执行会写入外部系统的网络发布命令。
 
@@ -98,6 +99,7 @@ repo-root/
 
 - 依赖缺失时先确认本次使用的 `maven.localRepository` 是否来自缓存、IDE 配置或项目配置。
 - Maven 版本不一致时先确认本次使用的 `maven.executable` 是否已验证并缓存。
+- JDK、`release/source/target`、toolchain 或 Maven Wrapper 不匹配时，必须按 `06-environment-discovery.md#mavenjava-环境缓存` 重新读取 `pom.xml`、`.mvn/*`、wrapper、IDE 配置和本机 JDK/Maven 候选，更新缓存后用同一目标命令重试一次。
 - 多模块找不到依赖时确认是否加了 `-am`。
 - 指定测试不存在或跨模块时可加 `-Dsurefire.failIfNoSpecifiedTests=false`。
 - 构建失败后先区分是本次改动、历史失败、依赖环境还是测试选择错误，不连续盲改。

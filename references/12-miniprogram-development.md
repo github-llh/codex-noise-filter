@@ -24,7 +24,7 @@
 - 命中 `app.json`、`app.js`、`app.wxss`、`sitemap.json`、`project.config.json`、`project.private.config.json`、`miniprogramRoot`、`miniprogram_npm`、`wxml`、`wxss`、`wxs`、`wx:`、`setData`、`Component`、`Page`、`Behavior`、`subPackages`、`preloadRule` 时按原生小程序处理。
 - 命中 `pages.json`、`manifest.json`、`App.vue`、`uni.scss`、`uni_modules`、`#ifdef MP`、`#ifdef MP-WEIXIN`、`mp-weixin`、`unpackage/dist` 时按 uni-app 处理。
 - 命中 `@tarojs/*`、`taro`、`Taro.`、`app.config.js`、`app.config.ts`、`page.config.*`、`config/index.*`、`TARO_ENV`、`dev:weapp`、`build:weapp` 时按 Taro 处理。
-- 默认组合：小程序任务读 `02` + `12`。涉及 Vue/React 语法时加 `11`；涉及通用布局、表单、状态契约时加 `04`；只有用户明确要求模拟器、预览、上传或真机验证时，才加 `06` 查开发者工具路径。
+- 默认组合：小程序任务读 `02` + `12`。涉及 Vue/React 语法时加 `11`；涉及通用布局、表单、状态契约时加 `04`；执行构建、编译、CI 或发布前校验前加 `06` 并按 `小程序环境缓存` 复用/更新项目配置和 Node 包管理器。只有用户明确要求模拟器、预览、上传或真机验证时，才查开发者工具路径。
 - 不因为小程序是前端就一次性读取所有前端、Java、Python reference；触碰接口契约、后端数据或构建链路时再按索引追加。
 
 ## 项目形态识别
@@ -102,18 +102,20 @@
 
 ## 环境与运行
 
-先执行 `01-global-engineering-rules.md#跨技术栈环境与命令`，路径未知时再读 `06-environment-discovery.md`。
+先执行 `01-global-engineering-rules.md#跨技术栈环境与命令`，再按 `06-environment-discovery.md#小程序环境缓存` 读取/复用 `.codex/local-environment.json`、小程序项目配置、框架平台、源码目录、输出目录、构建脚本和必要的 Node 包管理器。
 
 - 首先读取项目脚本和配置：`package.json`、lockfile、`project.config.json`、`project.private.config.json`、`pages.json`、`manifest.json`、`config/index.*`。
+- 有 `package.json` 的小程序项目必须同时按 `06-environment-discovery.md#node前端环境缓存` 读取 Node 版本、包管理器、lockfile、`scripts` 和框架依赖版本；缓存命中同一 framework、platform、sourceRoot、outputRoot、packageJson 和构建脚本时直接复用。
 - 原生微信小程序：默认优先执行项目已有构建、编译或 CI 脚本；不默认用微信开发者工具模拟器打开工程。
 - uni-app：CLI 项目默认优先使用项目已有 `build:mp-weixin` 或 `build:custom` 脚本；不默认运行到 HBuilderX/小程序模拟器。
 - Taro：默认优先使用项目已有 `build:weapp` 或 `taro build --type weapp`；构建后不默认用微信开发者工具打开输出目录。
-- 首次运行需要开发者工具路径时，按 `06-environment-discovery.md` 从缓存、IDE/项目配置、本机候选路径发现并验证；不要把未验证路径写成长期规则。
+- 首次运行需要开发者工具路径时，按 `06-environment-discovery.md#小程序环境缓存` 从缓存、IDE/项目配置、本机候选路径发现并验证；不要把未验证路径写成长期规则。
 - 不混用 npm/yarn/pnpm/bun；锁文件和 `packageManager` 按 `11-frontend-vue-react.md` 执行。
 
 ## 构建与发布
 
 - 构建命令必须来自项目 scripts 或框架配置，不凭经验替换包管理器或输出目录。
+- 构建/编译/CI 失败且疑似框架版本、目标平台、包管理器、lockfile、`miniprogramRoot`、`sourceRoot`、`outputRoot`、条件编译、Taro/uni-app 脚本、开发者工具 CLI 或 `miniprogram-ci` 不匹配时，必须重跑 `06-environment-discovery.md#小程序环境缓存`，更新缓存后用同一目标命令重试一次。
 - 原生小程序发布、预览或上传属于操作性验证/发布链路，只有用户明确要求时才执行；默认只确认构建配置、`appid`、`miniprogramRoot`、`setting`、npm 构建产物和忽略规则。
 - uni-app 发布到微信小程序通常生成 `unpackage/dist/build/mp-weixin`；自动上传依赖 HBuilderX/CI 插件、上传密钥、`appid` 和 IP 白名单，密钥不得提交。
 - Taro 小程序 CI 可复用项目已有 `@tarojs/plugin-mini-ci` 或 `miniprogram-ci` 脚本；不要自行新增上传能力，除非用户明确要求。
