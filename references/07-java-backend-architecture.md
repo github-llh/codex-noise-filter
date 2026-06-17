@@ -1,6 +1,6 @@
 # Java 后端架构规则
 
-本文件按需读取。只有任务涉及 Java 后端分层、新建文件归属地、Controller/Service/DAO/DTO/Entity、接口契约、注释和调用链时打开。文件归属、验证、安全边界、硬编码、重复逻辑和注释的跨技术栈判断先看 `01-global-engineering-rules.md`；本文件只写 Java 后端落地方式。Java 代码风格、枚举、参数校验、Lombok、Optional、去重复逻辑见 `08-java-style-patterns.md`。
+本文件按需读取。是否打开由本 skill 根据文件证据、包结构、注解、调用链、触碰范围和分层风险内部判定；命中 Java 后端分层、新建文件归属地、Controller/Service/DAO/DTO/Entity、接口契约、注释或调用链时必须打开，外部点名不作为前提。文件归属、验证、安全边界、硬编码、重复逻辑和注释的跨技术栈判断先看 `01-global-engineering-rules.md`；本文件只写 Java 后端落地方式。Java 代码风格、枚举、参数校验、Lombok、Optional、去重复逻辑见 `08-java-style-patterns.md`。
 
 ## 后端分层
 

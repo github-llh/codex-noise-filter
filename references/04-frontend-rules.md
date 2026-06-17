@@ -1,6 +1,6 @@
 # 前端规则
 
-本文件只处理通用前端布局、状态契约和前后端协同。文件归属、环境命令、验证策略、安全边界、硬编码和重复逻辑先按 `01-global-engineering-rules.md` 判断；涉及 Vue 2、Vue 3、React、Vite、组件语法、包管理、运行、测试、lint/format/type check 或前端构建时，继续读取 `11-frontend-vue-react.md`；涉及微信小程序、uni-app、Taro、分包、开发者工具模拟器、`project.config.json`、`app.json`、`pages.json` 或 `app.config.*` 时，继续读取 `12-miniprogram-development.md`。
+本文件只处理通用前端布局、状态契约和前后端协同。文件归属、环境命令、验证策略、安全边界、硬编码和重复逻辑先按 `01-global-engineering-rules.md` 判断；本 skill 根据文件证据、项目配置、命令节点、报错输出、触碰范围和调用链内部判定是否继续读取技术栈 reference。命中 Vue 2、Vue 3、React、Vite、组件语法、包管理、运行、测试、lint/format/type check 或前端构建时，继续读取 `11-frontend-vue-react.md`；命中微信小程序、uni-app、Taro、分包、开发者工具模拟器、`project.config.json`、`app.json`、`pages.json` 或 `app.config.*` 时，继续读取 `12-miniprogram-development.md`。
 
 ## 基本原则
 

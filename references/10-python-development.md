@@ -1,6 +1,6 @@
 # Python 开发规则
 
-本文件按需读取。只有任务涉及 Python 语法、脚本、服务、包管理、虚拟环境、依赖、运行、测试、lint/format、类型检查或 Python 性能时打开。文件归属、环境命令、验证策略、安全边界、硬编码、重复逻辑和注释的跨技术栈判断先按 `01-global-engineering-rules.md` 执行；通用不可绕过门禁、调用链和既有代码局部对齐仍按 `02-noise-filter-workflow.md` 执行；环境路径发现见 `06-environment-discovery.md`。
+本文件按需读取。是否打开由本 skill 根据文件证据、项目配置、命令节点、报错输出、触碰范围和调用链内部判定；命中 Python 语法、脚本、服务、包管理、虚拟环境、依赖、运行、测试、lint/format、类型检查或 Python 性能时必须打开，外部点名不作为前提。文件归属、环境命令、验证策略、安全边界、硬编码、重复逻辑和注释的跨技术栈判断先按 `01-global-engineering-rules.md` 执行；通用不可绕过门禁、调用链和既有代码局部对齐仍按 `02-noise-filter-workflow.md` 执行；环境路径发现见 `06-environment-discovery.md`。
 
 参考来源：Python 官方文档、PEP 8、PEP 257、Python Packaging User Guide、pytest、Ruff、uv 官方文档。
 

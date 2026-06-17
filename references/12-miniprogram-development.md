@@ -1,6 +1,6 @@
 # 小程序开发规则
 
-本文件按需读取。只有任务涉及微信小程序、其他平台小程序、原生小程序、uni-app、Taro、`project.config.json`、`app.json`、`pages.json`、`app.config.*`、分包、开发者工具模拟器、`miniprogram-ci`、`miniprogram-simulate`、小程序构建产物或小程序测试时打开。文件归属、环境命令、验证策略、安全边界、硬编码、重复逻辑和注释的跨技术栈判断先按 `01-global-engineering-rules.md` 执行；通用前端布局、状态契约和前后端协同见 `04-frontend-rules.md`；Vue/React 语法复用 `11-frontend-vue-react.md`；Node 和开发者工具路径发现见 `06-environment-discovery.md`；不可绕过门禁仍见 `02-noise-filter-workflow.md`。
+本文件按需读取。是否打开由本 skill 根据文件证据、项目配置、命令节点、报错输出、触碰范围和调用链内部判定；命中微信小程序、其他平台小程序、原生小程序、uni-app、Taro、`project.config.json`、`app.json`、`pages.json`、`app.config.*`、分包、开发者工具模拟器、`miniprogram-ci`、`miniprogram-simulate`、小程序构建产物或小程序测试时必须打开，外部点名不作为前提。文件归属、环境命令、验证策略、安全边界、硬编码、重复逻辑和注释的跨技术栈判断先按 `01-global-engineering-rules.md` 执行；通用前端布局、状态契约和前后端协同见 `04-frontend-rules.md`；Vue/React 语法复用 `11-frontend-vue-react.md`；Node 和开发者工具路径发现见 `06-environment-discovery.md`；不可绕过门禁仍见 `02-noise-filter-workflow.md`。
 
 参考来源：微信小程序官方文档、微信开发者工具与 `miniprogram-ci`/`miniprogram-simulate`、uni-app 官方文档、Taro 官方文档、项目实际脚本和配置。
 

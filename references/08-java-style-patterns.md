@@ -1,6 +1,6 @@
 # Java 代码风格模式
 
-本文件按需读取。只承载 Java 落地写法；跨技术栈通用判断先看 `01-global-engineering-rules.md#跨技术栈硬编码治理` 和 `01-global-engineering-rules.md#跨技术栈重复逻辑治理`。只有任务涉及 Java 枚举、配置属性、Bean Validation、MapStruct/BeanUtils、Optional、Stream、函数式风格或 Lombok 时打开。
+本文件按需读取，只承载 Java 落地写法；跨技术栈通用判断先看 `01-global-engineering-rules.md#跨技术栈硬编码治理` 和 `01-global-engineering-rules.md#跨技术栈重复逻辑治理`。是否打开由本 skill 根据代码证据、触碰范围、调用链和风格预检内部判定；命中 Java 枚举、配置属性、Bean Validation、MapStruct/BeanUtils、Optional、Stream、函数式风格或 Lombok 时必须打开，外部点名不作为前提。
 
 ## 枚举与常量
 
