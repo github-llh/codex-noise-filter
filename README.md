@@ -265,7 +265,7 @@ references/
 - Python 运行优先使用项目命令、`python -m ...`、`uv run ...`、`poetry run ...`；测试优先定向运行 `python -m pytest path::test` 或项目已有 `tox/nox` 命令。
 - Python 修改要做最小验证：语法/导入、定向测试、lint/format/type check 中与触碰范围相关的项；无法验证时说明原因。
 - 前端项目先确认 `package.json`、lockfile、`packageManager`、Node 版本和构建工具；不要混用 npm/yarn/pnpm/bun。
-- 前端编译/构建前必须先读取目标 `package.json` 的 `scripts`、依赖、`engines`、`packageManager` 和 lockfile，匹配 Node 版本、包管理器与构建脚本，并写入 `.codex/local-environment.json`；缓存满足当前 package 和命令时直接复用。编译失败且疑似环境/依赖/脚本不匹配时，重新读取项目配置和本机环境，更新缓存后重试一次。
+- 前端编译、构建、lint、format、typecheck 或测试前必须先读取目标 `package.json` 的 `scripts`、依赖、`engines`、`packageManager`、lockfile，以及 ESLint/Prettier/EditorConfig/Biome/Stylelint/TypeScript 等语法、缩进和格式规范文件，匹配 Node 版本、包管理器与项目脚本，并写入 `.codex/local-environment.json` 的 `frontendQuality`；缓存满足当前 package、命令和规范文件集合时直接复用。编译失败且疑似环境/依赖/脚本/规范配置不匹配时，重新读取项目配置和本机环境，更新缓存后重试一次。
 - Java、Python、前端、小程序等所有技术栈任务结束后，默认不做运行态、交互态或屏幕级操作验证：不启动浏览器，不使用 Browser/Computer Use，不操控电脑屏幕点击，不打开小程序模拟器或真机，不手工调用外部系统/API 页面。默认以语法检查、编译、类型检查、构建或等价非交互命令通过作为验收；只有当前任务目标本身需要浏览器、截图、页面点击、视觉回归、E2E、模拟器、真机、外部服务联调或电脑屏幕操作证据，且权限与副作用边界清楚时，才执行对应操作验证。
 - Vue 项目必须先区分 Vue 2 与 Vue 3：Vue 2 默认 Options API 和 Vue Test Utils v1，Vue 3 可用 Composition API、`<script setup>`、Pinia 和 Vue Test Utils v2。
 - React 项目先确认 React/React DOM 版本、框架和 TypeScript/JSX 配置；Hooks 只能在组件或自定义 Hook 顶层调用，副作用放 `useEffect`，纯派生值不额外存 state。
@@ -281,6 +281,7 @@ references/
 - 硬编码治理跨技术栈保持一致：固定闭合集合优先用本栈枚举/联合类型/字典对象，技术标准值优先框架常量，环境或运维可变值走配置，运行期业务可维护值走字典/数据库/配置中心。
 - 重复逻辑治理跨技术栈保持一致：字段不同但结构相同的分支、映射、校验、默认值和展示组装，先判断是否为稳定变化点，再用本栈 mapper、converter、schema、策略、hook/composable 或 helper 收敛。
 - Vue/React 修改优先运行项目已有 `typecheck`、`build`、`lint` 或等价语法/编译命令；不默认用浏览器验证关键页面或点击操作。
+- 前端格式和语法验证不依赖 IDE 飘红/飘黄：进入验证阶段时读取 `.codex/local-environment.json` 的 `frontendQuality`，核对 ESLint/Prettier/EditorConfig/Biome/Stylelint/TypeScript 配置是否变化，再运行项目已有 lint/format/typecheck/build 脚本；没有脚本时说明缺口，不臆造会全仓改格式的命令。
 - 新建文件前必须确认 module、层级职责、包路径、同类文件位置和依赖方向，尤其注意接口、实现、实体、契约可能分属不同 module。
 - 明确固定集合的状态、类型、来源、动作、阶段、结果等值优先写成业务 Enum，避免魔法字符串和数字散落。
 - URL、密钥、开关、阈值、时间窗、线程池、缓存 TTL、外部系统参数等环境或运维可变值优先写入 yml/properties 或配置中心，并通过配置类注入。

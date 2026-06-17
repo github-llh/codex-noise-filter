@@ -96,6 +96,7 @@
 - 前端环境缓存：`14-environment-cache-by-stack.md#node前端环境缓存`
 - 前端测试与验证：`11-frontend-vue-react.md#测试与验证`
 - 前端 lint/format/type check：`11-frontend-vue-react.md#lint格式化与类型检查`
+- 前端语法与缩进规范缓存：`14-environment-cache-by-stack.md#node前端环境缓存`
 - 小程序开发规则：`12-miniprogram-development.md`
 - 小程序项目形态识别：`12-miniprogram-development.md#项目形态识别`
 - 小程序语法与框架选择：`12-miniprogram-development.md#语法与框架选择`
@@ -165,7 +166,7 @@
 | Maven 构建/测试/多模块 root | `06` + `14` + `03` | 先验证/复用 Maven/JDK 缓存，再执行 Maven 命令 |
 | 环境路径发现/缓存/忽略规则/当前项目范围 | `02` + `06` | 任务边界、workspace root、cwd、禁止项或用户输入指向当前项目、当前工作区、不跨项目、不要同步到全局时，内部先核对 `.codex/local-environment.json` 和 `.codex/` 忽略规则；需要栈级缓存细节时加 `14`，需要构建命令时加 `03` |
 | 前端页面/布局/表单/状态契约 | `02` + `04` | 涉及 Vue/React 语法或构建测试加 `11` |
-| Vue/React/Vite/组件测试/前端构建 | `02` + `11` | 通用布局状态加 `04`；执行构建/typecheck/lint/test 前加 `06` |
+| Vue/React/Vite/组件测试/前端构建 | `02` + `11` | 通用布局状态加 `04`；只要是前端项目，执行构建/typecheck/lint/format/test 前必须加 `06` + `14`，识别并缓存 ESLint/Prettier/EditorConfig/Biome/Stylelint/TypeScript 等规范文件 |
 | 小程序原生/uni-app/Taro/分包/模拟器 | `02` + `12` | uni-app/Taro 语法加 `11`，通用布局状态加 `04`；执行构建/编译/CI 前加 `06`；只有当前任务目标本身包含模拟器、预览、上传、真机或发布链路，且权限边界清楚时才查开发者工具路径 |
 | 最终回复/交接/压缩上下文/模型或窗口恢复 | `05` | 长任务恢复、自动续跑、上下文丢失、模型切换、窗口切换、模式切换、插件/技能加载、网络错误恢复或需要重建任务边界时加 `02` |
 
@@ -199,9 +200,10 @@
 - `Controller`、`Service`、`接口层`、`实现层`、`I*Service`、`返回实体`、`数据库实体`、`VO`、`DTO`、`DO`、`PO`、`Entity`、`业务代码下沉`、`URL 填充`、`列表加工`、`业务抽象`、`扩展性`、`可维护`、`健壮性`、`策略`、`handler map`、`Assembler`、`Converter`、`领域组件`、`事务`、`@Transactional`、`rollbackFor`、`module 归属`、`新建文件放哪`、`注释`：读 `07-java-backend-architecture.md`。
 - `新建文件`、`文件归属`、`目录位置`、`放哪`、`module 归属`、`package`、`workspace`、`生成目录`、`构建产物`、`dist`、`build`、`target`、`unpackage/dist`、`miniprogram_npm`、`依赖方向`、`循环依赖`、`接口和实现分离`、`测试目录`：先读 `01-global-engineering-rules.md#跨技术栈文件归属与依赖边界`；Java 追加 `07`，Python 追加 `10`，Vue/React 追加 `11`，小程序追加 `12`。
 - `环境`、`命令`、`运行`、`包管理器`、`lockfile`、`root`、`workspace`、`filter`、`版本`、`版本不匹配`、`构建失败后重算`、`JDK`、`Maven`、`Node`、`Python`、`虚拟环境`、`模拟器`、`开发者工具`、`CLI`、`全局安装`：先读 `01-global-engineering-rules.md#跨技术栈环境与命令`；只要流程进入工具链命令节点就追加 `06`，先从项目根读取/复用 `.codex/local-environment.json`，缺失或不满足再按技术栈发现、验证、创建或更新缓存，并按技术栈追加 `03`/`10`/`11`/`12`。
-- `构建`、`编译`、`测试`、`lint`、`typecheck`、`build`、`运行`、`预览`、`打包`、`代码生成`、`mvn test`、`npm run build`、`pnpm run build`、`pytest`、`uv run`：当本 skill 流程进入这些验证或工具链节点时，先读 `06-environment-discovery.md#构建测试前环境缓存门禁`，再按技术栈追加 `14` 和命令规则；命令失败疑似环境问题时必须重算并更新 `.codex/local-environment.json` 后重试一次。
+- `构建`、`编译`、`测试`、`lint`、`format`、`typecheck`、`build`、`运行`、`预览`、`打包`、`代码生成`、`mvn test`、`npm run build`、`pnpm run build`、`pytest`、`uv run`：当本 skill 流程进入这些验证或工具链节点时，先读 `06-environment-discovery.md#构建测试前环境缓存门禁`，再按技术栈追加 `14` 和命令规则；前端项目必须先识别 ESLint/Prettier/EditorConfig/Biome/Stylelint/TypeScript 规范文件并写入/更新 `.codex/local-environment.json`；命令失败疑似环境问题时必须重算并更新缓存后重试一次。
 - `当前项目`、`当前工作区`、`只修改当前项目`、`只改当前项目`、`不跨项目`、`不要同步到全局`、`不要改其他目录`、`workspaceRoot`、`local-environment.json 没触发`、`local-environment 没触发`、`.codex/local-environment.json`：先读 `06-environment-discovery.md#当前项目范围门禁`；若后续要执行构建、测试、运行或代码生成，再追加对应技术栈缓存规则和命令规则。
 - `测试`、`验证`、`lint`、`format`、`typecheck`、`build`、`unit test`、`e2e`、`pytest`、`mvn test`、`Vitest`、`Jest`、`Playwright`、`Cypress`、`浏览器点击`、`电脑屏幕`、`Browser`、`Computer Use`、`模拟器验证`、`真机验证`、`无法验证`：先读 `01-global-engineering-rules.md#跨技术栈验证策略`，再按技术栈追加 `03`/`04`/`10`/`11`/`12`。
+- `ESLint`、`eslint.config`、`.eslintrc`、`react/jsx-indent-props`、`jsx-indent`、`indent`、`Prettier`、`.prettierrc`、`prettier.config`、`.editorconfig`、`EditorConfig`、`Biome`、`biome.json`、`Stylelint`、`.stylelintrc`、`oxlint`、`tsconfig.json`、`jsconfig.json`、`格式化报错`、`缩进规范`、`语法规范`、`飘红`、`飘黄`：前端项目先读 `14-environment-cache-by-stack.md#node前端环境缓存`，把规范文件、命令和缓存有效性写入/更新 `.codex/local-environment.json`；执行验证时再读 `11-frontend-vue-react.md#lint格式化与类型检查`，不能只依赖 IDE 警告或手工观察。
 - `注释`、`契约注释`、`缺注释`、`JSDoc`、`docstring`、`public API`、`export interface`、`export type`、`interface`、`type.ts`、`api.ts`、`request`、`response`、`DTO`、`VO`、`props 注释`、`slot 注释`、`hook 注释`、`配置注释`、`SQL 注释`、`react/jsx-indent-props`、`jsx-indent`、`lint 缩进`、`格式化报错`：先读 `01-global-engineering-rules.md#跨技术栈注释原则` 和 `01-global-engineering-rules.md#注释契约自动触发`；若 lint/格式化/阅读/检索暴露的是 Vue/React/TypeScript 导出类型、组件契约或 api client，追加 `11-frontend-vue-react.md#typescript-与-api-契约注释`，不能只修缩进后跳过契约缺口。
 - `any`、`: any`、`as any`、`unknown as`、`defineProps<any>`、`PropType<any>`、`React.FC<any>`、`PropsWithChildren<any>`、`Record<string, any>`、`props`、`properties`、`defineProps`、`defineEmits`、`Component properties`、`Taro Props`、`uni-app props`、`属性类型`、`类型缺失`：先读 `02-noise-filter-workflow.md#强规则命中后的自动升级`；Vue/React/TypeScript 加 `11-frontend-vue-react.md#属性类型与-any-边界`，小程序原生/uni-app/Taro 加 `12-miniprogram-development.md#属性与数据类型`。只要是在定义属性、事件、插槽、页面参数、请求响应或公开组件 API，支持类型时必须显式定义类型，不能等待用户要求。
 - `密钥`、`token`、`secret`、`生产地址`、`appid`、`私钥`、`白名单`、`权限`、`认证`、`授权`、`租户`、`审计`、`脱敏`、`上传`、`下载`、`外部 API`、`超时`、`重试`、`动态 URL`、`富文本`、`eval`、`exec`、`反序列化`、`不可回滚副作用`：先读 `01-global-engineering-rules.md#跨技术栈安全与外部边界`；涉及异步、幂等、事务副作用追加 `09`，再按技术栈追加对应 reference。
@@ -217,6 +219,6 @@
 - `注释位置`、`注释原则`、`docstring`、`Javadoc`、`props 注释`、`slot 注释`、`hook 注释`、`配置注释`、`SQL 注释`：读 `01-global-engineering-rules.md#跨技术栈注释原则` 和 `01-global-engineering-rules.md#注释契约自动触发`，再按技术栈追加对应 reference。
 - `高并发`、`幂等`、`死锁`、`异步`、`MQ`、`事件`、`线程池`、`虚拟线程`、`批量`、`用户上下文`、`创建人`、`修改人`：读 `09-concurrency-async-batch.md`。
 - `mvn`、`pom.xml`、`.mvn/maven.config`、`.mvn/jvm.config`、`maven-wrapper.properties`、`JAVA_HOME`、`maven.compiler.release`、`java.version`、`-pl`、`-am`、`多模块构建`、`测试命令`：先读 `14-environment-cache-by-stack.md#mavenjava-环境缓存`，再读 `03-maven-backend-build.md`。
-- `MAVEN_HOME`、`JAVA_HOME`、`Node`、`pnpm`、`IDE 配置路径`、`.codex/local-environment.json`、`local-environment.json`、`.codex/`、`.gitignore`、`check-ignore`、`环境缓存`、`缓存失效`、`验证路径`、`本机候选路径`、`项目配置变化`、`工具版本不匹配`：读 `06-environment-discovery.md#自动环境缓存维护`。
+- `MAVEN_HOME`、`JAVA_HOME`、`Node`、`pnpm`、`IDE 配置路径`、`.codex/local-environment.json`、`local-environment.json`、`.codex/`、`.gitignore`、`check-ignore`、`环境缓存`、`缓存失效`、`验证路径`、`本机候选路径`、`项目配置变化`、`工具版本不匹配`、`ESLint 配置变化`、`Prettier 配置变化`、`.editorconfig 变化`：读 `06-environment-discovery.md#自动环境缓存维护`。
 - `flex`、`grid`、`组件`、`页面`、`路由守卫`、`加载/空状态`：读 `04-frontend-rules.md`。
 - `Context Capsule`、`最终回复`、`记忆管理`、`会话切换`、`归档会话`、`当前会话`、`上下文压缩`、`压缩窗口`、`自动压缩`、`上下文丢失`、`不丢失重要信息`、`自动胶囊`、`恢复边界`、`证据锚点`、`回滚点丢失`、`模型切换`、`切换模型`、`新建窗口`、`切换窗口`、`切换模式`、`插件`、`技能`、`网络错误`、`自动继续`：读 `05-delivery-templates.md#上下文权威与恢复门禁`；如果恢复后继续修改或自动续跑，再追加 `02-noise-filter-workflow.md#skill-规则刷新与会话恢复`。

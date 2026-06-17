@@ -130,7 +130,7 @@
    - 路径缺失、命令失败、项目配置变化或工具版本明显不匹配时，标记该项失效并重新发现；不要继续用失效路径盲跑。
 3. 读取项目配置并选择最贴近项目的环境：
    - Maven/Java 项目必须先按 `14-environment-cache-by-stack.md#mavenjava-环境缓存` 读取 `pom.xml`、`.mvn/*`、wrapper、Java/Maven 版本约束和模块结构，选择匹配度最高的 JDK、Maven 和构建 root。
-   - Node/前端项目必须先按 `14-environment-cache-by-stack.md#node前端环境缓存` 读取目标 `package.json`、lockfile、`engines`、`packageManager` 和 `scripts`，选择匹配度最高的 Node、包管理器和脚本命令。
+   - Node/前端项目必须先按 `14-environment-cache-by-stack.md#node前端环境缓存` 读取目标 `package.json`、lockfile、`engines`、`packageManager`、`scripts`，以及 ESLint/Prettier/EditorConfig/Biome/Stylelint/TypeScript 等语法、缩进和格式规范文件，选择匹配度最高的 Node、包管理器和脚本命令。
    - Python 项目必须先按 `14-environment-cache-by-stack.md#python-环境缓存` 读取 `pyproject.toml`、锁文件、requirements、tox/nox、版本文件和虚拟环境配置，选择匹配度最高的 Python、管理器和命令入口。
    - 小程序项目必须先按 `14-environment-cache-by-stack.md#小程序环境缓存` 读取平台配置、框架配置、输出目录和必要的 `package.json`，选择匹配度最高的小程序框架、目标平台、源码目录、构建脚本和 Node 包管理器。
    - 只读取当前任务命中的技术栈配置，不为了补全缓存扫描无关技术栈。
@@ -187,7 +187,7 @@
 | 场景 | 最小验证 | 记录要点 | 差异规则 |
 | --- | --- | --- | --- |
 | Maven/JDK | `<mavenExecutable> -version`，必要时验证 `JAVA_HOME` 和 `java -version` | `mavenRoot`、`modulePath`、`maven.executable`、`maven.localRepository`、`java.home/version/versionRequirement`、来源 | 先按 `14` 的 Maven/Java 环境缓存匹配，再按 `03` 执行构建 |
-| Node/前端 | `node --version`，项目实际包管理器 `--version`，必要时验证 `corepack --version` | `node.executable`、`node.version`、`packageManager.name/executable/version`、`packageJson`、`packageRoot`、lockfile、scripts、selectedCommand、来源 | 先按 `14` 的 Node/前端环境缓存匹配，再按 `11` 执行构建 |
+| Node/前端 | `node --version`，项目实际包管理器 `--version`，必要时验证 `corepack --version` | `node.executable`、`node.version`、`packageManager.name/executable/version`、`packageJson`、`packageRoot`、lockfile、scripts、selectedCommand、`frontendQuality` 规范文件集合、来源 | 先按 `14` 的 Node/前端环境缓存匹配，再按 `11` 执行构建、lint、format 或 typecheck |
 | Python | `<pythonExecutable> --version`，项目实际管理器或测试工具 `--version` | `python.executable/version/versionRequirement`、`manager`、`packageRoot`、项目配置文件、lockfile、来源 | 先按 `14` 的 Python 环境缓存匹配，再按 `10` 执行命令 |
 | 小程序 | 项目实际构建 CLI `--version`、构建脚本 dry check，只有明确需要时验证 `<wechatDevtoolsCli> --help` | `framework`、`platform`、`projectConfig`、`sourceRoot`、`outputRoot`、`buildCommand`、`devtoolsCli`、来源 | 先按 `14` 的小程序环境缓存匹配，再按 `12` 执行构建/CI |
 

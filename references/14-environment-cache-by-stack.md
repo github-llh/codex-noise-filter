@@ -54,24 +54,34 @@ Maven/Java 命令失败后的重算：
    - 不因为根目录有 `package.json` 就忽略子包的 `package.json`。
 2. 读取目标 `package.json` 字段：
    - `scripts`：优先选择与当前任务匹配的 `build`、`typecheck`、`lint`、`test`、`compile`、框架自定义脚本；不要臆造不存在的脚本。
-   - `dependencies`、`devDependencies`：识别 Vue 2/3、React、Vite、Next、Nuxt、Vue CLI、Taro、uni-app、TypeScript、ESLint 等工具链版本。
+   - `dependencies`、`devDependencies`：识别 Vue 2/3、React、Vite、Next、Nuxt、Vue CLI、Taro、uni-app、TypeScript、ESLint、Prettier、Stylelint、Biome、oxlint 等工具链版本。
    - `engines.node`、`engines.npm`、`packageManager`、Volta 配置：作为 Node 和包管理器版本约束。
-3. 读取锁文件和包管理器配置：
+3. 读取语法、缩进和格式规范文件：
+   - ESLint flat config：`eslint.config.js`、`eslint.config.mjs`、`eslint.config.cjs`、`eslint.config.ts`、`eslint.config.mts`、`eslint.config.cts`。
+   - ESLint legacy config：`.eslintrc`、`.eslintrc.js`、`.eslintrc.cjs`、`.eslintrc.yaml`、`.eslintrc.yml`、`.eslintrc.json`，以及 `package.json` 中的 `eslintConfig`。
+   - Prettier：`package.json` 中的 `prettier`，`.prettierrc`、`.prettierrc.json`、`.prettierrc.yml`、`.prettierrc.yaml`、`.prettierrc.json5`、`.prettierrc.js`、`.prettierrc.cjs`、`.prettierrc.mjs`、`.prettierrc.ts`、`.prettierrc.cts`、`.prettierrc.mts`、`prettier.config.js`、`prettier.config.cjs`、`prettier.config.mjs`、`prettier.config.ts`、`prettier.config.cts`、`prettier.config.mts`，以及 `.prettierignore`。
+   - EditorConfig：从目标文件或目标 package 目录向上查找 `.editorconfig`，直到项目根或命中 `root = true`；缓存每个命中的文件路径。
+   - 其他前端规范：`biome.json`、`biome.jsonc`、`.stylelintrc`、`.stylelintrc.json`、`.stylelintrc.yaml`、`.stylelintrc.yml`、`.stylelintrc.js`、`.stylelintrc.cjs`、`stylelint.config.js`、`stylelint.config.cjs`、`oxlint.json`、`.oxlintrc.json`、`tsconfig.json`、`tsconfig.*.json`、`jsconfig.json`。
+   - 只读取目标 package、workspace root 和触碰文件向上路径内的规范文件；不全仓扫描无关 package，也不把 IDE inspection profile 当作项目规范来源。
+4. 读取锁文件和包管理器配置：
    - `pnpm-lock.yaml` -> 默认 `pnpm`。
    - `yarn.lock`、`.yarnrc.yml` -> 默认 `yarn`，注意 Yarn classic 与 berry。
    - `package-lock.json`、`npm-shrinkwrap.json` -> 默认 `npm`。
    - `bun.lockb`、`bun.lock` -> 默认 `bun`。
    - 没有 lockfile 时再按 `packageManager`、项目 README/CI、scripts 中的命令前缀判断。
-4. 选择命令：
+5. 选择命令：
    - 优先使用 `package.json` 里已存在的 scripts，例如 `<pm> run build`、`<pm> run typecheck`、`<pm> run lint`。
+   - 若存在 ESLint/Prettier/Biome/Stylelint/TypeScript 规范文件或依赖，优先匹配已有 `lint`、`lint:fix`、`format`、`format:check`、`prettier`、`stylelint`、`typecheck`、`check`、`biome`、`oxlint` 脚本；没有脚本时只记录可用工具和缺口，不臆造会改动大量文件的命令。
    - 如果 scripts 明确使用 `npx`、`pnpm dlx`、`yarn dlx` 或框架 CLI，记录为 `commandRunner`，但不要把 `npx` 误判为包管理器。
    - workspace 子包优先使用项目既有 filter/workspace 命令；没有项目范式时，在目标 package 目录执行该 package 的 script。
-5. 匹配本机环境：
+6. 匹配本机环境：
    - 优先复用 `.codex/local-environment.json` 中同一 `packageJson`、lockfile、Node 约束和包管理器仍匹配的缓存。
+   - 缓存中记录的 ESLint/Prettier/EditorConfig/Biome/Stylelint/TypeScript 规范文件不存在、路径集合变化、mtime/size/hash 变化，或 `package.json` 中 scripts/dependencies/devDependencies/packageManager 变化时，必须重新读取规范文件并更新缓存。
    - 缓存缺失或不匹配时，查找本机 Node、corepack、npm、pnpm、yarn、bun 候选，并验证版本。
    - Node 版本不满足 `engines.node`、`.nvmrc`、`.node-version`、Volta 或构建工具最低要求时，继续查找本机候选；找不到则说明缺口，不用不匹配版本盲跑。
-6. 写入缓存：
-   - 写入目标 package 的 `packageJson`、`packageRoot`、`workspaceRoot`、Node 版本约束、实际 Node 路径和版本、包管理器名称/路径/版本、lockfile、选定 scripts 和最终命令。
+7. 写入缓存：
+   - 写入目标 package 的 `packageJson`、`packageRoot`、`workspaceRoot`、Node 版本约束、实际 Node 路径和版本、包管理器名称/路径/版本、lockfile、选定 scripts、最终命令，以及 `frontendQuality`。
+   - `frontendQuality` 至少记录：`eslint`、`prettier`、`editorconfig`、`biome`、`stylelint`、`typescript`、`javascript`/`ecma` 相关配置文件路径，来源字段来自 `packageJson` 还是文件，文件 `mtime`/`size` 或可用 hash，匹配的验证脚本名，是否存在 format check 脚本。
    - 旧缓存若只有字符串形式的 `node.packageManager`，在下一次前端命令前按当前 schema 重写为对象，补齐 `name`、`executable`、`version`、`declared` 和 `commandRunner`。
    - 只写项目声明和已验证结果，不写安装日志、token、registry 凭据或临时失败详情。
 
