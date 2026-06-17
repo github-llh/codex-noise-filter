@@ -12,7 +12,7 @@
 ![Languages](https://img.shields.io/badge/Stacks-Java%20%7C%20Python%20%7C%20Vue%2FReact%20%7C%20MiniProgram-7c3aed)
 [![License](https://img.shields.io/badge/License-Apache--2.0-blue)](LICENSE)
 
-[快速开始](#快速开始) · [为什么用](#为什么用) · [使用方式](#使用方式) · [触发示例](#触发示例) · [能力概览](#能力概览) · [结构](#结构) · [协议](#协议) · [English](README.en.md)
+[快速开始](#快速开始) · [为什么用](#为什么用) · [使用方式](#使用方式) · [触发示例](#触发示例) · [能力概览](#能力概览) · [结构](#结构) · [社区健康](#社区健康) · [协议](#协议) · [English](README.en.md)
 
 </div>
 
@@ -327,6 +327,16 @@ references/
 - 新目标中途插入时，先判断与主任务关系，不默认重置已有调用链。
 - 全局 `AGENTS.md` 不需要承载全部细则，但建议保留为兜底入口。
 - 长期 memory 只记录稳定偏好和跨任务规则；机器私有绝对路径、临时日志、一次性失败和未验证猜测不写入长期记忆。
+
+## 社区健康
+
+本项目补齐 GitHub Community Standards 识别的社区文件：
+
+- [行为准则](CODE_OF_CONDUCT.md)：说明参与沟通和维护者处理边界。
+- [贡献指南](CONTRIBUTING.md)：说明 skill 项目的修改原则、README 双语同步和 PR 检查项。
+- [安全策略](SECURITY.md)：说明安全问题的私密报告方式和支持范围。
+- [Issue 模板](.github/ISSUE_TEMPLATE)：区分 bug 报告和功能建议，并提醒移除敏感信息。
+- [Pull request 模板](.github/PULL_REQUEST_TEMPLATE.md)：要求说明改动范围、同步项和验证结果。
 
 ## 协议
 

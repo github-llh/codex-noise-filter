@@ -12,7 +12,7 @@ Reduce context noise · enforce call-chain checks · load rules progressively ·
 ![Stacks](https://img.shields.io/badge/Stacks-Java%20%7C%20Python%20%7C%20Vue%2FReact%20%7C%20MiniProgram-7c3aed)
 [![License](https://img.shields.io/badge/License-Apache--2.0-blue)](LICENSE)
 
-[Quick Start](#quick-start) · [Why Use It](#why-use-it) · [Usage](#usage) · [Activation Examples](#activation-examples) · [Capabilities](#capabilities) · [Layout](#layout) · [License](#license) · [简体中文](README.md)
+[Quick Start](#quick-start) · [Why Use It](#why-use-it) · [Usage](#usage) · [Activation Examples](#activation-examples) · [Capabilities](#capabilities) · [Layout](#layout) · [Community Health](#community-health) · [License](#license) · [简体中文](README.md)
 
 </div>
 
@@ -327,6 +327,16 @@ references/
 - When the user inserts a new goal, treat it as an incremental task first and do not reset confirmed call chains by default.
 - The global `AGENTS.md` no longer needs to carry every detail, but it should remain as a fallback entry point.
 - Long-term memory should only store stable preferences and reusable rules, not machine-private absolute paths, temporary logs, one-off failures, or unverified guesses.
+
+## Community Health
+
+This project includes the community files recognized by GitHub Community Standards:
+
+- [Code of Conduct](CODE_OF_CONDUCT.md): participation expectations and maintainer enforcement boundaries.
+- [Contributing Guide](CONTRIBUTING.md): skill-specific change rules, bilingual README sync, and pull request checks.
+- [Security Policy](SECURITY.md): private reporting guidance and supported scope.
+- [Issue templates](.github/ISSUE_TEMPLATE): separate bug reports from feature requests and remind reporters to remove sensitive data.
+- [Pull request template](.github/PULL_REQUEST_TEMPLATE.md): requires scope, synchronization notes, and validation results.
 
 ## License
 
