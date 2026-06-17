@@ -35,55 +35,21 @@ description: |
 
 先读 `references/00-index.md`，按快速决策表选择最小 reference 组合，再按触碰范围追加对应文件。不要把所有 references 一次性读完；减少读取不能减少硬约束执行。
 
-最常用路由：
-
-- 通用工程规则、文件归属、环境命令、验证策略、安全边界、硬编码、重复逻辑、注释原则：`references/01-global-engineering-rules.md`
-- 编码风格智能化、魔法值分类、常量/枚举/配置放置、抽象时机：先读 `references/01-global-engineering-rules.md`，再按技术栈追加 `08`、`10`、`11` 或 `12`
-- 上下文预算、调用链确认、失败回退：`references/02-noise-filter-workflow.md`
-- 读取完整性、智能扩窗、Git 历史防回归：`references/13-read-expansion-and-history.md`
-- Maven、本地仓库、后端多模块构建：`references/03-maven-backend-build.md`
-- 前端代码规范、布局、状态、验证：`references/04-frontend-rules.md`
-- Vue/React 语法、版本、环境、运行、测试和构建：`references/11-frontend-vue-react.md`
-- 小程序原生/uni-app/Taro 语法、分包、运行、模拟器和测试：`references/12-miniprogram-development.md`
-- 输出格式、交付清单、上下文胶囊：`references/05-delivery-templates.md`
-- IDE、本机环境统一发现、缓存结构与 `.codex/` 忽略规则：`references/06-environment-discovery.md`
-- Maven/Java、Node/前端、Python、小程序栈级环境缓存：`references/14-environment-cache-by-stack.md`
-- Java 后端架构、归属地、分层和注释：`references/07-java-backend-architecture.md`
-- Java 代码风格、枚举、校验、Lombok、Optional、去重复：`references/08-java-style-patterns.md`
-- Python 语法、环境、运行、测试、lint、类型和性能：`references/10-python-development.md`
+具体路由只在 `references/00-index.md` 维护；不要在外层复制 reference 清单，避免入口膨胀和两处口径漂移。
 
 ## 硬约束
 
 - 默认使用简体中文回复；代码、命令、配置项、文件名、类名、方法名、日志和异常保持原文。
-- 本 skill 的硬约束不因运行方式变化而失效；无论是新增代码、修改已有代码、Plan、Global/Goal、上下文恢复、自动续跑、跨窗口、新指令插入、局部补丁还是后续修复，只要任务属于编程范围，都必须先走索引、确认触碰范围，并执行局部规则对齐。
-- 所有写成“自动触发”“内部触发”“必须自动”的规则都属于本 skill 执行流程内的高优先级门禁；任务状态、代码证据、触碰范围、调用链、工具链节点、Git/worktree 状态和风险信号是触发依据，外部提醒、显式点名 skill 或固定关键词都不能降低触发级别。
-- 修改前必须确认目标文件、问题根因、最小修改方案，以及不应影响的模块、接口、数据结构、权限和业务逻辑。
-- 涉及代码修改前必须先确认调用链与影响面；未闭环时只能继续诊断，不直接改。
-- 本 skill 流程进入文件写入节点时，必须先做补丁写入策略预判：重新读取目标锚点和当前原文，判断能否一次性插入；不能稳定命中时内部自动拆为逐文件、逐语义单元、结构化替换或完整最小语义单元替换，不要等补丁失败后反复输出“上下文有偏差”。
-- 本 skill 流程进入修改、同步、提交、分支、PR、回滚或跨 worktree 操作节点时，必须自动确认 Codex 当前 worktree、项目 Git root、当前分支、上游分支、dirty 状态和目标路径关系；不得把 Codex 临时 worktree、全局 skill 目录、真实项目分支或用户指定目录混用。
-- 涉及既有行为语义、公共契约、历史兼容、回归风险或重构旧逻辑时，不能只看当前任务描述和当前文件窗口；必须自动判断是否需要读取项目 git 历史。若修改点涉及 API/DTO/数据库/权限/路由/配置键/序列化值/外部协议、删除或替换旧逻辑、修复历史 bug、改默认值/状态流转/校验/权限/事务/缓存、调用链意图不清、当前代码与需求冲突、或同一逻辑最近多次变更，必须用 `git log`、`git blame`、`git show`、`git diff`、`git log -S/-G` 等读取最小历史证据，对比原意图和演进原因后再改。只有仓库没有 git、历史缺失、文件未跟踪或历史仍无法解释语义时，才说明缺口并保守处理。
-- 读取行数限制只能作为初始预算，不能作为漏判强规则违背的理由。修改任何技术栈代码时，如果只读了局部窗口，必须自动按文件类型、语法结构、框架配置和对应 reference 判断窗口是否覆盖本次语义单元；不足时扩读到完整逻辑闭环，例如 Java 类/方法/注解/字段，Python 模块/函数/类/docstring/import，Vue/React 组件 props/emits/hooks/state/template，原生小程序 Page/Component/data/setData/wxml/wxss，SQL mapper/动态 SQL，配置块、脚本入口和测试 fixture。未完成必要扩读前，不得声称“未发现硬编码/重复逻辑/分层错位/注释缺口”，也不得以未读区域为理由跳过低风险局部优化。只有语法边界、生成来源或业务语义确实无法自动判断时，才向用户说明缺口或询问。
-- “最小改动范围”不是不处理已命中强规则的理由；当触碰范围、直接调用链或为完成任务必须读取的相关文件里已经出现硬编码、重复逻辑、分层错位、配置写死、注释缺失或其他本 skill 明确治理项时，必须先判断调用链深度、涉及文件数量、契约风险和验证路径，并把低风险项写入当前任务清单和任务胶囊同步处理。若风险低且闭环明确，直接执行对应 skill/reference 的局部对齐；只有会改变 API、DTO、数据库、权限、事务或外部协议语义时，才保留兼容并说明边界。
-- Plan/计划阶段也必须走索引：计划中要列出适用 reference、触碰范围、局部对齐项和验收检查；没有这些内容的计划不能直接进入实现。
-- Global/Goal/目标追踪模式也必须走索引：每轮开始先恢复目标、适用 reference、触碰范围、局部对齐项、验收检查和 Context Capsule。
-- 长任务、频繁上下文压缩、自动续跑、跨窗口继续或失败回退时，必须自动维护任务胶囊和 Context Capsule，把任务清单、触碰范围、调用链、强规则同步项、失败策略、验证状态、证据锚点、已写入/未写入状态和回滚点作为不可丢失状态。
-- 本规则同时适用于新增代码和已有代码修改；凡本次触碰的方法、类、DTO、SQL、测试和调用链，必须在触碰范围内局部对齐规则，不能只让新增代码遵守。
-- 触碰任何技术栈代码、配置、脚本、测试或模板时，都必须先执行跨技术栈公共判断：文件归属和依赖边界、环境与命令来源、验证策略、安全与外部边界、硬编码治理、重复逻辑治理和注释位置；再按 Java、Python、Vue/React、小程序等技术栈语法落地。
-- 写任何新增代码或修改已有代码前，必须先做编码风格智能化预检：识别即将写入或继续保留的字面量、分支、状态值、类型值、阈值、时间窗、外部协议字段、配置 key、路由/事件/storage key、错误码和重复映射；按业务语义判断应复用既有枚举/常量/配置/字典/SDK 常量/设计 token，还是保留局部字面量。不能等代码写完后才被动发现魔法值。
-- 触碰 Java 后端 Controller 时必须执行分层检查：Controller 只保留路由、权限、校验触发、Service 调用和响应转换；返回数据补全、列表遍历加工、状态流转、跨系统取值、数据库/缓存访问等业务逻辑必须迁到 Service 实现层、Assembler 或项目既有业务组件。
-- 触碰 Java 后端接口、实现、返回实体、数据库实体、DTO/VO 时必须同步检查注释与 Lombok：Service 接口类和对外方法、重要实现方法、关键实体字段要补齐必要注释；项目已有 Lombok 时不手写无意义 getter/setter，实体按项目风格优先使用 Lombok，允许并优先复用项目既有 `@Data` 实体范式。
-- 业务逻辑出现稳定扩展点、多状态/多类型分支、跨系统差异、重复流程、重复校验、重复组装、重复字段映射或未来明显会继续增加规则时，必须评估抽象到业务方法、领域组件、策略、枚举行为、Assembler/Converter、配置属性或项目已有扩展点，避免继续堆 if/else、switch、setter 和复制代码。
-- 触碰任何技术栈代码时都必须检查硬编码值：固定闭合集合优先沉淀为该技术栈合适的枚举/联合类型/字典对象，技术标准或单点复用值用集中常量，环境或运维可变值走配置，运行期业务可维护值走字典/数据库/配置中心；不要按变量名前缀机械判断。
-- 所有技术栈任务结束后，默认不做运行态、交互态或屏幕级操作验证：不启动浏览器，不使用 Browser/Computer Use，不操控电脑屏幕点击，不打开小程序模拟器或真机，不手工调用外部系统/API 页面。默认验收以语法检查、编译、类型检查、构建或该技术栈等价的非交互命令通过为准；只有当前任务目标本身是浏览器、截图、页面点击、视觉回归、端到端交互、模拟器、真机、外部服务联调或电脑屏幕操作验证，且权限、环境和副作用边界清楚时，才执行对应操作验证。
+- `SKILL.md` 是轻量外层启动器，只保留触发、索引、总门禁和执行节奏；详细规则放在 references 中由 `00-index.md` 内部路由。规则不在外层重复展开，不代表降级或可跳过。
+- 本 skill 的硬约束不因运行方式变化而失效。新增、修改、删除、重构、Plan、Global/Goal、自动续跑、上下文恢复、跨窗口、新指令插入、局部补丁和后续修复，都必须先走索引、确认触碰范围，并执行局部规则对齐。
+- 所有写成“自动触发”“内部触发”“必须自动”的规则都属于本 skill 执行流程内的高优先级门禁。任务状态、代码证据、触碰范围、调用链、工具链节点、Git/worktree 状态和风险信号是触发依据，外部提醒、显式点名 skill 或固定关键词都不能降低触发级别。
+- 执行门禁、任务胶囊、调用链、强规则自动升级、补丁写入预判、worktree/分支、Plan/Goal、失败回退和既有代码一致性由 `02-noise-filter-workflow.md` 承载。
+- 语言、工具优先级、修改前确认、文件归属、环境命令、验证策略、安全边界、编码风格预检、硬编码、重复逻辑和注释原则由 `01-global-engineering-rules.md` 承载。
+- 读取完整性、智能扩窗和 Git 历史防回归由 `13-read-expansion-and-history.md` 承载；不能用初始读取窗口、局部 diff 或旧记忆替代必要证据。
+- 当前项目范围、`.codex/local-environment.json`、`.codex/` 忽略规则和工具链缓存由 `06-environment-discovery.md` 与 `14-environment-cache-by-stack.md` 承载；进入构建、测试、运行、lint、typecheck、代码生成等工具链节点前必须自动处理项目根缓存。
+- Java、Python、Vue/React、小程序、并发/异步/批量等落地细节只在命中代码证据、调用链、项目配置、命令节点或风险信号时按 `07`、`08`、`09`、`10`、`11`、`12` 追加读取，避免外层膨胀。
 - 对 JetBrains 项目，优先使用 JetBrains MCP / IDE 工具读取、定位、修改和诊断；只有明确不可用、超时或错误时才使用 Shell。
 - 不修改无关文件，不随意重构，不新增依赖，不改 API、DTO、数据库字段、权限、路由、配置键和公共契约，除非当前任务目标已明确授权并完成影响评估。
-- 当任务边界证据指向“当前项目、当前工作区、只修改当前项目、不跨项目、不影响其他目录”时，必须把 `.codex/local-environment.json` 作为项目范围和工具链缓存的前置证据读取并核对；即使本轮不执行构建/测试，也要在任务胶囊说明缓存存在性、workspaceRoot 是否匹配、`.codex/` 是否被忽略，以及本轮为何不更新或不使用工具链路径。该触发由本 skill 流程在确认任务边界时自动执行。
-- 当本 skill 执行流程进入构建、编译、测试、lint、typecheck、运行、预览、打包、发布前校验或代码生成节点时，作为流程内置前置步骤，必须先定位项目根并优先读取 `<project-root>/.codex/local-environment.json`；存在且满足当前命令时直接使用缓存路径组装命令，不存在或不满足时按 `06` + `14` 自动发现、验证并创建/更新该文件。
-- 后端 Maven 多模块项目默认从聚合 root 节点构建；执行 Maven/JDK/Node/Python/小程序工具链相关命令时，必须先按技术栈读取项目配置并验证/复用 `.codex/local-environment.json`。
-- 工具链命令不得依赖经验猜测或人工手动指定：Java/Maven 读取 `pom.xml`、`.mvn/*`、wrapper 和 Java/Maven 版本约束；Python 读取 `pyproject.toml`、锁文件、requirements、tox/nox 和 Python 版本文件；Node/前端读取目标 `package.json`、lockfile、`engines`、`packageManager`、`.nvmrc`/`.node-version`/Volta 和 `scripts`；小程序读取 `project.config.json`、`app.json`、`pages.json`、`manifest.json`、Taro/uni-app 配置和必要的 `package.json`。必须自动匹配最合适的 JDK/Maven、Python/虚拟环境/管理器、Node/包管理器/脚本、小程序框架/平台/构建命令，再写入或复用 `.codex/local-environment.json`。
-- 缓存已满足当前项目配置和命令时直接使用；编译、构建、测试、lint、typecheck、运行、预览或代码生成失败且疑似工具路径、版本、依赖、锁文件、脚本、模块路径、workspace/filter、虚拟环境、框架平台或开发者工具不匹配时，必须重新读取对应技术栈配置和本机候选环境，更新 `.codex/local-environment.json` 后用同一目标命令重试一次。只有仍无法自动确认时，才说明缺口，不把常规环境匹配转嫁成人工手动指定。
-- `.codex/local-environment.json` 已满足当前命令需求时直接使用缓存路径执行；缓存缺失、失效或不满足项目配置时才查找本机候选，验证通过后写回缓存，并用新缓存路径重试原构建、编译、测试或运行命令。
-- 更新 `.codex/local-environment.json` 后，必须自动确认项目根 `.gitignore` 是否包含 `/.codex/`，没有则补齐。
 - 当前 Codex home 下的全局 `AGENTS.md` 建议保留为轻量兜底；本 skill 已内化编程规则，编程任务优先按 skill 索引执行。
 
 ## 执行节奏
