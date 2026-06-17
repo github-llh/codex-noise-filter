@@ -275,6 +275,7 @@ references/
 - 小程序 npm、插件、分包、独立分包、预下载、权限、登录、支付、订阅消息、web-view 等能力必须按目标平台官方限制处理，并保留密钥、appid、上传凭证和白名单安全边界。
 - 小程序验证默认以构建/编译通过为准；`miniprogram-simulate`、`miniprogram-ci`、HBuilderX/uni-app 自动化、官方模拟器或真机只在当前任务目标本身需要操作性证据且权限边界清楚时执行。
 - 注释原则跨技术栈保持一致：注释放在对应技术栈最自然的契约位置，例如 Java Service 接口、Python docstring、Vue props/emits/slots 附近、React 组件/Hook/type 附近、前端导出 interface/type 和 api client 附近、SQL/配置定义处。新增、修改、阅读、检索、lint/format/typecheck 修复或截图/diff 审查时，只要暴露出明显契约缺口，都要内部触发注释检查。
+- 前端和小程序的属性类型属于自动强规则：定义 props、properties、事件、插槽、页面参数、请求/响应或公开组件 API 时，支持 TypeScript、JSDoc、PropTypes、Vue props type、原生小程序 `properties.type` 或框架类型的项目必须显式定义类型；禁止用裸 `any`、`as any`、`Record<string, any>` 或泛化对象掩盖契约问题。
 - 硬编码治理跨技术栈保持一致：固定闭合集合优先用本栈枚举/联合类型/字典对象，技术标准值优先框架常量，环境或运维可变值走配置，运行期业务可维护值走字典/数据库/配置中心。
 - 重复逻辑治理跨技术栈保持一致：字段不同但结构相同的分支、映射、校验、默认值和展示组装，先判断是否为稳定变化点，再用本栈 mapper、converter、schema、策略、hook/composable 或 helper 收敛。
 - Vue/React 修改优先运行项目已有 `typecheck`、`build`、`lint` 或等价语法/编译命令；不默认用浏览器验证关键页面或点击操作。

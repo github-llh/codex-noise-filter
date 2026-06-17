@@ -15,6 +15,7 @@
 - [React 规则](#react-规则)
 - [组件注释位置](#组件注释位置)
 - [TypeScript 与 API 契约注释](#typescript-与-api-契约注释)
+- [属性类型与 any 边界](#属性类型与-any-边界)
 - [状态、路由与接口](#状态路由与接口)
 - [枚举、常量与配置](#枚举常量与配置)
 - [环境与依赖](#环境与依赖)
@@ -123,6 +124,26 @@ TypeScript 的类型只能表达形状，不能完整表达业务语义、来源
 - 简单局部类型、只在单文件内部使用且命名已完整表达语义的字段，可以不补注释；但必须在任务胶囊或最终回复说明保留原因，避免把未判断误当成无需注释。
 - 补注释不得改变序列化字段名、接口 code、路由、权限、状态值、请求方法和 loading/cache 行为。
 - 对 `react/jsx-indent-props`、`jsx-indent`、Prettier 缩进这类格式问题，先按项目 lint 风格修缩进，再检查同一 JSX/组件/type/API 语义单元是否存在契约注释缺口；低风险时同步补齐。
+
+## 属性类型与 any 边界
+
+这是内部自动门禁，不依赖用户说“不要写 any”。新增、修改、阅读、检索、lint/typecheck 修复、截图/diff 审查或调用链确认时，只要看到前端属性定义、事件定义、插槽定义、页面参数、请求/响应、公开组件 API 或模型类型，就必须检查是否有明确类型。
+
+必须处理的信号：
+
+- Vue：`props`、`defineProps`、`defineEmits`、`defineSlots`、`withDefaults`、`PropType`、组件 `modelValue`、slot scope、composable 入参/返回值。
+- React：`Props`/`State`/`Context`/`Ref` 接口、组件函数参数、children、render prop、事件回调、Hook 入参/返回值、第三方组件二次封装透传属性。
+- TypeScript：`: any`、`as any`、`unknown as`、`Record<string, any>`、`Function`、`Object`、`Array<any>`、`Promise<any>`、`React.FC<any>`、`PropsWithChildren<any>`、`defineProps<any>`、`PropType<any>`、导出类型字段缺失。
+- JavaScript 项目：即使没有 TypeScript，也要用项目已有 JSDoc、PropTypes、Vue `type`/`validator`、默认值或运行期校验表达属性契约；不要让公开属性变成无约束对象。
+
+落地规则：
+
+- 支持 TypeScript 时，属性、事件、插槽、公开组件 API、请求/响应和模型字段必须定义具体类型；优先复用已有 `interface`、`type`、生成类型、后端字典/枚举、SDK 类型或组件库类型。
+- 禁止用裸 `any` 逃避契约。确实接收未知数据时优先 `unknown`，在边界处做类型收窄、schema 校验、类型守卫或 adapter 转换，再进入业务组件。
+- 透传第三方组件属性时，优先继承第三方组件提供的 props 类型，或用 `Pick`/`Omit`/交叉类型收窄；不要用 `{ [key: string]: any }` 放开全部属性。
+- Vue props 必须声明类型和必要默认值；复杂对象/数组用工厂默认值，TypeScript 项目用 `defineProps<T>()` 或 `PropType<T>`，不写 `Object as any`。
+- React 组件参数必须用命名清晰的 props 类型；事件回调使用 React/DOM 或组件库提供的事件类型，不写 `(e: any) => ...`。
+- 只有项目不支持类型系统且没有 PropTypes/JSDoc/运行期校验范式时，才可保留无法表达的动态属性，并在任务胶囊说明原因和后续收敛点。
 
 ## 状态、路由与接口
 
