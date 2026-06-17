@@ -11,6 +11,8 @@
 
 ## 目录
 
+- [当前项目范围门禁](#当前项目范围门禁)
+- [构建测试前环境缓存门禁](#构建测试前环境缓存门禁)
 - [发现顺序](#发现顺序)
 - [自动环境缓存维护](#自动环境缓存维护)
 - [Maven/Java 环境缓存](#mavenjava-环境缓存)
@@ -22,6 +24,56 @@
 - [缓存策略](#缓存策略)
 - [写入边界](#写入边界)
 - [与长期记忆的关系](#与长期记忆的关系)
+
+## 当前项目范围门禁
+
+当任务边界被限定为“当前项目、当前工作区、只修改当前项目、不跨项目、不要同步到全局、不要改其他目录”时，`.codex/local-environment.json` 不只是工具链路径缓存，也作为项目范围证据自动触发。即使本轮只改文档、配置或 skill 规则且不准备执行 Maven/Node/Python/小程序命令，也必须做轻量核对。该门禁由本 skill 在确认任务边界时内部触发，不依赖用户显式提醒。
+
+触发后先做轻量核对：
+
+1. 定位当前任务工作区根，优先用 `git rev-parse --show-toplevel`，失败时用当前路径和项目根标志。
+2. 读取当前工作区的 `.codex/local-environment.json`，只读当前项目，不读取或同步全局 skill 目录、其他仓库或父级无关目录。
+3. 核对 `workspaceRoot`、`scope`、工具链缓存项和当前工作区是否一致；缓存缺少 `workspaceRoot` 时不能据此扩大范围，只能记录“缓存缺少范围字段，本轮按当前 Git root 保守处理”。
+4. 用 `git check-ignore -v .codex/local-environment.json .codex/` 核对 `.codex/` 是否被当前项目根 `.gitignore` 覆盖；未覆盖时按“自动环境缓存维护”补根忽略规则。
+5. 若本轮不执行构建、测试、运行、预览、代码生成或工具链命令，不查找本机候选、不验证版本、不更新工具路径，只在任务胶囊记录“已核对缓存存在性和项目范围，本轮不使用工具链路径”。
+6. 若后续准备执行工具链命令，再进入“自动环境缓存维护”和对应 `14` 技术栈缓存规则，验证并按需更新缓存。
+
+不得出现的行为：
+
+- 不能因为当前项目有 `.codex/local-environment.json` 就同步或修改其他目录下的 skill 副本。
+- 不能把全局 `~/.codex/skills/...` 的缓存或路径当成当前项目范围证据。
+- 不能为了补齐缓存 schema 查找无关技术栈或写入未验证路径。
+- 不能在用户已限定当前项目时，只用当前 cwd 口头说明范围而不核对本项目 `.codex/local-environment.json` 和忽略规则。
+
+## 构建测试前环境缓存门禁
+
+本节是自动门禁，不需要用户提醒、指定或追问。只要本 skill 的执行流程进入构建、编译、测试、lint、typecheck、运行、预览、打包、发布前校验或代码生成节点，就必须先从当前任务项目根处理 `.codex/local-environment.json`。
+
+执行顺序：
+
+1. 定位项目根：优先 `git rev-parse --show-toplevel`；非 Git 项目按当前触碰文件向上查找 `pom.xml`、`package.json`、`pyproject.toml`、`project.config.json` 等根标志。
+2. 固定缓存路径：只使用 `<project-root>/.codex/local-environment.json`，不得使用父目录、其他仓库或全局 skill 目录的缓存。
+3. 缓存存在：
+   - JSON 可解析且包含当前命令所需工具链时，优先直接使用缓存中的 `executable`、`home`、`localRepository`、`packageManager.executable`、`python.executable`、`devtoolsCli` 等路径组装命令。
+   - 缓存缺少 `workspaceRoot` 时，不阻断使用；按当前项目根保守补充判断，并在下次需要更新缓存时写入 `workspaceRoot`。
+   - 只有缓存路径不存在、JSON 无法解析、项目配置明确变化、缓存不满足当前命令或命令失败疑似环境问题时，才进入重新发现。
+4. 缓存不存在：
+   - 创建 `<project-root>/.codex/` 目录。
+   - 按当前命令命中的技术栈读取项目配置，再按 `14-environment-cache-by-stack.md` 查找本机候选、执行最小验证。
+   - 验证通过后创建 `.codex/local-environment.json`，只写当前命令需要且已验证的字段，不为补齐 schema 写空值或猜测值。
+5. 执行命令：使用缓存路径或新验证路径执行原目标命令；不要回退到未验证全局命令。
+6. 命令失败：
+   - 如果错误可能来自工具路径、版本、依赖、锁文件、脚本、模块路径、workspace/filter、虚拟环境、框架平台、本地仓库或开发者工具路径不匹配，必须重新读取项目配置和本机候选环境。
+   - 找到更匹配环境后更新 `.codex/local-environment.json`，并用同一目标命令重试一次。
+   - 重试仍失败时，停止连续重试，区分环境问题、依赖缺失、项目历史失败和本次改动问题。
+7. 忽略规则：创建或更新缓存后，必须确认项目根 `.gitignore` 覆盖 `/.codex/`，没有则补齐并用 `git check-ignore -v` 验证。
+
+禁止行为：
+
+- 不允许先跑构建/测试失败后才想起检查缓存。
+- 不允许因为当前 shell 有 `mvn/node/python` 就跳过项目根缓存。
+- 不允许把缓存缺失转交给用户手动指定路径；应先自动发现、验证并创建。
+- 不允许在缓存可用时重复全盘查找环境。
 
 ## 发现顺序
 
@@ -58,11 +110,11 @@
 
 ## 自动环境缓存维护
 
-只要任务需要使用 Maven/JDK/Node/Python/小程序开发者工具等本机工具链执行构建、编译、测试、运行、预览、打包、发布前校验或代码生成，就自动前置执行本流程；不需要额外提出维护 `.codex/local-environment.json`。
+只要任务需要使用 Maven/JDK/Node/Python/小程序开发者工具等本机工具链执行构建、编译、测试、lint、typecheck、运行、预览、打包、发布前校验或代码生成，就自动前置执行本流程；不需要额外提出维护 `.codex/local-environment.json`。具体执行顺序先按 [构建测试前环境缓存门禁](#构建测试前环境缓存门禁) 处理项目根缓存，再进入当前技术栈发现。
 
 触发场景：
 
-- 即将执行 `mvn`、`java`、`node`、`npm`、`pnpm`、`yarn`、`bun`、`python`、`pytest`、`uv`、`poetry`、`tox`、`nox`、微信开发者工具 CLI、`miniprogram-ci`、Taro/uni-app 构建命令等。
+- 即将执行 `mvn`、`java`、`node`、`npm`、`pnpm`、`yarn`、`bun`、`python`、`pytest`、`uv`、`poetry`、`tox`、`nox`、微信开发者工具 CLI、`miniprogram-ci`、Taro/uni-app 构建命令，以及 lint、typecheck、compile、codegen 等项目脚本。
 - 构建、编译、测试、运行命令失败，且失败原因可能是工具路径、版本、`JAVA_HOME`、本地 Maven 仓库、包管理器、虚拟环境、开发者工具路径或工作目录不匹配。
 - 任务目标直接涉及强化、补齐或更新 `.codex/local-environment.json`。
 

@@ -109,8 +109,10 @@
 - Maven/Java 环境缓存：`14-environment-cache-by-stack.md#mavenjava-环境缓存`
 - Python 环境缓存：`14-environment-cache-by-stack.md#python-环境缓存`
 - 自动环境缓存维护：`06-environment-discovery.md#自动环境缓存维护`
+- 构建测试前环境缓存门禁：`06-environment-discovery.md#构建测试前环境缓存门禁`
 - 环境缓存结构：`06-environment-discovery.md#缓存结构`
 - 环境缓存策略：`06-environment-discovery.md#缓存策略`
+- 当前项目范围与环境缓存门禁：`06-environment-discovery.md#当前项目范围门禁`
 - 多模块构建 root 节点：`03-maven-backend-build.md#多层-maven-结构构建`
 - 后端验证命令：`03-maven-backend-build.md#后端构建与验证`
 - 前端布局与组件：`04-frontend-rules.md#布局与组件`
@@ -137,13 +139,13 @@
 | Java 事务/并发/批量/异步 | `02` + `07` + `09` | 需要构建验证时加 `03` |
 | Java 枚举/配置/校验/Lombok/重复 if-set | `02` + `01` + `08` | 只问规则可省略 `02`；涉及分层或接口注释加 `07` |
 | 文件归属/目录位置/依赖边界/生成目录 | `02` + `01` | 只问规则可省略 `02`；Java 加 `07`，Python 加 `10`，Vue/React 加 `11`，小程序加 `12` |
-| 环境/运行/命令/包管理器/root/workspace | `02` + `01` + `06` + `14` | 只问规则可省略 `02`；执行工具链命令前按技术栈读取配置、验证/复用缓存，再按技术栈加 `03`/`10`/`11`/`12` |
-| 测试/验证/lint/typecheck/build/模拟器 | `02` + `01` + `06` + `14` | 只问规则可省略 `02`；执行工具链命令前按技术栈读取配置、验证/复用缓存，再按技术栈追加 `03`/`04`/`10`/`11`/`12` |
+| 环境/运行/命令/包管理器/root/workspace | `02` + `01` + `06` + `14` | 只问规则可省略 `02`；流程进入工具链命令节点前必须先从项目根读取/复用 `.codex/local-environment.json`，缺失或不满足再发现并创建/更新缓存，再按技术栈加 `03`/`10`/`11`/`12` |
+| 测试/验证/lint/typecheck/build/模拟器 | `02` + `01` + `06` + `14` | 只问规则可省略 `02`；流程进入工具链命令节点前必须先从项目根读取/复用 `.codex/local-environment.json`，缺失或不满足再发现并创建/更新缓存，再按技术栈追加 `03`/`04`/`10`/`11`/`12` |
 | 密钥/权限/租户/审计/外部调用/上传下载/动态内容 | `02` + `01` | 只问规则可省略 `02`；并发副作用加 `09`，再按技术栈追加对应 reference |
 | 编码风格智能化/魔法值/常量放置/抽象边界 | `02` + `01` | Java 加 `08`，Python 加 `10`，Vue/React 加 `11`，小程序加 `12`；触碰后端分层或业务抽象再加 `07` |
 | Python 语法/脚本/服务/包/测试 | `02` + `10` | 运行/测试/lint/type check 前加 `06`，跨系统调用再加对应 reference |
 | Maven 构建/测试/多模块 root | `06` + `14` + `03` | 先验证/复用 Maven/JDK 缓存，再执行 Maven 命令 |
-| 环境路径发现/缓存/忽略规则 | `06` | 需要栈级缓存细节时加 `14`，需要构建命令时加 `03`；涉及代码修改时加 `02` |
+| 环境路径发现/缓存/忽略规则/当前项目范围 | `06` | 用户强调只修改当前项目、当前工作区或不跨项目时先核对 `.codex/local-environment.json`；需要栈级缓存细节时加 `14`，需要构建命令时加 `03`；涉及代码修改时加 `02` |
 | 前端页面/布局/表单/状态契约 | `02` + `04` | 涉及 Vue/React 语法或构建测试加 `11` |
 | Vue/React/Vite/组件测试/前端构建 | `02` + `11` | 通用布局状态加 `04`；执行构建/typecheck/lint/test 前加 `06` |
 | 小程序原生/uni-app/Taro/分包/模拟器 | `02` + `12` | uni-app/Taro 语法加 `11`，通用布局状态加 `04`；执行构建/编译/CI 前加 `06`；只有当前任务目标本身包含模拟器、预览、上传、真机或发布链路，且权限边界清楚时才查开发者工具路径 |
@@ -176,7 +178,9 @@
 - `补丁拒绝`、`补丁整体拒绝`、`没有写入`、`上下文行不一致`、`上下文不匹配`、`patch rejected`、`hunk failed`、`apply_patch failed`、`重复重试`、`精准 patch`、`逐个 patch`、`逐文件 patch`、`整段替换`、`替换完整语义单元`：先读 `02-noise-filter-workflow.md#失败处理`，必须判断是否切换为逐文件精准补丁、IDE/结构化替换或完整最小语义单元替换。
 - `Controller`、`Service`、`接口层`、`实现层`、`I*Service`、`返回实体`、`数据库实体`、`VO`、`DTO`、`DO`、`PO`、`Entity`、`业务代码下沉`、`URL 填充`、`列表加工`、`业务抽象`、`扩展性`、`可维护`、`健壮性`、`策略`、`handler map`、`Assembler`、`Converter`、`领域组件`、`事务`、`@Transactional`、`rollbackFor`、`module 归属`、`新建文件放哪`、`注释`：读 `07-java-backend-architecture.md`。
 - `新建文件`、`文件归属`、`目录位置`、`放哪`、`module 归属`、`package`、`workspace`、`生成目录`、`构建产物`、`dist`、`build`、`target`、`unpackage/dist`、`miniprogram_npm`、`依赖方向`、`循环依赖`、`接口和实现分离`、`测试目录`：先读 `01-global-engineering-rules.md#跨技术栈文件归属与依赖边界`；Java 追加 `07`，Python 追加 `10`，Vue/React 追加 `11`，小程序追加 `12`。
-- `环境`、`命令`、`运行`、`包管理器`、`lockfile`、`root`、`workspace`、`filter`、`版本`、`版本不匹配`、`构建失败后重算`、`JDK`、`Maven`、`Node`、`Python`、`虚拟环境`、`模拟器`、`开发者工具`、`CLI`、`全局安装`：先读 `01-global-engineering-rules.md#跨技术栈环境与命令`；只要准备执行工具链命令就追加 `06` 按技术栈读取配置、验证/复用缓存，并按技术栈追加 `03`/`10`/`11`/`12`。
+- `环境`、`命令`、`运行`、`包管理器`、`lockfile`、`root`、`workspace`、`filter`、`版本`、`版本不匹配`、`构建失败后重算`、`JDK`、`Maven`、`Node`、`Python`、`虚拟环境`、`模拟器`、`开发者工具`、`CLI`、`全局安装`：先读 `01-global-engineering-rules.md#跨技术栈环境与命令`；只要流程进入工具链命令节点就追加 `06`，先从项目根读取/复用 `.codex/local-environment.json`，缺失或不满足再按技术栈发现、验证、创建或更新缓存，并按技术栈追加 `03`/`10`/`11`/`12`。
+- `构建`、`编译`、`测试`、`lint`、`typecheck`、`build`、`运行`、`预览`、`打包`、`代码生成`、`mvn test`、`npm run build`、`pnpm run build`、`pytest`、`uv run`：当本 skill 流程进入这些验证或工具链节点时，先读 `06-environment-discovery.md#构建测试前环境缓存门禁`，再按技术栈追加 `14` 和命令规则；命令失败疑似环境问题时必须重算并更新 `.codex/local-environment.json` 后重试一次。
+- `当前项目`、`当前工作区`、`只修改当前项目`、`只改当前项目`、`不跨项目`、`不要同步到全局`、`不要改其他目录`、`workspaceRoot`、`local-environment.json 没触发`、`local-environment 没触发`、`.codex/local-environment.json`：先读 `06-environment-discovery.md#当前项目范围门禁`；若后续要执行构建、测试、运行或代码生成，再追加对应技术栈缓存规则和命令规则。
 - `测试`、`验证`、`lint`、`format`、`typecheck`、`build`、`unit test`、`e2e`、`pytest`、`mvn test`、`Vitest`、`Jest`、`Playwright`、`Cypress`、`浏览器点击`、`电脑屏幕`、`Browser`、`Computer Use`、`模拟器验证`、`真机验证`、`无法验证`：先读 `01-global-engineering-rules.md#跨技术栈验证策略`，再按技术栈追加 `03`/`04`/`10`/`11`/`12`。
 - `密钥`、`token`、`secret`、`生产地址`、`appid`、`私钥`、`白名单`、`权限`、`认证`、`授权`、`租户`、`审计`、`脱敏`、`上传`、`下载`、`外部 API`、`超时`、`重试`、`动态 URL`、`富文本`、`eval`、`exec`、`反序列化`、`不可回滚副作用`：先读 `01-global-engineering-rules.md#跨技术栈安全与外部边界`；涉及异步、幂等、事务副作用追加 `09`，再按技术栈追加对应 reference。
 - `编码风格智能化`、`写代码风格`、`魔法值`、`magic string`、`magic number`、`固定值`、`字面量`、`抽常量`、`常量`、`枚举`、`Enum`、`状态值`、`类型值`、`来源值`、`协议`、`模式`、`渠道`、`格式`、`默认值`、`阈值`、`时间窗`、`content-type`、`media type`、`平台编码`、`字典`：先读 `01-global-engineering-rules.md#跨技术栈编码风格智能化门禁` 和 `01-global-engineering-rules.md#跨技术栈硬编码治理`；Java 落地追加 `08`，Python 追加 `10`，Vue/React 追加 `11`，小程序追加 `12`。
