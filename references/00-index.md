@@ -101,6 +101,8 @@
 - Lombok 使用标准：`08-java-style-patterns.md#lombok-使用标准`
 - token 预算与读取窗口：`02-noise-filter-workflow.md#上下文预算`
 - 调用链闭环：`02-noise-filter-workflow.md#调用链确认`
+- 补丁写入策略预判：`02-noise-filter-workflow.md#补丁写入策略预判`
+- Codex worktree 与项目分支门禁：`02-noise-filter-workflow.md#codex-worktree-与项目分支门禁`
 - 既有代码修改一致性：`02-noise-filter-workflow.md#既有代码修改一致性`
 - 失败回退：`02-noise-filter-workflow.md#失败处理`
 - 补丁上下文不匹配与策略切换：`02-noise-filter-workflow.md#失败处理`
@@ -134,7 +136,7 @@
 | 只问规则、解释 skill、优化索引 | `00` + 目标 reference | 需要同步说明时加 README |
 | 报错日志/异常堆栈/构建失败/测试失败/启动失败 | `02` | 按日志识别技术栈：Maven 加 `06` + `03`，Python 加 `06` + `10`，Vue/React/Node 加 `06` + `11`，小程序加 `06` + `12`；触碰代码再加 `01` 和对应业务 reference |
 | Plan/Global/Goal/续跑/上下文恢复 | `02` | 涉及代码层再加对应业务 reference |
-| Git 历史/提交记录/回归风险/历史兼容 | `13` | 按文件类型和风险追加业务 reference；需要同步任务胶囊时加 `02`，需要理解具体技术栈语义时加 `07`/`08`/`10`/`11`/`12` |
+| Git 历史/提交记录/回归风险/历史兼容/worktree/分支 | `13` | worktree/分支状态先读 `02`；历史语义按文件类型和风险追加 `13` 与业务 reference；需要同步任务胶囊时加 `02` |
 | Java Controller/Service/Entity/DTO 修改 | `02` + `07` | 枚举/校验/Lombok/Optional/重复逻辑加 `08` |
 | Java 事务/并发/批量/异步 | `02` + `07` + `09` | 需要构建验证时加 `03` |
 | Java 枚举/配置/校验/Lombok/重复 if-set | `02` + `01` + `08` | 只问规则可省略 `02`；涉及分层或接口注释加 `07` |
@@ -176,6 +178,8 @@
 - `读取行数`、`行数限制`、`窗口不足`、`只读了局部`、`没读到`、`漏判`、`漏修`、`智能扩窗`、`扩读`、`完整逻辑`、`完整闭环`、`完整方法`、`完整类`、`完整组件`、`完整函数`、`完整模块`、`完整页面`、`完整 SQL`、`语义单元`、`符号完整体`、`局部规则扫描`、`未读区域`、`读到某些代码`、`自动判断`、`不等外部指定`：先读 `13-read-expansion-and-history.md#读取完整性与智能扩窗`，再按命中的技术栈追加 `07`/`08`/`10`/`11`/`12`。
 - `报错`、`报错了`、`失败了`、`不行`、`还是这样`、`处理一下`、`看下这个`、`Exception`、`Caused by`、`Traceback`、`Error:`、`BUILD FAILURE`、`Failed to execute goal`、`Compilation failure`、`npm ERR`、`pnpm ERR`、`yarn error`、`pytest`、`AssertionError`、`TypeError`、`ReferenceError`、`NullPointerException`、`SQLSyntaxErrorException`、`HTTP 500`、`启动失败`、`测试失败`、`构建失败`：先读 `02-noise-filter-workflow.md#自动意图识别`，再按日志中的文件、命令、框架和工具链追加对应 reference。
 - `补丁拒绝`、`补丁整体拒绝`、`没有写入`、`上下文行不一致`、`上下文不匹配`、`patch rejected`、`hunk failed`、`apply_patch failed`、`重复重试`、`精准 patch`、`逐个 patch`、`逐文件 patch`、`整段替换`、`替换完整语义单元`：先读 `02-noise-filter-workflow.md#失败处理`，必须判断是否切换为逐文件精准补丁、IDE/结构化替换或完整最小语义单元替换。
+- `一次性插入`、`一次性 patch`、`补丁预判`、`写入策略`、`小补丁`、`大补丁`、`结构化替换`、`完整语义单元替换`、`不要重复出现上下文偏差`、`上下文有偏差`：先读 `02-noise-filter-workflow.md#补丁写入策略预判`；本 skill 流程进入写入节点时内部判断能否一次性插入，不能稳定命中时自动拆小或换策略。
+- `worktree`、`Codex worktree`、`Codex 工作区`、`项目分支`、`当前分支`、`上游分支`、`git branch`、`git worktree`、`linked worktree`、`临时 worktree`、`分支处理`、`同步分支`、`切换分支`、`提交分支`、`PR 分支`：先读 `02-noise-filter-workflow.md#codex-worktree-与项目分支门禁`；涉及历史语义或回归风险再追加 `13`。
 - `Controller`、`Service`、`接口层`、`实现层`、`I*Service`、`返回实体`、`数据库实体`、`VO`、`DTO`、`DO`、`PO`、`Entity`、`业务代码下沉`、`URL 填充`、`列表加工`、`业务抽象`、`扩展性`、`可维护`、`健壮性`、`策略`、`handler map`、`Assembler`、`Converter`、`领域组件`、`事务`、`@Transactional`、`rollbackFor`、`module 归属`、`新建文件放哪`、`注释`：读 `07-java-backend-architecture.md`。
 - `新建文件`、`文件归属`、`目录位置`、`放哪`、`module 归属`、`package`、`workspace`、`生成目录`、`构建产物`、`dist`、`build`、`target`、`unpackage/dist`、`miniprogram_npm`、`依赖方向`、`循环依赖`、`接口和实现分离`、`测试目录`：先读 `01-global-engineering-rules.md#跨技术栈文件归属与依赖边界`；Java 追加 `07`，Python 追加 `10`，Vue/React 追加 `11`，小程序追加 `12`。
 - `环境`、`命令`、`运行`、`包管理器`、`lockfile`、`root`、`workspace`、`filter`、`版本`、`版本不匹配`、`构建失败后重算`、`JDK`、`Maven`、`Node`、`Python`、`虚拟环境`、`模拟器`、`开发者工具`、`CLI`、`全局安装`：先读 `01-global-engineering-rules.md#跨技术栈环境与命令`；只要流程进入工具链命令节点就追加 `06`，先从项目根读取/复用 `.codex/local-environment.json`，缺失或不满足再按技术栈发现、验证、创建或更新缓存，并按技术栈追加 `03`/`10`/`11`/`12`。
