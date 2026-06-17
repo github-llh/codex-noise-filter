@@ -14,6 +14,7 @@
 - [Vue 3 规则](#vue-3-规则)
 - [React 规则](#react-规则)
 - [组件注释位置](#组件注释位置)
+- [TypeScript 与 API 契约注释](#typescript-与-api-契约注释)
 - [状态、路由与接口](#状态路由与接口)
 - [枚举、常量与配置](#枚举常量与配置)
 - [环境与依赖](#环境与依赖)
@@ -105,6 +106,23 @@
 - React：组件用途写在组件导出或函数定义上方；复杂 props 契约写在 props type/interface 字段附近；复杂 Hook、副作用、memoization、ref、context 边界写在对应 hook 附近；JSX 内只保留非显然分支、可访问性或兼容注释。
 - 测试文件注释解释场景、夹具来源和回归原因；不要注释每一步点击和断言。
 - 如果注释必须跨文件解释，优先把契约沉淀到类型、props、emits、slot、hook、composable、README/Story 示例或测试用例中，不用散落的长注释替代清晰 API。
+
+## TypeScript 与 API 契约注释
+
+TypeScript 的类型只能表达形状，不能完整表达业务语义、来源、单位、兼容性和外部协议。打开 `.ts`、`.tsx`、`.vue`、`api`、`service`、`methods`、`type`、`model`、`schema` 文件时，只要看到以下对外契约，必须自动做注释检查，不等待用户说“补注释”：
+
+- `export interface`、`export type`、导出的 `enum`/常量对象、组件 `Props`、`Emits`、`Slots`、Hook/composable 返回类型。
+- API 命名空间、请求参数、响应结果、分页/筛选/排序参数、统计卡片、字典项、状态/类型/来源字段、时间字段、外部系统 id、权限/租户/脱敏字段。
+- `api/methods`、`service`、`request` 目录里的请求函数，尤其是 URL、loading、缓存、重试、权限、错误处理、幂等或后端接口语义不明显时。
+- lint/format/typecheck 错误只定位到 JSX 缩进、props 缩进或类型位置，但同一文件里已暴露上述契约边界。
+
+落地规则：
+
+- 类型或接口上方用项目既有 JSDoc/块注释风格说明业务对象用途；字段注释只补非显然语义，例如单位、取值来源、后端字典、兼容旧字段、外部协议映射、权限/脱敏含义。
+- API 请求函数注释说明接口用途、关键副作用和特殊边界；不要重复 `http.get`、URL 字符串或参数名本身。
+- 简单局部类型、只在单文件内部使用且命名已完整表达语义的字段，可以不补注释；但必须在任务胶囊或最终回复说明保留原因，避免把未判断误当成无需注释。
+- 补注释不得改变序列化字段名、接口 code、路由、权限、状态值、请求方法和 loading/cache 行为。
+- 对 `react/jsx-indent-props`、`jsx-indent`、Prettier 缩进这类格式问题，先按项目 lint 风格修缩进，再检查同一 JSX/组件/type/API 语义单元是否存在契约注释缺口；低风险时同步补齐。
 
 ## 状态、路由与接口
 
