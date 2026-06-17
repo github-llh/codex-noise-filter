@@ -59,6 +59,7 @@
 - 跨技术栈编码风格智能化门禁：`01-global-engineering-rules.md#跨技术栈编码风格智能化门禁`
 - 跨技术栈硬编码治理：`01-global-engineering-rules.md#跨技术栈硬编码治理`
 - 跨技术栈重复逻辑治理：`01-global-engineering-rules.md#跨技术栈重复逻辑治理`
+- 跨技术栈抽象抽离时机：`01-global-engineering-rules.md#跨技术栈抽象抽离时机`
 - 高风险变更：`01-global-engineering-rules.md#高风险变更`
 - AGENTS 演进建议：`01-global-engineering-rules.md#项目演进规则`
 - Plan 阶段门禁：`02-noise-filter-workflow.md#plan-阶段门禁`
@@ -159,7 +160,7 @@
 | 密钥/权限/租户/审计/外部调用/上传下载/动态内容 | `02` + `01` | 进入风险评估或写入流程时保持 `02`；并发副作用加 `09`，再按技术栈追加对应 reference |
 | 注释/契约缺口/导出类型/API 边界 | `02` + `01` | 命中 Java Service/DTO/VO/Entity 加 `07`；命中 Python 公共模块/类/函数加 `10`；命中 Vue/React props/emits/slots、导出 `interface/type`、api client/request/response 加 `11`；命中小程序 Page/Component/properties 加 `12` |
 | 属性定义/props/properties/any | `02` + `01` | 命中 Vue/React/TypeScript 追加 `11#属性类型与-any-边界`；命中原生小程序/uni-app/Taro 追加 `12#属性与数据类型`；若要执行 typecheck/lint 再加 `06` + `14` |
-| 编码风格智能化/魔法值/常量放置/抽象边界 | `02` + `01` | Java 加 `08`，Python 加 `10`，Vue/React 加 `11`，小程序加 `12`；触碰后端分层或业务抽象再加 `07` |
+| 编码风格智能化/魔法值/常量放置/抽象边界 | `02` + `01` | 命中公共接口/方法/类/文件、helper、base、hook/composable、schema、mapper/converter、adapter、策略、handler map、泛型、`any` 或 `Object` 时，先执行 `01#跨技术栈抽象抽离时机`；Java 加 `08`，Python 加 `10`，Vue/React 加 `11`，小程序加 `12`；触碰后端分层或业务抽象再加 `07` |
 | Python 语法/脚本/服务/包/测试 | `02` + `10` | 运行/测试/lint/type check 前加 `06`，跨系统调用再加对应 reference |
 | Maven 构建/测试/多模块 root | `06` + `14` + `03` | 先验证/复用 Maven/JDK 缓存，再执行 Maven 命令 |
 | 环境路径发现/缓存/忽略规则/当前项目范围 | `02` + `06` | 任务边界、workspace root、cwd、禁止项或用户输入指向当前项目、当前工作区、不跨项目、不要同步到全局时，内部先核对 `.codex/local-environment.json` 和 `.codex/` 忽略规则；需要栈级缓存细节时加 `14`，需要构建命令时加 `03` |
@@ -205,7 +206,8 @@
 - `any`、`: any`、`as any`、`unknown as`、`defineProps<any>`、`PropType<any>`、`React.FC<any>`、`PropsWithChildren<any>`、`Record<string, any>`、`props`、`properties`、`defineProps`、`defineEmits`、`Component properties`、`Taro Props`、`uni-app props`、`属性类型`、`类型缺失`：先读 `02-noise-filter-workflow.md#强规则命中后的自动升级`；Vue/React/TypeScript 加 `11-frontend-vue-react.md#属性类型与-any-边界`，小程序原生/uni-app/Taro 加 `12-miniprogram-development.md#属性与数据类型`。只要是在定义属性、事件、插槽、页面参数、请求响应或公开组件 API，支持类型时必须显式定义类型，不能等待用户要求。
 - `密钥`、`token`、`secret`、`生产地址`、`appid`、`私钥`、`白名单`、`权限`、`认证`、`授权`、`租户`、`审计`、`脱敏`、`上传`、`下载`、`外部 API`、`超时`、`重试`、`动态 URL`、`富文本`、`eval`、`exec`、`反序列化`、`不可回滚副作用`：先读 `01-global-engineering-rules.md#跨技术栈安全与外部边界`；涉及异步、幂等、事务副作用追加 `09`，再按技术栈追加对应 reference。
 - `编码风格智能化`、`写代码风格`、`魔法值`、`magic string`、`magic number`、`固定值`、`字面量`、`抽常量`、`常量`、`枚举`、`Enum`、`状态值`、`类型值`、`来源值`、`协议`、`模式`、`渠道`、`格式`、`默认值`、`阈值`、`时间窗`、`content-type`、`media type`、`平台编码`、`字典`：先读 `01-global-engineering-rules.md#跨技术栈编码风格智能化门禁` 和 `01-global-engineering-rules.md#跨技术栈硬编码治理`；Java 落地追加 `08`，Python 追加 `10`，Vue/React 追加 `11`，小程序追加 `12`。
-- `重复 if`、`重复 set`、`重复赋值`、`重复映射`、`重复转换`、`字段不同逻辑相同`、`默认值填充`、`策略`、`handler map`、`mapper`、`converter`、`adapter`：先读 `01-global-engineering-rules.md#跨技术栈重复逻辑治理`；Java 落地追加 `08`，其他技术栈按文件类型追加对应 reference。
+- `抽象抽离`、`公共接口`、`公共方法`、`公共类`、`公共文件`、`抽公共`、`helper`、`base`、`hook`、`composable`、`schema`、`mapper`、`converter`、`adapter`、`策略`、`handler map`、`泛型`、`Generic`、`Object`、`反射`、`any 例外`：先读 `01-global-engineering-rules.md#跨技术栈抽象抽离时机`；Java 公共抽象追加 `07#业务抽象与扩展性` 和 `08#去硬编码与重复逻辑`，Vue/React 追加 `11#属性类型与-any-边界`，小程序追加 `12#属性与数据类型`。
+- `重复 if`、`重复 set`、`重复赋值`、`重复映射`、`重复转换`、`字段不同逻辑相同`、`默认值填充`、`策略`、`handler map`、`mapper`、`converter`、`adapter`：先读 `01-global-engineering-rules.md#跨技术栈重复逻辑治理` 和 `01-global-engineering-rules.md#跨技术栈抽象抽离时机`；Java 落地追加 `08`，其他技术栈按文件类型追加对应 reference。
 - `Enum`、`yml`、`properties`、`@ConfigurationProperties`、`@Value`、`Bean Validation`、`Lombok`、`@Data`、`getter/setter`、`Optional`、`Stream`、`MapStruct`、`BeanUtils`、`BiConsumer`、`Function`：Java 项目读 `08-java-style-patterns.md`。
 - `Python`、`.py`、`pyproject.toml`、`requirements.txt`、`requirements-dev.txt`、`setup.py`、`tox.ini`、`noxfile.py`、`Pipfile`、`poetry.lock`、`uv.lock`、`.python-version`、`.venv/pyvenv.cfg`、`pytest`、`unittest`、`ruff`、`black`、`isort`、`mypy`、`pyright`、`venv`、`.venv`、`typing`、`dataclass`、`asyncio`、`脚本`、`包管理`、`虚拟环境`：读 `10-python-development.md`；执行命令前追加 `14-environment-cache-by-stack.md#python-环境缓存`。
 - `Vue`、`Vue2`、`Vue 2`、`Vue3`、`Vue 3`、`.vue`、`SFC`、`Composition API`、`Options API`、`script setup`、`defineProps`、`defineEmits`、`props`、`emits`、`slots`、`Vuex`、`Pinia`、`Vue Router`、`React`、`JSX`、`TSX`、`Hooks`、`children`、`render prop`、`useState`、`useEffect`、`Vite`、`Vitest`、`Jest`、`Testing Library`、`Vue Test Utils`、`Cypress`、`Playwright`、`组件创建`、`组件使用`、`组件注释`、`package.json`、`pnpm`、`yarn`、`npm`、`bun`：读 `11-frontend-vue-react.md`。

@@ -139,10 +139,12 @@ TypeScript 的类型只能表达形状，不能完整表达业务语义、来源
 落地规则：
 
 - 支持 TypeScript 时，属性、事件、插槽、公开组件 API、请求/响应和模型字段必须定义具体类型；优先复用已有 `interface`、`type`、生成类型、后端字典/枚举、SDK 类型或组件库类型。
-- 禁止用裸 `any` 逃避契约。确实接收未知数据时优先 `unknown`，在边界处做类型收窄、schema 校验、类型守卫或 adapter 转换，再进入业务组件。
+- 禁止用裸 `any` 逃避业务契约。确实接收未知数据时优先 `unknown`，在边界处做类型收窄、schema 校验、类型守卫或 adapter 转换，再进入业务组件。
 - 透传第三方组件属性时，优先继承第三方组件提供的 props 类型，或用 `Pick`/`Omit`/交叉类型收窄；不要用 `{ [key: string]: any }` 放开全部属性。
 - Vue props 必须声明类型和必要默认值；复杂对象/数组用工厂默认值，TypeScript 项目用 `defineProps<T>()` 或 `PropType<T>`，不写 `Object as any`。
 - React 组件参数必须用命名清晰的 props 类型；事件回调使用 React/DOM 或组件库提供的事件类型，不写 `(e: any) => ...`。
+- 抽出的公共接口、组件、hook/composable、adapter、api service、mapper 或工具方法，先按 `01-global-engineering-rules.md#跨技术栈抽象抽离时机` 判断是否真的需要公共化；公共业务契约仍必须类型化，优先用泛型、联合类型、组件库类型、生成类型或 `unknown` + 收窄保留输入/输出关系。
+- `any` 只允许隔离在最小桥接层：未类型化第三方库、组件库属性全量透传、框架插件扩展点、复杂动态 slot/render prop/children、迁移暂存层或当前 TypeScript 无法表达的兼容边界。保留时必须限制在单个 adapter/helper 或局部签名内，不外泄到业务 props、请求/响应模型、导出业务类型或页面状态，并在任务胶囊记录原因、作用域和后续收敛点。
 - 只有项目不支持类型系统且没有 PropTypes/JSDoc/运行期校验范式时，才可保留无法表达的动态属性，并在任务胶囊说明原因和后续收敛点。
 
 ## 状态、路由与接口

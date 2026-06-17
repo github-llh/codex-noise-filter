@@ -94,6 +94,7 @@
 - uni-app 复用 Vue 规则：`props`、`defineProps`、`emits`、slot scope、页面参数和接口模型必须类型化；TypeScript 项目不得使用 `any` 承接页面/组件属性。
 - Taro 复用 React/Vue 规则：组件 `Props`、页面路由参数、事件回调、Taro API 返回值、请求/响应模型必须显式类型化；不得用 `any`、`Record<string, any>` 或泛化对象绕过。
 - 小程序 API、订阅消息、支付、登录、定位、上传下载、蓝牙、web-view 等平台能力的返回值和回调参数，优先使用官方/框架类型或项目封装类型；没有官方类型时定义最小业务接口，不把动态结果一路传进页面。
+- 抽出公共组件、Behavior、hook、adapter、service、model/schema、mapper 或工具文件前，先按 `01-global-engineering-rules.md#跨技术栈抽象抽离时机` 判断复用语义、变化点和依赖方向。uni-app/Taro 复用前端 `any` 例外边界；原生小程序只有在平台事件 `detail`、插件回调、第三方 SDK 或动态透传属性确实无法静态表达时，才可在最小 adapter/JSDoc/Object 边界保留动态类型，并在入口处做默认值、字段存在性或运行期校验。
 
 处理边界：
 
