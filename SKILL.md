@@ -2,7 +2,7 @@
 name: codex-noise-filter
 description: |
   专用于编程相关、写代码/读代码/改代码/调试/重构/构建/测试/代码规范治理场景。
-  识别到代码片段、报错日志、堆栈、构建/测试失败、路径、类名、方法名、配置文件、截图里的代码或错误、Java 后端 Controller/Service/DTO/Entity、前端导出类型/API 边界、组件属性类型、ESLint/Prettier/EditorConfig 等前端语法与缩进规范、Maven 多模块、事务并发、Python、Vue/React、小程序、文件归属、环境命令、local-environment 缓存、.codex 忽略规则、验证策略、安全边界、注释契约、编码风格智能化、魔法值、常量放置、硬编码、重复逻辑、公共抽象、泛型/any 边界、Plan/Goal、上下文压缩、减少 token 或调用链确认等编程任务时自动启用。
+  识别到代码片段、报错日志、堆栈、构建/测试失败、路径、类名、方法名、配置文件、截图里的代码或错误、Java 后端 Controller/Service/DTO/Entity、前端导出类型/API 边界、组件属性类型、ESLint/Prettier/EditorConfig 等前端语法与缩进规范、Maven 多模块、事务并发、Python、Vue/React、小程序、文件归属、环境命令、local-environment 缓存、.codex 忽略规则、验证策略、安全边界、注释契约、编码风格智能化、魔法值、常量放置、硬编码、重复逻辑、公共抽象、泛型/any 边界、Plan/Goal、第三方 Agent/App/CLI/终端/IDE 扩展、MCP/ACP/hooks/subagent、cc switch/路由转发/模型切换、上下文压缩、减少 token 或调用链确认等编程任务时自动启用。
   执行时先读索引、收敛上下文、确认触碰范围和调用链，先按跨技术栈公共规则判断，再按对应技术栈落地；默认压缩噪音与冗余输出，并内置用户全局 AGENTS 规则，避免切换会话或窗口后规则丢失。
 ---
 
@@ -19,6 +19,7 @@ description: |
 - 用户只说“报错了”“失败了”“为什么不行”“处理一下”“看下这个”“还是这样”“按计划执行”等模糊指令，但上下文能从日志、截图、路径、当前仓库或上一轮任务推断为编程排查或修复。
 - 用户正在制定或执行 Plan/计划，且计划内容会产生代码读取、修改、构建、测试或重构。
 - 用户正在使用 Global/Goal/目标追踪/长期推进模式，且目标会产生代码读取、修改、构建、测试或重构。
+- 任务经第三方 coding agent、桌面/网页 App、IDE 插件、终端/TUI/CLI、MCP/ACP、hook、subagent、CI/chatops/webhook、`cc switch`/`cc-switch`/`ccswitch`、model/provider router、gateway/proxy/adapter 转发、包装或路由执行；只要原始意图、转发载荷、工具动作、cwd、文件、命令、日志或 diff 涉及代码读取、修改、构建、测试、调试、重构或代码规范治理，就按本 skill 内部自动触发。
 - 当前任务处于上个会话接续、上下文恢复、自动续跑、跨窗口继续、引用上一轮结论、存在 Context Capsule、或 skill/reference 近期在当前工作区发生变更的状态；这类状态必须自动刷新规则，不依赖外部提醒。
 - 任务涉及路径、文件名、类名、方法名、错误日志、调用链、构建、测试、前后端代码规范。
 - 任务目标、代码证据或上下文体现写代码风格、智能化抽象、公共接口/方法/类/文件抽离、泛型/any 边界、减少魔法值、抽常量、枚举化、配置化、去掉硬编码或避免重复逻辑。
@@ -42,6 +43,7 @@ description: |
 - 默认使用简体中文回复；代码、命令、配置项、文件名、类名、方法名、日志和异常保持原文。
 - `SKILL.md` 是轻量外层启动器，只保留触发、索引、总门禁和执行节奏；详细规则放在 references 中由 `00-index.md` 内部路由。规则不在外层重复展开，不代表降级或可跳过。
 - 本 skill 的硬约束不因运行方式变化而失效。新增、修改、删除、重构、Plan、Global/Goal、自动续跑、上下文恢复、跨窗口、新指令插入、局部补丁和后续修复，都必须先走索引、确认触碰范围，并执行局部规则对齐。
+- Agent、App、CLI、终端、IDE 插件、MCP/ACP、hook、subagent、CI/chatops/webhook、`cc switch`、模型/供应商路由、gateway/proxy/adapter 只是承载入口，不改变任务性质，也不能绕过本 skill 的索引、门禁、局部对齐和验证流程。
 - 所有写成“自动触发”“内部触发”“必须自动”的规则都属于本 skill 执行流程内的高优先级门禁。任务状态、代码证据、触碰范围、调用链、工具链节点、Git/worktree 状态和风险信号是触发依据，外部提醒、显式点名 skill 或固定关键词都不能降低触发级别。
 - 执行门禁、任务胶囊、调用链、强规则自动升级、补丁写入预判、worktree/分支、Plan/Goal、失败回退和既有代码一致性由 `02-noise-filter-workflow.md` 承载。
 - 语言、工具优先级、修改前确认、文件归属、环境命令、验证策略、安全边界、编码风格预检、硬编码、重复逻辑和注释原则由 `01-global-engineering-rules.md` 承载。

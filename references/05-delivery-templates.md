@@ -80,7 +80,7 @@ Context Capsule
 
 1. 当前系统、开发者、AGENTS 和当前 skill 最新规则。
 2. 用户当前最新消息和当前任务边界。
-3. 当前工作区真实证据：当前文件原文、`git diff`、`git status`、项目配置、active cache path、命令验证结果。
+3. 当前工作区真实证据：当前文件原文、`git diff`、`git status`、项目配置、active cache path、命令验证结果，以及第三方 agent/app/CLI、MCP/ACP、hook、subagent、CI/chatops、`cc switch`、router/gateway/proxy/adapter 转发载荷中可复查的 cwd、文件、命令、日志和 diff。
 4. 当前会话内已确认的 Context Capsule、任务胶囊、已读证据和回滚点。
 5. 归档会话、历史会话摘要和 rollout summary。
 6. 长期 memory 中的稳定偏好和历史经验。
@@ -99,7 +99,7 @@ Context Capsule
 - 切换模型、模型响应速度变化、模型能力差异导致输出风格或工具使用习惯变化。
 - 新建窗口、切换窗口、切换会话、打开归档会话、从历史摘要继续。
 - 切换 Plan/Default/Goal 等模式，或普通执行与自动续跑之间切换。
-- 使用插件、连接器、MCP 工具、Browser/Computer Use、GitHub 工具、Figma 工具或其他技能后回到主任务。
+- 使用插件、连接器、MCP/ACP 工具、第三方 agent、App、终端/CLI、hook、subagent、CI/chatops/webhook、`cc switch`、router/gateway/proxy/adapter、Browser/Computer Use、GitHub 工具、Figma 工具或其他技能后回到主任务。
 - 技能加载、技能缺失、技能版本变化、当前工作区 skill/reference 有未提交改动。
 - 网络错误、工具超时、浏览器刷新、应用恢复、自动继续、上下文压缩或响应被截断。
 
@@ -109,7 +109,7 @@ Context Capsule
 2. 核对当前用户最新指令是否改变目标、允许范围或禁止范围。
 3. 核对当前 Git root、worktree、分支、dirty 状态和本轮允许修改目录。
 4. 用当前文件原文和 `git diff` 校验已写入/未写入状态，不凭归档会话或 memory 断言。
-5. 恢复任务胶囊：目标、触碰范围、调用链、强规则同步项、环境缓存状态、上下文权威状态、失败策略、验证状态、回滚点和下一步。
+5. 恢复任务胶囊：目标、触碰范围、调用链、强规则同步项、环境缓存状态、入口与路由状态、上下文权威状态、失败策略、验证状态、回滚点和下一步。
 6. 若下一步要执行构建、测试、lint、typecheck、运行或代码生成，按 `06` 和 `14` 处理项目根环境缓存。
 
 ### 会话、归档与 memory 平衡

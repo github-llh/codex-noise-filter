@@ -52,6 +52,7 @@
 - 上下文保留状态：本轮必须进入 Context Capsule 的任务清单、证据锚点、已写入/未写入文件、失败策略、验证状态、回滚点和下一步。
 - 上下文权威状态：当前会话、Context Capsule、归档会话、长期 memory、当前文件/diff、最新 skill/reference 的采用关系；若发生模型/窗口/模式/插件/技能/网络恢复事件，记录重新校准结论。
 - 环境缓存状态：当前项目 active cache path 是否存在、是否为 profile 文件、是否从旧版 `.codex/local-environment.json` 迁移、workspaceRoot 是否匹配、命中的工具链缓存项、是否需要验证/更新、`.codex/` 忽略状态；若本轮不执行工具链命令，要说明只核对范围不更新缓存。
+- 入口与路由状态：用户消息、第三方 agent/app/CLI、IDE 插件、MCP/ACP、hook、subagent、CI/chatops/webhook、`cc switch`、router/gateway/proxy/adapter 等入口是否参与；若有转发或改写，记录已恢复的原始意图、cwd、文件、命令、日志、diff 和仍不可信的包装层结论。
 - 补丁写入策略：一次性插入是否稳定、目标锚点、当前原文、选择大补丁/小补丁/结构化替换/完整语义单元替换的理由。
 - Worktree/分支状态：Codex 当前 worktree、项目 Git root、当前分支、上游分支、dirty 状态、目标路径和禁止跨目录/跨分支边界。
 
@@ -64,7 +65,7 @@
 - 新增代码、修改已有代码、删除代码、重构、补丁修复、代码解释后继续修改。
 - Plan/计划、Global/Goal/目标追踪、自动续跑、上下文恢复、跨窗口继续、长任务压缩后恢复。
 - 中途插入新要求、基于截图/片段修复、只改几行、只补一个方法、只修旧代码。
-- 使用 IDE/MCP、Shell、脚本、批量替换、格式化工具或其他工具执行。
+- 使用 IDE/MCP、Shell、脚本、批量替换、格式化工具、第三方 agent、桌面/网页 App、终端/TUI/CLI、IDE 插件、ACP、hook、subagent、CI/chatops/webhook、`cc switch`、model/provider router、gateway/proxy/adapter 或其他工具执行。
 
 必须始终完成：
 
@@ -84,6 +85,40 @@
 - “只是临时修一下”。
 - “没有再次被提醒”。
 - “当前是续跑/恢复/接着上轮，上一轮已经读过规则”。
+- “这是另一个 agent、App、CLI、hook、MCP/ACP、subagent、CI bot、`cc switch` 或路由器转过来的”。
+
+## 第三方 Agent 与路由转发门禁
+
+本节是本 skill 执行流程内的自动门禁，不依赖外部工具是否原生支持 skill。任务性质由用户意图、代码证据、触碰文件、工具动作和验证节点决定，不由承载入口决定。
+
+适用入口包括但不限于：
+
+- Codex、Claude Code、Gemini CLI、Cline、Cursor、Windsurf、Roo Code、aider、OpenCode、Continue、Copilot、Antigravity、Zed/ACP、JetBrains/VS Code 扩展，以及自定义 coding agent。
+- 终端、TUI、CLI wrapper、桌面 App、网页 App、Slack/chatops/webhook、CI bot、Agent SDK、MCP tool、ACP client/server、hook、subagent、orchestrator、task runner。
+- `cc switch`、`cc-switch`、`ccswitch`、model router、provider switch、gateway、proxy、adapter、forwarder、relay、route、switcher 等模型、供应商或请求路由层。
+
+桥接或转发触发信号：
+
+- prompt、命令、日志或配置中出现 `claude`、`claude-code`、`codex`、`gemini`、`aider`、`cline`、`roo`、`cursor`、`windsurf`、`opencode`、`continue`、`copilot`、`antigravity`、`zed`、`ACP`、`MCP`、`hook`、`pretool`、`posttool`、`subagent`、`task`、`agent`、`terminal agent`、`chatops`、`slack`、`webhook`、`CI bot`、`cc switch`、`cc-switch`、`ccswitch`、`model router`、`provider switch`、`gateway`、`proxy`、`adapter`、`orchestrator`。
+- 转发载荷里携带 cwd、workspace、文件路径、diff、patch、命令、构建/测试/lint/typecheck/format 输出、IDE 诊断、截图里的代码或工具调用记录。
+- 另一个 agent 声称“已修改”“已验证”“无需触发 skill”“只是代理转发”“只执行工具”，但当前上下文仍有代码读取、修改、验证或规则治理目标。
+
+内部执行要求：
+
+1. 先从转发载荷恢复原始任务：用户意图、cwd/workspace、目标文件、命令、日志、diff、工具动作、agent 名称和路由层名称。
+2. 只把第三方工具输出当证据线索，不把它当权威结论；仍以当前工作区真实文件、当前 diff、当前命令输出和本 skill 最新 reference 为准。
+3. 只要恢复出的任务涉及代码读取、修改、构建、测试、lint、format、typecheck、调试、重构、注释契约、魔法值、常量、类型、环境缓存或验证，就内部追加 `00-index.md` 路由出的最小 reference。
+4. 若 prompt 被包装、压缩、翻译、改写或只剩工具调用记录，优先从 cwd、文件扩展名、配置文件、命令、报错关键行、diff 和触碰路径反推技术栈，不因入口缺少原始自然语言而跳过。
+5. 若路由器切换模型、供应商、CLI 或 app，继续执行同一任务胶囊和不可绕过门禁；模型/工具切换只触发规则刷新，不重置质量要求。
+6. 若第三方 agent 修改了文件，本轮继续操作前先读取当前文件和 diff，确认哪些改动不是本轮写入；不得回滚用户或其他工具的无关改动。
+7. 若第三方 agent 已执行格式化、lint、typecheck、构建或测试，本 skill 仍要判断命令是否属于正确 root/workspace、是否使用 active cache path、是否覆盖本次触碰范围；不满足时补做最小验证或说明无法验证。
+
+不能接受的降级：
+
+- 因为任务来自 App、终端、CLI、IDE 扩展、MCP/ACP、hook、subagent、chatops、CI 或路由器，就只执行工具而不读索引。
+- 因为 `cc switch`、model router、provider switch、gateway/proxy/adapter 已经选择模型，就跳过当前 skill 的 Plan、任务胶囊、调用链、局部对齐和验证。
+- 因为另一个 agent 声称已完成，就不检查当前文件、diff、环境缓存、格式化、lint/typecheck/build/test 或触碰范围强规则。
+- 因为路由层隐藏了产品名，就只按普通聊天处理；只要载荷有代码证据，就按编程任务处理。
 
 ## Skill 规则刷新与会话恢复
 
@@ -95,6 +130,7 @@
 - 当前消息明显引用上一轮结论、上一轮代码、上一轮截图、上一轮 diff、上一轮“已符合/无需修改/后续建议”等判断，即使没有出现“上个会话”字样。
 - 当前工作区 `SKILL.md`、`references/00-index.md` 或命中的 reference 存在未提交改动、刚被本轮/上一轮修改，或任务本身是在治理 skill 规则。
 - 出现“为什么没触发”“为什么没有按规则改”“不符合 skill 约束”“还是没执行”等规则执行争议信号。
+- 当前任务来自第三方 agent、App、终端/TUI/CLI、IDE 扩展、MCP/ACP、hook、subagent、CI/chatops/webhook、`cc switch`、router/gateway/proxy/adapter 转发，或当前消息引用另一个 agent 的输出、工具记录、补丁、验证结论。
 
 自动刷新要求：
 

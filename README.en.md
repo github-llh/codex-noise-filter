@@ -25,6 +25,7 @@ Use it for:
 - Coding, debugging, refactoring, migration, and code explanation tasks.
 - Pasted error logs, stack traces, build/test failures, IDE screenshots, code snippets, or diffs where Codex should infer whether to debug, fix, or validate.
 - Multi-file investigation, cross-module backend analysis, Maven builds, frontend fixes, Mini Program native/uni-app/Taro work, and Python script/service/package/test work.
+- Requests forwarded through Claude Code, Gemini CLI, Cline, Roo Code, aider, OpenCode, Continue, Cursor/Windsurf, ACP/MCP, hooks, subagents, CI/chatops, `cc switch`, model/provider routers, gateways, or proxies when the payload still involves code reads, edits, builds, tests, lint, format, typecheck, debugging, or refactoring.
 - Signals that the task needs lower token usage, concise evidence, reproducible reasoning, narrower file reads, or preserved evidence chains.
 
 ## Why Use It
@@ -41,10 +42,13 @@ Many coding-task failures are not caused by missing coding ability. They come fr
 | Obvious hardcoding, repeated logic, or layering issues in screenshots, snippets, or call-chain-related files may get blocked by an over-narrow "minimal change" reading. | Judge call-chain depth, file count, contract risk, and validation path automatically; when the closure is low-risk, write it into the task capsule, apply the matching reference, and fix it locally. |
 | Build commands may be guessed from habit, such as `npm run build`, system `python`, or the current shell's `mvn`, then require manual environment hints after failure. | Match toolchains, commands, and cache entries from Java/Maven, Python, Node/frontend, and Mini Program project configuration; if a failure looks environment-related, recompute the cache and retry once. |
 | Plan/Goal, resume, or cross-window work can forget constraints. | Plan/Goal/context restoration must still use indexed rules and Context Capsules. |
+| A task forwarded by a third-party agent, app, CLI, hook, MCP/ACP, subagent, CI bot, or `cc switch`/router may be treated as plain tool execution. | Treat the entrypoint and router as evidence only; recover the original task from cwd, files, commands, logs, diffs, and tool actions, then trigger indexing, local alignment, and validation internally. |
 
 ## Usage
 
 Codex skills can be used from the Codex App, CLI, and IDE extension. Day-to-day activation should not depend on mentioning `$codex-noise-filter`; code, logs, stack traces, command output, screenshots with errors, paths, project structure, resume state, or rule-failure signals should be enough for the skill to treat the request as a coding task.
+
+If a request arrives through a third-party agent, desktop/web app, terminal/TUI/CLI, IDE plugin, MCP/ACP, hook, subagent, CI/chatops/webhook, `cc switch`, model/provider router, gateway/proxy/adapter, it follows the same rule: recover the original task, cwd, files, commands, logs, diffs, and tool actions first, then route through `references/00-index.md`. A third-party tool's "changed", "validated", or "no skill needed" conclusion is only a clue; it cannot replace checks against the current worktree files, diff, environment cache, and validation commands.
 
 ### Repository Scope
 
@@ -135,6 +139,7 @@ These inputs should enter the indexed workflow without requiring an explicit ski
 - Python: `Traceback`, `pytest`, `AssertionError`, `ModuleNotFoundError`, `ImportError`.
 - Node/Vue/React: `npm ERR`, `pnpm ERR`, `yarn error`, `TypeError`, `ReferenceError`, `vite`, `webpack`.
 - Mini Programs: `project.config.json`, `miniprogram-ci`, `setData`, `app.json`, `pages.json`, `TARO_ENV`, `mp-weixin`.
+- Agent/router forwarding: `Claude Code`, `Gemini CLI`, `Cline`, `Roo Code`, `aider`, `OpenCode`, `Continue`, `Cursor`, `Windsurf`, `Copilot`, `Antigravity`, `Zed`, `ACP`, `MCP`, `hook`, `subagent`, `chatops`, `webhook`, `CI bot`, `cc switch`, `cc-switch`, `ccswitch`, `model router`, `provider switch`, `gateway`, `proxy`, `adapter`.
 - Ambiguous but contextual Chinese prompts: `报错了`, `失败了`, `为什么不行`, `还是这样`, `处理一下`, `看下这个`.
 
 ## Activation Examples
@@ -251,6 +256,7 @@ references/
 - When edits affect behavior semantics, public contracts, historical compatibility, regression risk, or old-logic refactors, automatically read the smallest useful git history evidence with `git log`, `git blame`, `git show`, `git diff`, and `git log -S/-G`. Scope history reads to touched files, semantic units, key tokens, and direct call chains; do not scan the full repository history or use git commands that mutate the worktree.
 - Minimal change is not a reason to ignore strong-rule hits. If hardcoding, repeated logic, hardcoded config, layering mistakes, or comment/security gaps are already inside the touched scope, direct call chain, or related files that must be read for the task, judge low-risk closure first, write it into the task capsule, and fix locally when it holds.
 - Regardless of whether the work is new code, an existing-code edit, Plan, Global/Goal mode, auto-resume, context restoration, cross-window continuation, a local patch, or a follow-up fix, coding tasks must run through the skill index, touched-scope confirmation, call-chain confirmation, and local rule alignment.
+- Regardless of whether the request comes from Codex, a third-party agent, app, terminal/CLI, IDE extension, MCP/ACP, hook, subagent, CI/chatops/webhook, `cc switch`, model/provider router, gateway/proxy/adapter, payloads with code evidence or toolchain actions must trigger the skill against the current worktree files and diff. Do not skip indexing, local alignment, or validation because another tool already handled it.
 - Plan stages must also use the skill index. Plans must list applicable references, touched scope, local-alignment items, and acceptance checks.
 - Global/Goal mode must also use the skill index. Each round must restore the goal, applicable references, touched scope, local-alignment items, acceptance checks, and Context Capsule.
 - Rules apply to both new code and existing-code edits. Every touched method, class, DTO, SQL, test, and direct call chain must be locally aligned with the rules.
