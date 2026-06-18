@@ -1,6 +1,6 @@
 # 全局工程规则
 
-本文件只保留所有编程任务都需要先看的通用规则。各技术栈 reference 只保留落地差异；文件归属、环境命令、验证、安全边界、硬编码、重复逻辑和注释先按本文件判断，再进入对应技术栈文件。
+本文件只保留所有编程任务都需要先看的通用规则。各技术栈 reference 只保留落地差异；文件归属、环境命令、验证、安全边界、编码与中文乱码、硬编码、重复逻辑和注释先按本文件判断，再进入对应技术栈文件。
 
 ## 语言偏好
 
@@ -9,6 +9,37 @@
 - 代码、命令、配置项、环境变量、文件名、类名、方法名、日志、异常信息保持原文。
 - 不使用英文标题 `What Changed`、`Validation`、`Root Cause`、`Next Steps`、`Summary`。
 - 使用中文标题：`变更内容`、`验证结果`、`根因分析`、`下一步`、`总结`。
+
+## 跨技术栈编码与中文乱码门禁
+
+这是内部自动门禁。只要新增、修改、读取、检索、格式化、构建、测试、lint/typecheck、终端输出、页面渲染、日志、配置或第三方转发载荷中出现中文字符、非 ASCII 文案、乱码、替换字符、`encoding`、`charset`、`UTF-8`、`GBK`、locale、跨平台文件名或字符集相关错误，就必须先确认编码来源和验证路径，不能把它当成普通展示问题跳过。
+
+触发信号：
+
+- 文件内容或 diff 中出现 `�`、`???` 替换、中文被拆成乱码、转义异常、字符串截断、非 ASCII 文件名异常或日志里中文不可读。
+- 编译、构建、测试、lint、typecheck、打包、运行输出包含 `encoding`、`charset`、`MalformedInputException`、`UnmappableCharacterException`、`UnicodeDecodeError`、`UnicodeEncodeError`、`iconv`、`file.encoding`、`project.build.sourceEncoding`、`meta charset`、`Content-Type` charset 等信号。
+- Maven/Java、Node/前端、Python、小程序、终端 Shell、CI、IDE、第三方 agent 或模型路由环境可能使用了不同 locale、默认编码、换行或文件名清洗规则。
+
+处理顺序：
+
+1. 先确认项目事实，不凭个人编辑器默认值判断：`.editorconfig`、`pom.xml` 的 `project.build.sourceEncoding`、Maven compiler/resources 配置、前端 `meta charset`/响应头、TypeScript/构建配置、Python 源文件声明、README/CI 脚本和已有同类文件编码。
+2. 读取当前文件时保留原编码证据；不要用整文件重写、格式化或复制粘贴无意改变换行、BOM、缩进和非 ASCII 字符。
+3. 若进入工具链命令节点，先按 `06` + `14` 解析 active cache path，并记录会影响编码的工具版本、脚本、locale、source encoding、前端规范文件或 Python 解释器。
+4. 修复乱码优先在正确边界处理：源文件编码声明、构建资源编码、终端/CI locale、HTTP `Content-Type` charset、HTML meta、i18n 资源、后端响应编码、文件名 slug 规则或数据源解码；不要在业务逻辑里硬编码二次转码掩盖根因。
+5. 如果第三方工具声称已修复乱码，仍要用当前文件、当前 diff 和最小命令确认没有引入双重编码、转义丢失、展示文案变更或跨平台文件名风险。
+
+落地边界：
+
+- Java/Maven：优先检查 `project.build.sourceEncoding`、`maven.compiler.encoding`、resources filtering、运行时 `file.encoding` 和日志编码；不要把中文常量或注释在不同编码间来回转换。
+- 前端/小程序：优先检查 `.editorconfig`、Prettier/ESLint、HTML/页面 `charset`、HTTP 响应头、i18n 资源、构建工具和小程序平台配置；不要把中文展示文案当业务 code 判断值。
+- Python：优先检查源文件编码声明、解释器版本、终端 locale、文件读写 `encoding=` 和测试 fixture 编码；文件 IO 必须显式使用项目需要的编码。
+- 跨平台文件名：缓存 profile、生成文件、导出文件和临时文件必须使用 `06#跨系统缓存文件命名` 的清洗规则；中文名可作为业务展示值，但不能作为跨系统唯一标识。
+
+验证要求：
+
+- 修改源码或配置后，至少用最轻量方式确认当前文件可正确读取，相关构建/编译/lint/typecheck 或页面/日志输出不再乱码。
+- 无法运行命令时，说明缺少的环境、locale、工具链、服务或样例数据，并保留已确认的文件编码证据。
+- 不能只说“已改为 UTF-8”；必须说明依据来自项目配置、文件内容、命令输出或 active cache path。
 
 ## 工具优先级
 

@@ -2,7 +2,7 @@
 
 用于 Maven、JDK、Node、Python、包管理器、IDE 配置路径、小程序开发者工具等本机环境。目标是提供跨技术栈统一的“发现、验证、缓存”机制，避免硬编码路径或重复全盘查找。
 
-本文件只管环境路径和工具可用性，不替代各技术栈的运行、构建、测试规则：
+本文件只管环境路径、工具可用性和会影响工具链输出的基础 locale/encoding 证据，不替代各技术栈的运行、构建、测试规则：
 
 - Maven 构建和多模块命令见 `03-maven-backend-build.md`。
 - Python 依赖、运行、测试、lint/type check 见 `10-python-development.md`。
@@ -94,16 +94,21 @@
    - JSON 可解析且包含当前命令所需工具链时，优先直接使用缓存中的 `executable`、`home`、`localRepository`、`packageManager.executable`、`python.executable`、`devtoolsCli` 等路径组装命令。
    - 缓存缺少 `workspaceRoot` 时，不阻断使用；按当前项目根保守补充判断，并在下次需要更新缓存时写入 `workspaceRoot`。
    - 只有缓存路径不存在、JSON 无法解析、项目配置明确变化、缓存不满足当前命令或命令失败疑似环境问题时，才进入重新发现。
-4. 缓存不存在：
+4. 编码与 locale 核对：
+   - 若当前任务、工具输出或待执行命令涉及中文字符、非 ASCII 文案、乱码、`encoding`、`charset`、`UTF-8`/`GBK`、终端输出、资源编译、日志或跨平台文件名，必须同时读取 `01#跨技术栈编码与中文乱码门禁`。
+   - active cache path 中已有 locale、source encoding、前端 `frontendQuality`、Python 解释器或 Maven source encoding 记录时，先核对是否仍匹配当前项目配置；缺失时只补当前命令需要且可验证的字段。
+   - 不为了处理乱码直接全局改 shell 配置、IDE 全局编码或系统 locale；只能记录当前项目命令需要的环境变量、项目配置和验证命令。
+5. 缓存不存在：
    - 创建 `<project-root>/.codex/` 目录。
    - 按当前命令命中的技术栈读取项目配置，再按 `14-environment-cache-by-stack.md` 查找本机候选、执行最小验证。
    - 验证通过后创建 active cache path，只写当前命令需要且已验证的字段，不为补齐 schema 写空值或猜测值。
-5. 执行命令：使用缓存路径或新验证路径执行原目标命令；不要回退到未验证全局命令。
-6. 命令失败：
+6. 执行命令：使用缓存路径或新验证路径执行原目标命令；不要回退到未验证全局命令。
+7. 命令失败：
    - 如果错误可能来自工具路径、版本、依赖、锁文件、脚本、模块路径、workspace/filter、虚拟环境、框架平台、本地仓库或开发者工具路径不匹配，必须重新读取项目配置和本机候选环境。
+   - 如果错误或输出可能来自字符集、locale、资源编码、终端编码、文件名编码、HTTP charset 或前端页面 charset 不匹配，必须执行 `01#跨技术栈编码与中文乱码门禁`，并按当前技术栈重新核对编码配置后重试一次原命令。
    - 找到更匹配环境后更新 active cache path，并用同一目标命令重试一次。
    - 重试仍失败时，停止连续重试，区分环境问题、依赖缺失、项目历史失败和本次改动问题。
-7. 忽略规则：创建或更新缓存后，必须确认项目根 `.gitignore` 覆盖 `/.codex/`，没有则补齐并用 `git check-ignore -v .codex/ .codex/local-environment*.json` 验证。
+8. 忽略规则：创建或更新缓存后，必须确认项目根 `.gitignore` 覆盖 `/.codex/`，没有则补齐并用 `git check-ignore -v .codex/ .codex/local-environment*.json` 验证。
 
 禁止行为：
 
@@ -153,6 +158,7 @@
 
 - 即将执行 `mvn`、`java`、`node`、`npm`、`pnpm`、`yarn`、`bun`、`python`、`pytest`、`uv`、`poetry`、`tox`、`nox`、微信开发者工具 CLI、`miniprogram-ci`、Taro/uni-app 构建命令，以及 lint、typecheck、compile、codegen 等项目脚本。
 - 构建、编译、测试、运行命令失败，且失败原因可能是工具路径、版本、`JAVA_HOME`、本地 Maven 仓库、包管理器、虚拟环境、开发者工具路径或工作目录不匹配。
+- 构建、编译、测试、运行、lint、format、typecheck 或日志输出出现中文乱码、字符集异常、`encoding`/`charset`/locale 错误、文件名编码问题或资源过滤乱码。
 - 任务目标直接涉及强化、补齐或更新 `.codex/local-environment.json`、profile 环境缓存、主机名/用户名区分、跨 Windows/macOS 文件名兼容或 `.codex/` 忽略规则；其中旧版 `.codex/local-environment.json` 必须自动迁移替换为 profile 缓存。
 
 执行步骤：
@@ -177,6 +183,7 @@
 5. 执行最小验证：
    - Maven/JDK、Node、Python、小程序开发者工具按 [公共验证矩阵](#公共验证矩阵) 验证。
    - Maven 后端若项目声明 Java 8，但默认 `mvn -version` 使用更高 JDK，应优先尝试带 `JAVA_HOME=<project-jdk>` 的验证命令，并把项目目标 Java 版本和验证 JDK 分开记录。
+   - 命中编码/乱码风险时，同时记录本次命令使用的 locale、source encoding、前端规范文件、Python 文件 IO 编码或小程序/页面 charset 依据；只记录可验证证据，不写未验证猜测。
 6. 写回缓存：
    - 只写验证通过的字段。
    - 更新 `updatedAt`、`workspaceRoot`，能确认 Maven 聚合 root 时写入 `mavenRoot`。
@@ -276,7 +283,8 @@
     "artifactId": "service-a",
     "selectedCommand": "/path/to/mvn -Dmaven.repo.local=/path/to/repository -pl server/service-a -am compile",
     "verifiedCommand": "/path/to/mvn -version",
-    "verified": true
+    "verified": true,
+    "sourceEncoding": "UTF-8"
   },
   "java": {
     "source": "pom|ide-config|verified-local-candidate|cache",
@@ -310,7 +318,11 @@
     },
     "selectedCommand": "pnpm run build",
     "verifiedCommand": "node --version && pnpm --version",
-    "verified": true
+    "verified": true,
+    "locale": {
+      "LANG": "zh_CN.UTF-8",
+      "LC_ALL": ""
+    }
   },
   "python": {
     "source": "project-venv|project-config|verified-local-candidate|cache",

@@ -56,6 +56,7 @@
 3. 类型边界：TypeScript 项目不得把业务 props、请求响应、页面参数、事件回调和公开组件 API 写成裸 `any`、`Object`、`Function` 或过宽 `Record<string, any>`；JavaScript 项目也要复用 PropTypes、Vue `type`/`validator`、JSDoc 或运行期校验范式。
 4. 抽象边界：重复条件、重复展示映射、重复字段转换、重复默认值、重复请求适配和跨页面复用逻辑，先判断是否进入 hook/composable、selector、mapper、adapter、store、service 或局部 helper；页面私有且一次性语义清楚时可以只局部集中。
 5. 格式化与验证：格式错误先按项目 ESLint/Prettier/EditorConfig/Biome/Stylelint/TypeScript 配置修触碰范围；修完后仍必须回扫同一组件、函数、类型或配置块的注释、魔法值、类型和契约缺口，不能只让 formatter 通过。
+6. 编码与中文乱码：组件文案、i18n、模板、HTML `charset`、响应头、构建输出、CSS content、mock/fixture 或终端日志出现中文字符、乱码、`encoding`/`charset` 信号时，必须追加 `01#跨技术栈编码与中文乱码门禁`，并在验证前核对 active cache path 的前端规范文件和 charset/locale 依据。
 
 补齐和修改边界：
 

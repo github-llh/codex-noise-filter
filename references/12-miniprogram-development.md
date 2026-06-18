@@ -22,12 +22,12 @@
 
 ## 触发与读取
 
-- 本节触发不受调用入口影响；任务来自任意第三方调用、App、CLI、IDE 插件、MCP/ACP、hook、subagent、路由转发、未知 wrapper 或模型路由时，只要载荷命中小程序、uni-app、Taro 文件、配置、命令、日志、截图或 diff，就按本节内部触发。
+- 本节触发不受调用入口影响；任务来自任意第三方调用、App、CLI、IDE 插件、MCP/ACP、hook、subagent、路由转发、未知 wrapper 或模型路由时，只要载荷命中小程序、uni-app、Taro 文件、配置、命令、日志、截图、中文乱码、编码/charset 信号或 diff，就按本节内部触发。
 - 命中 `app.json`、`app.js`、`app.wxss`、`sitemap.json`、`project.config.json`、`project.private.config.json`、`miniprogramRoot`、`miniprogram_npm`、`wxml`、`wxss`、`wxs`、`wx:`、`setData`、`Component`、`Page`、`Behavior`、`subPackages`、`preloadRule` 时按原生小程序处理。
 - 命中 `pages.json`、`manifest.json`、`App.vue`、`uni.scss`、`uni_modules`、`#ifdef MP`、`#ifdef MP-WEIXIN`、`mp-weixin`、`unpackage/dist` 时按 uni-app 处理。
 - 命中 `@tarojs/*`、`taro`、`Taro.`、`app.config.js`、`app.config.ts`、`page.config.*`、`config/index.*`、`TARO_ENV`、`dev:weapp`、`build:weapp`，或用户输入 `raro` 但上下文出现小程序/React/Vue/构建脚本时，按 Taro 处理。
 - 默认组合：小程序任务读 `02` + `12`。涉及 Vue/React 语法时加 `11`；涉及通用布局、表单、状态契约时加 `04`；执行构建、编译、CI 或发布前校验前加 `06` 并按 `小程序环境缓存` 复用/更新项目配置和 Node 包管理器。只有当前任务目标本身包含模拟器、预览、上传、真机或发布链路，且权限边界清楚时，才查开发者工具路径。
-- 只要触碰小程序页面、组件、Behavior、wxml/wxss/wxs、uni-app/Taro 组件、配置、分包、api/service/model、mock、fixture 或构建脚本，就同步执行 `04#前端自动局部对齐门禁`：注释契约、魔法值、类型边界、抽象边界、格式化和验证是同一闭环。
+- 只要触碰小程序页面、组件、Behavior、wxml/wxss/wxs、uni-app/Taro 组件、配置、分包、api/service/model、mock、fixture 或构建脚本，就同步执行 `04#前端自动局部对齐门禁`：注释契约、魔法值、类型边界、抽象边界、编码/中文乱码、格式化和验证是同一闭环。
 - 不因为小程序是前端就一次性读取所有前端、Java、Python reference；触碰接口契约、后端数据或构建链路时再按索引追加。
 
 ## 项目形态识别
@@ -85,6 +85,7 @@
 - `wxml`、Vue template、JSX 中只保留非显然权限、slot、兼容、可访问性和布局边界注释，不逐行解释绑定和事件。
 - 稳定状态、来源、动作、平台、业务类型和页面模式优先集中为 enum/常量映射，不在页面模板和事件处理里散写魔法字符串。
 - lint/format/typecheck 或构建错误只定位到缩进、模板语法、TS 类型或配置字段时，仍要回扫同一页面/组件/config 的属性契约、魔法值、注释和 `setData`/事件 payload 类型边界。
+- 中文页面文案、模板、i18n/字典资源、平台配置、构建产物或开发者工具日志出现乱码时，必须按 `01-global-engineering-rules.md#跨技术栈编码与中文乱码门禁` 确认源码编码、构建脚本、Node 前端规范文件、平台 charset/locale 和最小验证方式。
 
 ## 属性与数据类型
 
