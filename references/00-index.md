@@ -6,7 +6,7 @@
 
 `SKILL.md` 的硬约束视为常驻规则，不因索引性能优化而丢失；`00-index.md` 只负责把任务导向最小 reference 集，不重复展开全部细则。
 
-自动触发优先级：凡 `SKILL.md` 或 reference 中写明“自动触发”“内部触发”“必须自动”的规则，都按 skill 执行流程内的高优先级门禁处理。路由关键词只是发现信号，不是触发前提；任务状态、代码证据、触碰范围、调用链、工具链节点、Git/worktree 状态和风险信号命中时，必须内部追加对应 reference，外部提醒或显式点名不参与触发级别判断。
+自动触发优先级：凡 `SKILL.md` 或 reference 中写明“自动触发”“内部触发”“必须自动”的规则，都按 skill 执行流程内的高优先级门禁处理。路由关键词只是发现信号，不是触发前提；任务状态、代码证据、触碰范围、调用链、工具链节点、Git/worktree 状态、风险信号或任何第三方调用载荷命中时，必须内部追加对应 reference，外部提醒、显式点名、模型类型、供应商、App、CLI、插件、路由器或转发协议不参与触发级别判断。
 
 外层与内部实现分层：
 
@@ -17,7 +17,7 @@
 
 读取顺序按三段执行：
 
-1. 先判定运行门禁和意图证据：涉及读取、修改、构建、测试、重构、报错日志、异常堆栈、构建/测试失败、Plan、Global/Goal、自动续跑、上下文恢复、第三方 agent/app/CLI/IDE 扩展、MCP/ACP、hook、subagent、CI/chatops/webhook、`cc switch`、router/gateway/proxy/adapter 转发时，读 `02-noise-filter-workflow.md` 对应章节；涉及智能扩窗或 Git 历史时读 `13-read-expansion-and-history.md`。
+1. 先判定运行门禁和意图证据：涉及读取、修改、构建、测试、重构、报错日志、异常堆栈、构建/测试失败、Plan、Global/Goal、自动续跑、上下文恢复、任意第三方调用、agent/app/CLI/IDE 扩展、MCP/ACP、hook、subagent、CI/chatops/webhook、`cc switch`、router/gateway/proxy/adapter、自定义 wrapper、未知转发层或模型路由时，读 `02-noise-filter-workflow.md` 对应章节；涉及智能扩窗或 Git 历史时读 `13-read-expansion-and-history.md`。
 2. 再判定业务域：Java 后端读 `07`，Java 风格读 `08`，Python 读 `10`，Vue/React 读 `11`，小程序读 `12`，通用前端读 `04`，并发/异步/批量读 `09`，构建读 `03`，统一环境发现读 `06`，栈级环境缓存读 `14`。
 3. 最后按需补充：只在需要交付模板、Context Capsule、语言/工具细则、高风险说明时读 `05` 或 `01`。
 
@@ -155,7 +155,7 @@
 | 只问规则、解释 skill、优化索引 | `00` + 目标 reference | 需要同步说明时加 README |
 | 报错日志/异常堆栈/构建失败/测试失败/启动失败 | `02` | 按日志识别技术栈：Maven 加 `06` + `03`，Python 加 `06` + `10`，Vue/React/Node 加 `06` + `11`，小程序加 `06` + `12`；触碰代码再加 `01` 和对应业务 reference |
 | Plan/Global/Goal/续跑/上下文恢复 | `02` | 涉及代码层再加对应业务 reference |
-| 第三方 agent/App/终端/CLI/IDE 扩展/MCP/ACP/hooks/subagent/CI/chatops/路由转发/cc switch | `02` | 从转发载荷恢复原始任务、cwd、文件、命令、日志、diff 和工具动作；只要涉及代码读取、修改、构建、测试、lint、format、typecheck、调试、重构或代码规范治理，就按技术栈追加 `01`/`03`/`04`/`06`/`10`/`11`/`12`/`14`；涉及中断恢复、长工具调用或阶段胶囊时加 `05` |
+| 任意第三方调用/agent/App/终端/CLI/IDE 扩展/MCP/ACP/hooks/subagent/CI/chatops/路由转发/cc switch/未知 wrapper/模型路由 | `02` | 从转发载荷恢复原始任务、cwd、文件、命令、日志、diff 和工具动作；只要涉及代码读取、修改、构建、测试、lint、format、typecheck、调试、重构或代码规范治理，就按技术栈追加 `01`/`03`/`04`/`06`/`10`/`11`/`12`/`14`；涉及中断恢复、长工具调用或阶段胶囊时加 `05` |
 | Git 历史/提交记录/回归风险/历史兼容/worktree/分支 | `13` | worktree/分支状态先读 `02`；历史语义按文件类型和风险追加 `13` 与业务 reference；需要同步任务胶囊时加 `02` |
 | Java Controller/Service/Entity/DTO 修改 | `02` + `07` | 枚举/校验/Lombok/Optional/重复逻辑加 `08` |
 | Java 事务/并发/批量/异步 | `02` + `07` + `09` | 需要构建验证时加 `03` |
@@ -196,7 +196,7 @@
 - `Plan`、`计划`、`执行计划`、`分步实现`：先读 `02-noise-filter-workflow.md#plan-阶段门禁`。
 - `Global`、`Goal`、`目标追踪`、`长期推进`、`自动续跑`、`跨轮推进`：先读 `02-noise-filter-workflow.md#globalgoal-模式门禁`。
 - 上下文恢复、自动续跑、跨窗口继续、存在 Context Capsule、引用上一轮结论、当前工作区 skill/reference 有变更，或出现 `上个会话`、`接着问`、`刚更新 skill`、`更新了skill`、`为什么没触发`、`没触发skill`、`不符合skill约束`、`还是没执行`、`为什么没有改` 等恢复/规则失效信号：先读 `02-noise-filter-workflow.md#skill-规则刷新与会话恢复`，再按当前任务证据、触碰范围和技术栈追加对应 reference。
-- `第三方 agent`、`coding agent`、`AI agent`、`Agent SDK`、`App`、`desktop app`、`web app`、`终端 agent`、`terminal agent`、`TUI`、`CLI wrapper`、`IDE 插件`、`VS Code extension`、`JetBrains plugin`、`Claude Code`、`claude-code`、`Gemini CLI`、`Cline`、`Cursor`、`Windsurf`、`Roo Code`、`aider`、`OpenCode`、`Continue`、`Copilot`、`Antigravity`、`Zed`、`ACP`、`MCP`、`hook`、`pretool`、`posttool`、`subagent`、`orchestrator`、`chatops`、`Slack`、`webhook`、`CI bot`、`cc switch`、`cc-switch`、`ccswitch`、`model router`、`provider switch`、`gateway`、`proxy`、`adapter`、`forwarder`、`relay`、`route`、`switcher`：先读 `02-noise-filter-workflow.md#第三方-agent-与路由转发门禁`；若载荷涉及续跑或规则争议，再读 `02#skill-规则刷新与会话恢复`；若出现代码、文件、命令、日志或 diff，再按技术栈追加对应 reference。
+- `任意第三方调用`、`第三方 agent`、`coding agent`、`AI agent`、`Agent SDK`、`App`、`desktop app`、`web app`、`终端 agent`、`terminal agent`、`TUI`、`CLI wrapper`、`IDE 插件`、`VS Code extension`、`JetBrains plugin`、`Claude Code`、`claude-code`、`Gemini CLI`、`Cline`、`Cursor`、`Windsurf`、`Roo Code`、`aider`、`OpenCode`、`Continue`、`Copilot`、`Antigravity`、`Zed`、`ACP`、`MCP`、`hook`、`pretool`、`posttool`、`subagent`、`orchestrator`、`chatops`、`Slack`、`webhook`、`CI bot`、`cc switch`、`cc-switch`、`ccswitch`、`model router`、`provider switch`、`gateway`、`proxy`、`adapter`、`forwarder`、`relay`、`route`、`switcher`、`unknown wrapper`、`custom wrapper`、`tool wrapper`、`模型路由`、`供应商切换`、`未知转发`：先读 `02-noise-filter-workflow.md#第三方-agent-与路由转发门禁`；若载荷涉及续跑或规则争议，再读 `02#skill-规则刷新与会话恢复`；若出现代码、文件、命令、日志或 diff，再按技术栈追加对应 reference。
 - `findUsages`、`find usages`、`searchFiles`、`search files`、`executeCommand`、`execute command`、`Shell 命令`、`批量文件操作`、`耗时工具`、`长工具调用`、`30s`、`30 秒`、`超过 5 个文件`、`工具调用前`、`工具中断`、`IDE 集成中断`、`网络断开`、`重连`、`断点恢复`、`未完成 Capsule`、`阶段胶囊`、`中间 Capsule`、`读取 3 个文件`、`2 个工具调用`、`定位 读取 确认调用链 修改 验证`：先读 `02-noise-filter-workflow.md#ide-集成与长工具调用胶囊门禁` 和 `05-delivery-templates.md#上下文胶囊`；若是恢复后继续修改，再读 `02#skill-规则刷新与会话恢复`。
 - `新增代码`、`修改已有代码`、`旧代码`、`自动续跑`、`跨窗口`、`不可绕过`、`强制执行`、`不可容忍`、`最小改动冲突`、`为什么没有更改`、`调用链深不深`、`涉及文件没几个`、`调用链相关文件`、`列入计划`、`任务胶囊`、`当前任务清单`、`同步修改`、`同时修改`：先读 `02-noise-filter-workflow.md#不可绕过执行门禁` 和 `02-noise-filter-workflow.md#强规则命中后的自动升级`。
 - `git 历史`、`提交记录`、`历史提交`、`git log`、`git blame`、`git show`、`git diff`、`-S`、`-G`、`回归`、`改崩`、`历史兼容`、`原来为什么`、`最近谁改的`、`之前逻辑`、`旧逻辑`、`行为语义`、`演进原因`、`改动原因`、`删除旧逻辑`、`替换旧逻辑`、`最近多次变更`：先读 `13-read-expansion-and-history.md#git-历史对比与回归防护`，再按触碰文件技术栈追加对应 reference。

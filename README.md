@@ -25,7 +25,7 @@
 - 编写、修改、调试、排查、重构、迁移、解释代码。
 - 粘贴报错日志、异常堆栈、构建/测试失败输出、IDE 截图、代码片段或 diff 后，希望 Codex 自动判断是在排障、修复还是验证。
 - 多文件排查、跨模块调用链分析、后端构建、前端页面修复、小程序原生/uni-app/Taro 治理、Python 脚本/服务/包/测试治理。
-- 任务经 Claude Code、Gemini CLI、Cline、Roo Code、aider、OpenCode、Continue、Cursor/Windsurf、ACP/MCP、hooks、subagent、CI/chatops、`cc switch`、model/provider router、gateway/proxy 等工具或路由层转发，但载荷仍涉及代码读取、修改、构建、测试、lint、format、typecheck、调试或重构。
+- 任务经任意第三方调用、Claude Code、Gemini CLI、Cline、Roo Code、aider、OpenCode、Continue、Cursor/Windsurf、ACP/MCP、hooks、subagent、CI/chatops、`cc switch`、model/provider router、gateway/proxy、自定义 wrapper、未知转发层或未来新增工具转发，但载荷仍涉及代码读取、修改、构建、测试、lint、format、typecheck、调试或重构。
 - 输入体现减少 token、压缩噪音、简洁可追溯、可复盘、少读无关文件或保留证据链的需求。
 
 ## 为什么用
@@ -42,13 +42,13 @@
 | 明明截图、片段或调用链相关文件里已经有不可接受的硬编码、重复逻辑或分层错位，却被“最小改动”挡住。 | 自动判断调用链深度、涉及文件数量、契约风险和验证路径；低风险闭环时写入任务胶囊并直接按对应 reference 局部修复。 |
 | 构建命令靠经验猜 `npm run build`、系统 `python` 或当前 shell 的 `mvn`，失败后还要人工手动指定环境。 | 按 Java/Maven、Python、Node/前端、小程序各自配置自动匹配工具链、命令和缓存；失败疑似环境不匹配时自动重算并重试一次。 |
 | Plan/Goal、续跑或跨窗口后容易忘记规则。 | Plan/Goal/上下文恢复都必须走索引和 Context Capsule。 |
-| 任务被第三方 agent、App、CLI、hook、MCP/ACP、subagent、CI bot 或 `cc switch`/router 转发后，容易被当成普通工具执行。 | 入口和路由层只作为证据；从 cwd、文件、命令、日志、diff 和工具动作恢复原始任务，继续内部触发索引、局部对齐和验证。 |
+| 任务被任意第三方调用、agent、App、CLI、hook、MCP/ACP、subagent、CI bot、未知 wrapper 或 `cc switch`/router 转发后，容易被当成普通工具执行。 | 入口和路由层只作为证据；从 cwd、文件、命令、日志、diff 和工具动作恢复原始任务，继续内部触发索引、局部对齐和验证。 |
 
 ## 使用方式
 
-Codex skills 可用于 Codex App、CLI 和 IDE 扩展。日常使用不应依赖写出 `$codex-noise-filter`；只要输入或上下文里有代码、日志、堆栈、命令输出、截图里的错误、路径、项目结构、续跑状态或规则失效信号，skill 就应按编程任务处理。
+Codex skills 可用于 Codex App、CLI、IDE 扩展，也可作为任意第三方调用、wrapper、路由转发或模型切换后的内部规则入口。日常使用不应依赖写出 `$codex-noise-filter`；只要输入、转发载荷或上下文里有代码、日志、堆栈、命令输出、截图里的错误、路径、项目结构、续跑状态或规则失效信号，skill 就应按编程任务处理。
 
-如果请求来自第三方 agent、桌面/网页 App、终端/TUI/CLI、IDE 插件、MCP/ACP、hook、subagent、CI/chatops/webhook、`cc switch`、model/provider router、gateway/proxy/adapter 等转发层，也按同一规则处理：先恢复原始任务、cwd、文件、命令、日志、diff 和工具动作，再由 `references/00-index.md` 自动路由。第三方工具的“已修改/已验证/无需触发”只能作为线索，不能替代当前工作区文件、diff、环境缓存和验证检查。
+如果请求来自任意第三方调用、第三方 agent、桌面/网页 App、终端/TUI/CLI、IDE 插件、MCP/ACP、hook、subagent、CI/chatops/webhook、`cc switch`、model/provider router、gateway/proxy/adapter、自定义 wrapper、未知转发层或模型路由，也按同一规则处理：先恢复原始任务、cwd、文件、命令、日志、diff 和工具动作，再由 `references/00-index.md` 自动路由。第三方工具的“已修改/已验证/无需触发”、模型切换或供应商选择只能作为线索，不能替代当前工作区文件、diff、环境缓存和验证检查。
 
 ### 仓库级使用
 
@@ -129,7 +129,7 @@ JetBrains 项目优先使用 JetBrains MCP / IDE 工具；搜索优先 rg。
 请说明当前任务是否触发 codex-noise-filter；如果触发，请列出将读取的 reference、触碰范围、禁止触碰范围和验证项。
 ```
 
-如果没有触发，常见原因是任务没有代码上下文、skill 未放在当前 Codex 可扫描目录、同名 skill 冲突、或 Codex 会话尚未重启。
+如果没有触发，只能是任务缺少代码上下文、转发载荷没有可复原的编程证据、skill 未被当前宿主加载、同名 skill 冲突或会话尚未刷新；不能因为任务来自第三方调用、模型路由、CLI/App/插件或未知 wrapper 就判定不触发。
 
 ### 自动触发信号
 
@@ -139,7 +139,7 @@ JetBrains 项目优先使用 JetBrains MCP / IDE 工具；搜索优先 rg。
 - Python：`Traceback`、`pytest`、`AssertionError`、`ModuleNotFoundError`、`ImportError`。
 - Node/Vue/React：`npm ERR`、`pnpm ERR`、`yarn error`、`TypeError`、`ReferenceError`、`vite`、`webpack`。
 - 小程序：`project.config.json`、`miniprogram-ci`、`setData`、`app.json`、`pages.json`、`TARO_ENV`、`mp-weixin`。
-- Agent/路由转发：`Claude Code`、`Gemini CLI`、`Cline`、`Roo Code`、`aider`、`OpenCode`、`Continue`、`Cursor`、`Windsurf`、`Copilot`、`Antigravity`、`Zed`、`ACP`、`MCP`、`hook`、`subagent`、`chatops`、`webhook`、`CI bot`、`cc switch`、`cc-switch`、`ccswitch`、`model router`、`provider switch`、`gateway`、`proxy`、`adapter`。
+- Agent/路由转发：任意第三方调用、未知 wrapper、未来新增 agent，以及 `Claude Code`、`Gemini CLI`、`Cline`、`Roo Code`、`aider`、`OpenCode`、`Continue`、`Cursor`、`Windsurf`、`Copilot`、`Antigravity`、`Zed`、`ACP`、`MCP`、`hook`、`subagent`、`chatops`、`webhook`、`CI bot`、`cc switch`、`cc-switch`、`ccswitch`、`model router`、`provider switch`、`gateway`、`proxy`、`adapter`。
 - 模糊但有上下文的中文指令：`报错了`、`失败了`、`为什么不行`、`还是这样`、`处理一下`、`看下这个`。
 
 ## 触发示例
@@ -256,7 +256,7 @@ references/
 - 涉及行为语义、公共契约、历史兼容、回归风险或重构旧逻辑时，自动读取最小 git 历史证据：`git log`、`git blame`、`git show`、`git diff`、`git log -S/-G`。只围绕触碰文件、语义单元、关键 token 和直接调用链查历史，不全量翻仓库，不用会改工作区的 git 命令。
 - 最小改动不是不处理强规则命中的理由；如果硬编码、重复逻辑、配置写死、分层错位或注释/安全边界缺口已经落在本次触碰范围、直接调用链或为完成任务必须读取的相关文件内，必须先判断低风险闭环，成立时写入任务胶囊并直接局部修复。
 - 无论新增、修改、Plan、Global/Goal、自动续跑、上下文恢复、跨窗口、局部补丁还是后续修复，只要属于编程任务，都必须执行 skill 索引、触碰范围确认、调用链确认和局部规则对齐。
-- 无论任务来自 Codex、第三方 agent、App、终端/CLI、IDE 扩展、MCP/ACP、hook、subagent、CI/chatops/webhook、`cc switch`、model/provider router、gateway/proxy/adapter，只要载荷涉及代码证据或工具链动作，都必须按当前工作区真实文件和 diff 重新触发 skill；不能用“另一个工具已处理”跳过索引、局部对齐或验证。
+- 无论任务来自 Codex、任意第三方调用、第三方 agent、App、终端/CLI、IDE 扩展、MCP/ACP、hook、subagent、CI/chatops/webhook、`cc switch`、model/provider router、gateway/proxy/adapter、自定义 wrapper、未知转发层或未来新增工具，只要载荷涉及代码证据或工具链动作，都必须按当前工作区真实文件和 diff 重新触发 skill；不能用“另一个工具已处理”、模型切换或供应商路由跳过索引、局部对齐或验证。
 - Plan/计划阶段也必须走 skill 索引，计划里要列出适用 reference、触碰范围、局部对齐项和验收检查。
 - Global/Goal/目标追踪模式也必须走 skill 索引，每轮恢复目标、适用 reference、触碰范围、局部对齐项、验收检查和 Context Capsule。
 - 规则同时适用于新增代码和已有代码修改；凡本次触碰的方法、类、DTO、SQL、测试和调用链，都要做局部规则对齐。

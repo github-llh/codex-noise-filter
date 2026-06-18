@@ -50,7 +50,7 @@
 
 Context Capsule 是自动恢复锚点，不是只在 Plan 模式或手工切换窗口时才写。只要任务进入复杂读取、修改、验证、失败回退、自动续跑、上下文恢复或新指令插入，就必须维护最新胶囊；接近上下文阈值、长时间工具执行前后、跨窗口、任务被打断或模型可能自动压缩时，必须输出可恢复版本。
 
-第三方 IDE 集成、MCP/ACP、agent wrapper、终端/CLI、hook、subagent、CI/chatops、`cc switch`、router/gateway/proxy/adapter 场景下，Context Capsule 还承担断点协议：读取 3 个文件或执行 2 次工具调用后必须输出初始版本；每次耗时工具调用前必须输出当前阶段快照；每个阶段节点完成后必须输出中间版本。
+任意第三方调用、第三方 IDE 集成、MCP/ACP、agent wrapper、终端/CLI、hook、subagent、CI/chatops、`cc switch`、router/gateway/proxy/adapter、自定义 wrapper、未知转发层或模型路由场景下，Context Capsule 还承担断点协议：读取 3 个文件或执行 2 次工具调用后必须输出初始版本；每次耗时工具调用前必须输出当前阶段快照；每个阶段节点完成后必须输出中间版本。
 
 压缩友好版本控制在 12 到 16 行，优先保留不可从当前窗口稳定恢复的信息：
 
@@ -85,7 +85,7 @@ Context Capsule
 
 1. 当前系统、开发者、AGENTS 和当前 skill 最新规则。
 2. 用户当前最新消息和当前任务边界。
-3. 当前工作区真实证据：当前文件原文、`git diff`、`git status`、项目配置、active cache path、命令验证结果，以及第三方 agent/app/CLI、MCP/ACP、hook、subagent、CI/chatops、`cc switch`、router/gateway/proxy/adapter 转发载荷中可复查的 cwd、文件、命令、日志和 diff。
+3. 当前工作区真实证据：当前文件原文、`git diff`、`git status`、项目配置、active cache path、命令验证结果，以及任意第三方调用、第三方 agent/app/CLI、MCP/ACP、hook、subagent、CI/chatops、`cc switch`、router/gateway/proxy/adapter、自定义 wrapper、未知转发层或模型路由载荷中可复查的 cwd、文件、命令、日志和 diff。
 4. 当前会话内已确认的 Context Capsule、任务胶囊、已读证据和回滚点。
 5. 归档会话、历史会话摘要和 rollout summary。
 6. 长期 memory 中的稳定偏好和历史经验。
@@ -101,10 +101,10 @@ Context Capsule
 
 以下事件都视为内部自动触发信号：
 
-- 切换模型、模型响应速度变化、模型能力差异导致输出风格或工具使用习惯变化。
+- 切换模型、供应商、上下文窗口、模型响应速度变化、模型能力差异导致输出风格或工具使用习惯变化；这些变化只能触发恢复检查，不能改变本 skill 的工作流要求。
 - 新建窗口、切换窗口、切换会话、打开归档会话、从历史摘要继续。
 - 切换 Plan/Default/Goal 等模式，或普通执行与自动续跑之间切换。
-- 使用插件、连接器、MCP/ACP 工具、第三方 agent、App、终端/CLI、hook、subagent、CI/chatops/webhook、`cc switch`、router/gateway/proxy/adapter、Browser/Computer Use、GitHub 工具、Figma 工具或其他技能后回到主任务。
+- 使用插件、连接器、MCP/ACP 工具、任意第三方调用、第三方 agent、App、终端/CLI、hook、subagent、CI/chatops/webhook、`cc switch`、router/gateway/proxy/adapter、自定义 wrapper、未知转发层、模型路由、Browser/Computer Use、GitHub 工具、Figma 工具或其他技能后回到主任务。
 - 技能加载、技能缺失、技能版本变化、当前工作区 skill/reference 有未提交改动。
 - 网络错误、网络断开、重连、工具超时、浏览器刷新、应用恢复、自动继续、上下文压缩或响应被截断。
 
@@ -144,9 +144,9 @@ Context Capsule
 
 - 每完成一个关键阶段，自动更新任务状态：定位、验证、修改、复核、失败回退。
 - 长任务阶段固定按“定位 -> 读取 -> 确认调用链 -> 修改 -> 验证”推进；每个阶段完成后输出或刷新中间 Capsule，阶段进行中但可能中断时也输出当前断点。
-- 第三方 IDE 集成、MCP/ACP、agent wrapper、终端/CLI、hook、subagent、CI/chatops、`cc switch` 或路由转发任务中，读取 3 个文件或执行 2 次工具调用后必须输出初始 Capsule，不等待上下文接近阈值。
+- 任意第三方调用、第三方 IDE 集成、MCP/ACP、agent wrapper、终端/CLI、hook、subagent、CI/chatops、`cc switch`、路由转发、未知 wrapper 或模型路由任务中，读取 3 个文件或执行 2 次工具调用后必须输出初始 Capsule，不等待上下文接近阈值。
 - 初始 Capsule 输出后，每累计新增读取超过 5 个文件，必须输出或刷新中间 Capsule，记录新增文件、已确认事实、未闭环项和下一步断点。
-- 执行预计耗时超过 30s、输出量大、网络不稳定或可能改变文件的工具调用前必须输出 Capsule 快照，包括 MCP/IDE `findUsages`、`searchFiles`、`executeCommand`、Shell 命令、构建、测试、lint、typecheck、format、codegen、全局搜索、批量读取、批量文件操作、git 历史查询、浏览器/模拟器/外部服务验证和第三方 agent 子任务。
+- 执行预计耗时超过 30s、输出量大、网络不稳定或可能改变文件的工具调用前必须输出 Capsule 快照，包括 MCP/IDE `findUsages`、`searchFiles`、`executeCommand`、Shell 命令、构建、测试、lint、typecheck、format、codegen、全局搜索、批量读取、批量文件操作、git 历史查询、浏览器/模拟器/外部服务验证和任意第三方调用/agent/wrapper 子任务。
 - 每次修改写入前必须先输出可恢复的中间 Capsule，写明目标文件、锚点、预期写入、回滚点和失败后如何判断已写入/未写入；写入后、验证前后、失败后、策略切换后、新指令插入后，都要确认 Capsule 是否仍覆盖最新任务清单、触碰范围、调用链、强规则同步项、失败状态、验证状态和回滚点。
 - 当输出即将变长、工具可能长时间运行、连续读取多个文件、准备批量修改、出现补丁失败或准备结束当前轮时，先给出或刷新压缩版 Capsule。
 - 已确认的调用链、约束、不变项、读取完整性、git 历史结论、已写入/未写入状态和回滚点不得在后续回复中丢失。
@@ -172,7 +172,7 @@ Context Capsule
 
 - 自动压缩、跨窗口、新会话或自动续跑后的第一步，先读取 `SKILL.md`、`references/00-index.md` 和当前任务命中的 reference，再用 Capsule、`git diff`、当前文件原文和已读证据恢复任务边界。
 - 恢复后必须核对：用户最新指令是否改变目标；任务清单是否完整；触碰范围和禁止项是否仍成立；调用链/强规则同步项/失败策略/验证状态是否缺失。
-- IDE 集成或第三方转发中断后重新触发时，先查最近未完成 Capsule、工具调用前快照和当前 diff；若 Capsule 记录了阶段断点，直接从该阶段继续，并只补读断点恢复所需的最小证据。
+- IDE 集成、任意第三方调用、第三方转发、未知 wrapper 或模型路由中断后重新触发时，先查最近未完成 Capsule、工具调用前快照和当前 diff；若 Capsule 记录了阶段断点，直接从该阶段继续，并只补读断点恢复所需的最小证据。
 - Capsule 缺少关键证据、回滚信息、已写入状态或策略切换依据时，先补读当前文件和 diff；仍无法恢复时，只问一个最小澄清问题，不直接继续写代码。
 - 不允许只写“延续上文”或凭旧记忆继续；压缩后所有继续修改都必须以当前文件和最新规则重新校准。
 
@@ -186,7 +186,7 @@ Context Capsule
 ### 全局 AGENTS 的定位
 
 - 本 skill 已内化全局 `AGENTS.md` 中应保留的编程规则，编程任务优先读 skill 索引。
-- 全局 `AGENTS.md` 仍建议保留，作为非 skill 场景、未触发 skill 场景和其他 agent 的兜底规则。
+- 全局 `AGENTS.md` 仍建议保留，作为外层未能加载 skill、未知第三方工具或其他 agent 的兜底入口；但只要任务载荷进入本 skill 且命中编程证据，仍按本 skill 内部触发和索引执行。
 - 不建议删除全局 `AGENTS.md`；如要瘦身，可保留语言偏好、工具优先级和“编程任务启用 codex-noise-filter”的指向。
 
 ## Codex 记忆管理

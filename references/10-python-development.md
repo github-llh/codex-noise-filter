@@ -21,6 +21,7 @@
 
 ## 触发与读取
 
+- 本节触发不受调用入口影响；任务来自任意第三方调用、App、CLI、IDE 插件、MCP/ACP、hook、subagent、路由转发、未知 wrapper 或模型路由时，只要载荷命中 Python 文件、配置、命令、日志或 diff，就按本节内部触发。
 - 看到 `.py`、`pyproject.toml`、`requirements.txt`、`setup.py`、`tox.ini`、`noxfile.py`、`Pipfile`、`poetry.lock`、`uv.lock`、`pytest.ini`、`ruff.toml`、`mypy.ini` 时优先读本文件。
 - 默认组合：`02` + `10`。执行 Python 语法检查、运行、测试、lint 或 type check 前加 `06` 并按 `python-环境缓存` 复用/更新环境；涉及前后端/Java 调用链时再按索引追加。
 - 不为 Python 任务一次性读取 Java、Maven、前端 reference；触碰范围扩大时再追加。

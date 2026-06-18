@@ -28,6 +28,7 @@
 
 ## 触发与读取
 
+- 本节触发不受调用入口影响；任务来自任意第三方调用、App、CLI、IDE 插件、MCP/ACP、hook、subagent、路由转发、未知 wrapper 或模型路由时，只要载荷命中前端文件、配置、命令、日志、截图或 diff，就按本节内部触发。
 - 看到 `package.json`、`.vue`、`.js`、`.jsx`、`.ts`、`.tsx`、`.mjs`、`.cjs`、`tsconfig.json`、`jsconfig.json`、`vite.config.*`、`vue.config.js`、`next.config.*`、`nuxt.config.*`、`webpack.config.*`、`vitest.config.*`、`jest.config.*`、`playwright.config.*`、`cypress.config.*`、`eslint.config.*` 时按本文件路由。
 - 默认组合：`02` + `11`。只涉及通用布局/表单/状态契约时可用 `02` + `04`；执行编译、构建、typecheck、lint 或测试前必须加 `06` 读取/复用 Node 前端环境缓存；涉及接口契约或后端数据问题再按索引追加后端 reference。
 - 只要本次触碰前端组件、页面、hook/composable、store、api/service/model/type、router、mock、fixture、样式或前端配置，就同步执行 `04#前端自动局部对齐门禁`：注释契约、魔法值、类型边界、抽象边界、格式化和验证是同一闭环，不因当前显性任务只是缩进、类型报错或构建失败而跳过。

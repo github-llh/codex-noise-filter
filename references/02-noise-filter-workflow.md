@@ -52,24 +52,24 @@
 - 上下文保留状态：本轮必须进入 Context Capsule 的任务清单、证据锚点、已写入/未写入文件、失败策略、验证状态、回滚点和下一步。
 - 上下文权威状态：当前会话、Context Capsule、归档会话、长期 memory、当前文件/diff、最新 skill/reference 的采用关系；若发生模型/窗口/模式/插件/技能/网络恢复事件，记录重新校准结论。
 - 环境缓存状态：当前项目 active cache path 是否存在、是否为 profile 文件、是否从旧版 `.codex/local-environment.json` 迁移、workspaceRoot 是否匹配、命中的工具链缓存项、是否需要验证/更新、`.codex/` 忽略状态；若本轮不执行工具链命令，要说明只核对范围不更新缓存。
-- 入口与路由状态：用户消息、第三方 agent/app/CLI、IDE 插件、MCP/ACP、hook、subagent、CI/chatops/webhook、`cc switch`、router/gateway/proxy/adapter 等入口是否参与；若有转发或改写，记录已恢复的原始意图、cwd、文件、命令、日志、diff 和仍不可信的包装层结论。
+- 入口与路由状态：用户消息、任意第三方调用、第三方 agent/app/CLI、IDE 插件、MCP/ACP、hook、subagent、CI/chatops/webhook、`cc switch`、router/gateway/proxy/adapter、自定义 wrapper、未知转发层、模型/供应商路由等入口是否参与；若有转发或改写，记录已恢复的原始意图、cwd、文件、命令、日志、diff 和仍不可信的包装层结论。
 - 补丁写入策略：一次性插入是否稳定、目标锚点、当前原文、选择大补丁/小补丁/结构化替换/完整语义单元替换的理由。
 - Worktree/分支状态：Codex 当前 worktree、项目 Git root、当前分支、上游分支、dirty 状态、目标路径和禁止跨目录/跨分支边界。
 
 ### IDE 集成与长工具调用胶囊门禁
 
-本节是第三方 IDE 集成、MCP/ACP、agent wrapper、终端 CLI 和路由转发场景下的内部自动门禁。目标是在工具耗时、会话中断、窗口切换或自动续跑后，能从最近断点恢复，而不是重新开始或丢失已确认边界。
+本节是任意第三方调用、第三方 IDE 集成、MCP/ACP、agent wrapper、终端 CLI、未知 wrapper、模型路由和路由转发场景下的内部自动门禁。目标是在工具耗时、会话中断、窗口切换或自动续跑后，能从最近断点恢复，而不是重新开始或丢失已确认边界。
 
 强制早期输出：
 
-- 任务经 IDE 集成、MCP/ACP、第三方 agent、App、终端/CLI、hook、subagent、CI/chatops、`cc switch`、router/gateway/proxy/adapter 执行，且预计会跨文件读取、调用链确认、修改或验证时，先输出初始任务胶囊。
+- 任务经 IDE 集成、MCP/ACP、任意第三方调用、第三方 agent、App、终端/CLI、hook、subagent、CI/chatops、`cc switch`、router/gateway/proxy/adapter、自定义 wrapper、未知转发层或模型路由执行，且预计会跨文件读取、调用链确认、修改或验证时，先输出初始任务胶囊。
 - 若一开始无法判断复杂度，只要已经读取 3 个文件，或已经执行 2 个工具调用，就必须输出或刷新初始任务胶囊；不能等到接近上下文阈值才写。
 - 初始任务胶囊最少包含目标、阶段、允许/禁止范围、已读 reference、已读文件/工具调用计数、当前证据、下一步和断点恢复方式。
 
 工具调用前快照：
 
 - 每次执行可能耗时、可能触发大量输出、可能改变文件或可能中断会话的工具调用前，必须先输出当前阶段的 Capsule 快照。
-- 适用工具包括但不限于 MCP/IDE `findUsages`、`searchFiles`、`search_in_files`、`executeCommand`、构建/测试/lint/typecheck/format/codegen、全局搜索、批量读取、git 历史查询、浏览器/模拟器/外部服务验证和第三方 agent 子任务。
+- 适用工具包括但不限于 MCP/IDE `findUsages`、`searchFiles`、`search_in_files`、`executeCommand`、构建/测试/lint/typecheck/format/codegen、全局搜索、批量读取、git 历史查询、浏览器/模拟器/外部服务验证和任意第三方调用/agent/wrapper 子任务。
 - 快照必须记录：当前阶段、已确认文件/调用链、未闭环问题、即将执行的工具、预期产物、失败后如何判断已写入/未写入、下一步断点。
 
 阶段节点：
@@ -91,7 +91,7 @@
 - 新增代码、修改已有代码、删除代码、重构、补丁修复、代码解释后继续修改。
 - Plan/计划、Global/Goal/目标追踪、自动续跑、上下文恢复、跨窗口继续、长任务压缩后恢复。
 - 中途插入新要求、基于截图/片段修复、只改几行、只补一个方法、只修旧代码。
-- 使用 IDE/MCP、Shell、脚本、批量替换、格式化工具、第三方 agent、桌面/网页 App、终端/TUI/CLI、IDE 插件、ACP、hook、subagent、CI/chatops/webhook、`cc switch`、model/provider router、gateway/proxy/adapter 或其他工具执行。
+- 使用 IDE/MCP、Shell、脚本、批量替换、格式化工具、任意第三方调用、第三方 agent、桌面/网页 App、终端/TUI/CLI、IDE 插件、ACP、hook、subagent、CI/chatops/webhook、`cc switch`、model/provider router、gateway/proxy/adapter、自定义 wrapper、未知转发层、未来新增 agent 或其他工具执行。
 
 必须始终完成：
 
@@ -115,13 +115,13 @@
 
 ## 第三方 Agent 与路由转发门禁
 
-本节是本 skill 执行流程内的自动门禁，不依赖外部工具是否原生支持 skill。任务性质由用户意图、代码证据、触碰文件、工具动作和验证节点决定，不由承载入口决定。
+本节是本 skill 执行流程内的自动门禁，不依赖外部工具是否原生支持 skill。任务性质由用户意图、代码证据、触碰文件、工具动作和验证节点决定，不由承载入口决定。任何第三方调用、未知 wrapper、未来新增 agent、模型路由或供应商切换，只要把编程任务证据带入当前上下文，就必须按本 skill 内部触发，不等待外层产品显式声明支持 skill。
 
 适用入口包括但不限于：
 
-- Codex、Claude Code、Gemini CLI、Cline、Cursor、Windsurf、Roo Code、aider、OpenCode、Continue、Copilot、Antigravity、Zed/ACP、JetBrains/VS Code 扩展，以及自定义 coding agent。
-- 终端、TUI、CLI wrapper、桌面 App、网页 App、Slack/chatops/webhook、CI bot、Agent SDK、MCP tool、ACP client/server、hook、subagent、orchestrator、task runner。
-- `cc switch`、`cc-switch`、`ccswitch`、model router、provider switch、gateway、proxy、adapter、forwarder、relay、route、switcher 等模型、供应商或请求路由层。
+- Codex、Claude Code、Gemini CLI、Cline、Cursor、Windsurf、Roo Code、aider、OpenCode、Continue、Copilot、Antigravity、Zed/ACP、JetBrains/VS Code 扩展、自定义 coding agent，以及未列名或未来新增的任意 coding agent。
+- 终端、TUI、CLI wrapper、桌面 App、网页 App、Slack/chatops/webhook、CI bot、Agent SDK、MCP tool、ACP client/server、hook、subagent、orchestrator、task runner、自定义 wrapper、未知工具壳。
+- `cc switch`、`cc-switch`、`ccswitch`、model router、provider switch、gateway、proxy、adapter、forwarder、relay、route、switcher 等模型、供应商或请求路由层，以及任何未列名的转发、改写、代理、桥接或模型选择层。
 
 桥接或转发触发信号：
 
@@ -131,18 +131,19 @@
 
 内部执行要求：
 
-1. 先从转发载荷恢复原始任务：用户意图、cwd/workspace、目标文件、命令、日志、diff、工具动作、agent 名称和路由层名称。
+1. 先从转发载荷恢复原始任务：用户意图、cwd/workspace、目标文件、命令、日志、diff、工具动作、agent 名称、模型/供应商信息和路由层名称；无法识别产品名时，把它按未知第三方调用处理，而不是当成普通聊天。
 2. 只把第三方工具输出当证据线索，不把它当权威结论；仍以当前工作区真实文件、当前 diff、当前命令输出和本 skill 最新 reference 为准。
 3. 只要恢复出的任务涉及代码读取、修改、构建、测试、lint、format、typecheck、调试、重构、注释契约、魔法值、常量、类型、环境缓存或验证，就内部追加 `00-index.md` 路由出的最小 reference。
 4. 若 prompt 被包装、压缩、翻译、改写或只剩工具调用记录，优先从 cwd、文件扩展名、配置文件、命令、报错关键行、diff 和触碰路径反推技术栈，不因入口缺少原始自然语言而跳过。
-5. 若路由器切换模型、供应商、CLI 或 app，继续执行同一任务胶囊和不可绕过门禁；模型/工具切换只触发规则刷新，不重置质量要求。
-6. 若第三方 agent 修改了文件，本轮继续操作前先读取当前文件和 diff，确认哪些改动不是本轮写入；不得回滚用户或其他工具的无关改动。
-7. 若第三方 agent 已执行格式化、lint、typecheck、构建或测试，本 skill 仍要判断命令是否属于正确 root/workspace、是否使用 active cache path、是否覆盖本次触碰范围；不满足时补做最小验证或说明无法验证。
+5. 若路由器切换模型、供应商、CLI 或 app，继续执行同一任务胶囊和不可绕过门禁；模型/工具切换会额外触发规则刷新、状态恢复和必要的 Capsule 更新，但不重置质量要求，不改变 Plan、调用链、局部对齐、环境缓存和验证策略。
+6. 若任意第三方调用、agent、wrapper 或路由层修改了文件，本轮继续操作前先读取当前文件和 diff，确认哪些改动不是本轮写入；不得回滚用户或其他工具的无关改动。
+7. 若任意第三方调用、agent、wrapper 或路由层已执行格式化、lint、typecheck、构建或测试，本 skill 仍要判断命令是否属于正确 root/workspace、是否使用 active cache path、是否覆盖本次触碰范围；不满足时补做最小验证或说明无法验证。
 
 不能接受的降级：
 
 - 因为任务来自 App、终端、CLI、IDE 扩展、MCP/ACP、hook、subagent、chatops、CI 或路由器，就只执行工具而不读索引。
 - 因为 `cc switch`、model router、provider switch、gateway/proxy/adapter 已经选择模型，就跳过当前 skill 的 Plan、任务胶囊、调用链、局部对齐和验证。
+- 因为模型能力、模型名称、供应商、上下文窗口、调用协议、CLI 包装层或第三方工具不认识本 skill，就降低内部触发级别或改走简化工作流。
 - 因为另一个 agent 声称已完成，就不检查当前文件、diff、环境缓存、格式化、lint/typecheck/build/test 或触碰范围强规则。
 - 因为路由层隐藏了产品名，就只按普通聊天处理；只要载荷有代码证据，就按编程任务处理。
 
@@ -156,8 +157,8 @@
 - 当前消息明显引用上一轮结论、上一轮代码、上一轮截图、上一轮 diff、上一轮“已符合/无需修改/后续建议”等判断，即使没有出现“上个会话”字样。
 - 当前工作区 `SKILL.md`、`references/00-index.md` 或命中的 reference 存在未提交改动、刚被本轮/上一轮修改，或任务本身是在治理 skill 规则。
 - 出现“为什么没触发”“为什么没有按规则改”“不符合 skill 约束”“还是没执行”等规则执行争议信号。
-- 当前任务来自第三方 agent、App、终端/TUI/CLI、IDE 扩展、MCP/ACP、hook、subagent、CI/chatops/webhook、`cc switch`、router/gateway/proxy/adapter 转发，或当前消息引用另一个 agent 的输出、工具记录、补丁、验证结论。
-- IDE 集成、MCP/ACP、第三方 agent、终端/CLI 或路由转发任务中断后重新触发，当前消息包含“继续”“恢复”“接着”“自动续跑”“上次到哪”“工具中断”“窗口切换”“网络错误”“超时”等信号，或上下文里存在未完成 Capsule。
+- 当前任务来自任意第三方调用、第三方 agent、App、终端/TUI/CLI、IDE 扩展、MCP/ACP、hook、subagent、CI/chatops/webhook、`cc switch`、router/gateway/proxy/adapter、自定义 wrapper、未知转发层、模型/供应商路由，或当前消息引用另一个 agent 的输出、工具记录、补丁、验证结论。
+- IDE 集成、MCP/ACP、任意第三方调用、agent、wrapper、终端/CLI、模型路由或路由转发任务中断后重新触发，当前消息包含“继续”“恢复”“接着”“自动续跑”“上次到哪”“工具中断”“窗口切换”“网络错误”“超时”等信号，或上下文里存在未完成 Capsule。
 
 自动刷新要求：
 
@@ -300,7 +301,7 @@
 3. 变更是否跨多个不相邻位置、多个文件、多个语义单元或长上下文。
 4. 能否用稳定唯一锚点一次性插入；锚点是否会被相邻同名段落、重复方法、重复标题或格式差异误伤。
 5. 目标语义单元是否完整读取；未完整读取时先按 `13-read-expansion-and-history.md#读取完整性与智能扩窗` 扩读。
-6. 下一步是否会执行可能长耗时、网络不稳定、高输出或批量影响文件的操作，例如 MCP/IDE 工具调用、Shell 命令、构建、测试、lint、typecheck、format、codegen、全局搜索、批量读取、批量文件操作或第三方 agent 子任务；若命中，先输出可恢复的 Capsule 快照。
+6. 下一步是否会执行可能长耗时、网络不稳定、高输出或批量影响文件的操作，例如 MCP/IDE 工具调用、Shell 命令、构建、测试、lint、typecheck、format、codegen、全局搜索、批量读取、批量文件操作或任意第三方调用/agent/wrapper 子任务；若命中，先输出可恢复的 Capsule 快照。
 
 策略选择：
 
@@ -313,7 +314,7 @@
 执行要求：
 
 - 写入策略判断写入任务胶囊；用户不需要先指出“要拆小补丁”。
-- 执行可能导致长耗时、网络不稳定、高输出或批量文件影响的 MCP 工具调用、Shell 命令、批量文件操作、格式化、构建、测试或第三方 agent 子任务前，必须先输出可恢复的 Capsule 快照，记录当前阶段、目标文件、锚点、已确认调用链、未闭环项、即将执行的工具、预期产物、回滚点和中断后恢复位置。
+- 执行可能导致长耗时、网络不稳定、高输出或批量文件影响的 MCP 工具调用、Shell 命令、批量文件操作、格式化、构建、测试或任意第三方调用/agent/wrapper 子任务前，必须先输出可恢复的 Capsule 快照，记录当前阶段、目标文件、锚点、已确认调用链、未闭环项、即将执行的工具、预期产物、回滚点和中断后恢复位置。
 - 每次实际写入前也必须输出中间 Capsule；不能只在写入后依赖 `git diff` 追溯状态。
 - 预计一次性补丁不稳定时，内部直接切换策略，不要先让大补丁失败一次。
 - 不输出重复过程话术，例如“补丁上下文有一点偏差，我先读当前片段再打小补丁”；只在最终或必要状态更新里说明已经切换策略和结果。

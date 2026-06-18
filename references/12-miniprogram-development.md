@@ -22,6 +22,7 @@
 
 ## 触发与读取
 
+- 本节触发不受调用入口影响；任务来自任意第三方调用、App、CLI、IDE 插件、MCP/ACP、hook、subagent、路由转发、未知 wrapper 或模型路由时，只要载荷命中小程序、uni-app、Taro 文件、配置、命令、日志、截图或 diff，就按本节内部触发。
 - 命中 `app.json`、`app.js`、`app.wxss`、`sitemap.json`、`project.config.json`、`project.private.config.json`、`miniprogramRoot`、`miniprogram_npm`、`wxml`、`wxss`、`wxs`、`wx:`、`setData`、`Component`、`Page`、`Behavior`、`subPackages`、`preloadRule` 时按原生小程序处理。
 - 命中 `pages.json`、`manifest.json`、`App.vue`、`uni.scss`、`uni_modules`、`#ifdef MP`、`#ifdef MP-WEIXIN`、`mp-weixin`、`unpackage/dist` 时按 uni-app 处理。
 - 命中 `@tarojs/*`、`taro`、`Taro.`、`app.config.js`、`app.config.ts`、`page.config.*`、`config/index.*`、`TARO_ENV`、`dev:weapp`、`build:weapp`，或用户输入 `raro` 但上下文出现小程序/React/Vue/构建脚本时，按 Taro 处理。
