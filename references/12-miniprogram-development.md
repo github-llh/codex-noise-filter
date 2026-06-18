@@ -128,7 +128,7 @@
 
 ## 环境与运行
 
-先执行 `01-global-engineering-rules.md#跨技术栈环境与命令`，再按 `14-environment-cache-by-stack.md#小程序环境缓存` 读取/复用 `.codex/local-environment.json`、小程序项目配置、框架平台、源码目录、输出目录、构建脚本和必要的 Node 包管理器。
+先执行 `01-global-engineering-rules.md#跨技术栈环境与命令`，再按 `06-environment-discovery.md#跨系统缓存文件命名` 解析 active cache path，并按 `14-environment-cache-by-stack.md#小程序环境缓存` 读取/复用小程序项目配置、框架平台、源码目录、输出目录、构建脚本和必要的 Node 包管理器。
 
 - 首先读取项目脚本和配置：`package.json`、lockfile、`project.config.json`、`project.private.config.json`、`pages.json`、`manifest.json`、`config/index.*`。
 - 有 `package.json` 的小程序项目必须同时按 `14-environment-cache-by-stack.md#node前端环境缓存` 读取 Node 版本、包管理器、lockfile、`scripts` 和框架依赖版本；缓存命中同一 framework、platform、sourceRoot、outputRoot、packageJson 和构建脚本时直接复用。

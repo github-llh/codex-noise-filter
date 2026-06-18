@@ -12,6 +12,7 @@
 ## 目录
 
 - [当前项目范围门禁](#当前项目范围门禁)
+- [跨系统缓存文件命名](#跨系统缓存文件命名)
 - [构建测试前环境缓存门禁](#构建测试前环境缓存门禁)
 - [发现顺序](#发现顺序)
 - [自动环境缓存维护](#自动环境缓存维护)
@@ -27,14 +28,14 @@
 
 ## 当前项目范围门禁
 
-当任务边界证据指向“当前项目、当前工作区、只修改当前项目、不跨项目、不要同步到全局、不要改其他目录”时，`.codex/local-environment.json` 不只是工具链路径缓存，也作为项目范围证据自动触发。边界证据可以来自用户输入、当前 `cwd`、workspace root、任务胶囊禁止项、触碰文件路径、Git root、worktree 状态或恢复上下文；即使本轮只改文档、配置或 skill 规则且不准备执行 Maven/Node/Python/小程序命令，也必须做轻量核对。该门禁由本 skill 在确认任务边界时内部触发，外部显式提醒不参与触发级别判断。
+当任务边界证据指向“当前项目、当前工作区、只修改当前项目、不跨项目、不要同步到全局、不要改其他目录”时，当前工作区本地环境缓存不只是工具链路径缓存，也作为项目范围证据自动触发。边界证据可以来自用户输入、当前 `cwd`、workspace root、任务胶囊禁止项、触碰文件路径、Git root、worktree 状态或恢复上下文；即使本轮只改文档、配置或 skill 规则且不准备执行 Maven/Node/Python/小程序命令，也必须做轻量核对。该门禁由本 skill 在确认任务边界时内部触发，外部显式提醒不参与触发级别判断。
 
 触发后先做轻量核对：
 
 1. 定位当前任务工作区根，优先用 `git rev-parse --show-toplevel`，失败时用当前路径和项目根标志。
-2. 读取当前工作区的 `.codex/local-environment.json`，只读当前项目，不读取或同步全局 skill 目录、其他仓库或父级无关目录。
+2. 按 [跨系统缓存文件命名](#跨系统缓存文件命名) 解析当前用户、当前机器、当前工作区的 active cache path；优先读取 `.codex/local-environment.<profile>.json`，兼容读取旧版 `.codex/local-environment.json`。
 3. 核对 `workspaceRoot`、`scope`、工具链缓存项和当前工作区是否一致；缓存缺少 `workspaceRoot` 时不能据此扩大范围，只能记录“缓存缺少范围字段，本轮按当前 Git root 保守处理”。
-4. 用 `git check-ignore -v .codex/local-environment.json .codex/` 核对 `.codex/` 是否被当前项目根 `.gitignore` 覆盖；未覆盖时按“自动环境缓存维护”补根忽略规则。
+4. 用 `git check-ignore -v .codex/ .codex/local-environment*.json` 核对 `.codex/` 和所有环境缓存 profile 是否被当前项目根 `.gitignore` 覆盖；未覆盖时按“自动环境缓存维护”补根忽略规则。
 5. 若本轮不执行构建、测试、运行、预览、代码生成或工具链命令，不查找本机候选、不验证版本、不更新工具路径，只在任务胶囊记录“已核对缓存存在性和项目范围，本轮不使用工具链路径”。
 6. 若后续准备执行工具链命令，再进入“自动环境缓存维护”和对应 `14` 技术栈缓存规则，验证并按需更新缓存。
 
@@ -43,16 +44,52 @@
 - 不能因为当前项目有 `.codex/local-environment.json` 就同步或修改其他目录下的 skill 副本。
 - 不能把全局 `~/.codex/skills/...` 的缓存或路径当成当前项目范围证据。
 - 不能为了补齐缓存 schema 查找无关技术栈或写入未验证路径。
-- 不能在用户已限定当前项目时，只用当前 cwd 口头说明范围而不核对本项目 `.codex/local-environment.json` 和忽略规则。
+- 不能在用户已限定当前项目时，只用当前 cwd 口头说明范围而不核对本项目 active cache path 和忽略规则。
+
+## 跨系统缓存文件命名
+
+本节是内部自动门禁。任何创建、读取、迁移或更新本地环境缓存的流程，都必须先解析跨 Windows/macOS/Linux 兼容的缓存文件名；不能只用单一固定文件名，也不能只用 hostname 区分不同用户和机器。
+
+文件布局：
+
+- 缓存目录固定为 `<project-root>/.codex/`，目录本身必须被 Git root 的 `.gitignore` 忽略。
+- 新写入优先使用 profile 文件：`<project-root>/.codex/local-environment.<profile>.json`。
+- 旧版兼容文件 `<project-root>/.codex/local-environment.json` 只作为读取和迁移 fallback；新规则下不要依赖它区分不同用户、不同机器或不同系统。
+- 若旧版文件存在且没有 profile 文件，读取旧版内容后生成 profile 文件，并把 `identity.migratedFrom` 记录为 `.codex/local-environment.json`；除非当前任务明确要求兼容旧工具，不主动覆盖旧版文件。
+
+`<profile>` 生成规则：
+
+1. 采集 `os`、`arch`、当前用户名、当前主机名或计算机名。
+2. 主机名只能作为可读标签，不能作为唯一 ID：用户可改名，局域网和组织内可能重复，macOS 局域网重名时还可能自动追加数字。
+3. 生成或复用 `profileId`：优先复用当前 profile 文件里的 `identity.profileId`；没有时生成随机 UUID，并在文件内容中保存完整 UUID。
+4. 文件名使用短 id：`local-environment.<os>-<arch>-<safe-user>-<safe-host>-<id8>.json`，其中 `<id8>` 是 `profileId` 的前 8 到 12 个十六进制字符。若检测到同名文件但 `identity` 不匹配，追加新的随机短 id，不能覆盖。
+5. `safe-user` 和 `safe-host` 只用于可读性，必须按跨系统规则清洗后再入文件名。
+
+跨系统文件名清洗规则：
+
+- 统一转小写；优先保留 ASCII 字母、数字、点、短横线和下划线。
+- 空白、中文、emoji、路径分隔符和 Windows 禁用字符 `< > : " / \ | ? *` 统一替换为 `-`，连续 `-` 折叠为一个。
+- 去掉首尾空格、点和短横线；空值用 `unknown`。
+- 不生成 Windows 保留设备名：`con`、`prn`、`aux`、`nul`、`com1` 到 `com9`、`lpt1` 到 `lpt9`；命中时加前缀 `x-`。
+- 不依赖大小写区分文件；`Alice-Mac` 和 `alice-mac` 视为同一个 slug。
+- 单段 slug 控制在 32 字符以内，完整文件名控制在 120 字符以内，避免 Windows 路径长度和同步工具兼容问题。
+
+缓存内容必须包含：
+
+- `schemaVersion`：当前缓存 schema 版本。
+- `workspaceRoot`：当前项目根的绝对路径。
+- `cacheFile`：当前 active cache path。
+- `identity`：`profileId`、`os`、`arch`、`username`、`hostname`、`safeUser`、`safeHost`、`createdAt`、`updatedAt`。
+- 各技术栈已验证的工具链字段。不得写入 token、密钥、registry 凭据、上传凭证或个人隐私备注。
 
 ## 构建测试前环境缓存门禁
 
-本节是自动门禁，属于流程内置前置步骤。只要本 skill 的执行流程进入构建、编译、测试、lint、typecheck、运行、预览、打包、发布前校验或代码生成节点，就必须先从当前任务项目根处理 `.codex/local-environment.json`。
+本节是自动门禁，属于流程内置前置步骤。只要本 skill 的执行流程进入构建、编译、测试、lint、typecheck、运行、预览、打包、发布前校验或代码生成节点，就必须先从当前任务项目根解析并处理 active cache path。
 
 执行顺序：
 
 1. 定位项目根：优先 `git rev-parse --show-toplevel`；非 Git 项目按当前触碰文件向上查找 `pom.xml`、`package.json`、`pyproject.toml`、`project.config.json` 等根标志。
-2. 固定缓存路径：只使用 `<project-root>/.codex/local-environment.json`，不得使用父目录、其他仓库或全局 skill 目录的缓存。
+2. 解析缓存路径：按 [跨系统缓存文件命名](#跨系统缓存文件命名) 得到 active cache path；不得使用父目录、其他仓库或全局 skill 目录的缓存。
 3. 缓存存在：
    - JSON 可解析且包含当前命令所需工具链时，优先直接使用缓存中的 `executable`、`home`、`localRepository`、`packageManager.executable`、`python.executable`、`devtoolsCli` 等路径组装命令。
    - 缓存缺少 `workspaceRoot` 时，不阻断使用；按当前项目根保守补充判断，并在下次需要更新缓存时写入 `workspaceRoot`。
@@ -60,13 +97,13 @@
 4. 缓存不存在：
    - 创建 `<project-root>/.codex/` 目录。
    - 按当前命令命中的技术栈读取项目配置，再按 `14-environment-cache-by-stack.md` 查找本机候选、执行最小验证。
-   - 验证通过后创建 `.codex/local-environment.json`，只写当前命令需要且已验证的字段，不为补齐 schema 写空值或猜测值。
+   - 验证通过后创建 active cache path，只写当前命令需要且已验证的字段，不为补齐 schema 写空值或猜测值。
 5. 执行命令：使用缓存路径或新验证路径执行原目标命令；不要回退到未验证全局命令。
 6. 命令失败：
    - 如果错误可能来自工具路径、版本、依赖、锁文件、脚本、模块路径、workspace/filter、虚拟环境、框架平台、本地仓库或开发者工具路径不匹配，必须重新读取项目配置和本机候选环境。
-   - 找到更匹配环境后更新 `.codex/local-environment.json`，并用同一目标命令重试一次。
+   - 找到更匹配环境后更新 active cache path，并用同一目标命令重试一次。
    - 重试仍失败时，停止连续重试，区分环境问题、依赖缺失、项目历史失败和本次改动问题。
-7. 忽略规则：创建或更新缓存后，必须确认项目根 `.gitignore` 覆盖 `/.codex/`，没有则补齐并用 `git check-ignore -v` 验证。
+7. 忽略规则：创建或更新缓存后，必须确认项目根 `.gitignore` 覆盖 `/.codex/`，没有则补齐并用 `git check-ignore -v .codex/ .codex/local-environment*.json` 验证。
 
 禁止行为：
 
@@ -77,7 +114,7 @@
 
 ## 发现顺序
 
-1. 读取工作区缓存：`.codex/local-environment.json`。
+1. 读取工作区缓存：先按 [跨系统缓存文件命名](#跨系统缓存文件命名) 解析 active cache path，再读取 profile 文件；旧版 `.codex/local-environment.json` 只作为 fallback。
 2. 读取 IDE/项目配置，按当前项目实际命中的技术栈选择，不一次性读取所有配置：
    - IDE：`.idea/misc.xml`、`.idea/workspace.xml`、`.idea/compiler.xml`、`.idea/jarRepositories.xml`。
    - Java/Maven：`.mvn/maven.config`、`.mvn/jvm.config`、`.mvn/wrapper/maven-wrapper.properties`、`pom.xml`。
@@ -106,24 +143,24 @@
    - `/Applications/wechatwebdevtools.app/Contents/MacOS/cli`
    - `/Applications/微信开发者工具.app/Contents/MacOS/cli`
 5. 找到候选后执行最小验证。
-6. 验证通过后写入 `.codex/local-environment.json`，下次优先复用。
+6. 验证通过后写入 active cache path，下次优先复用。
 
 ## 自动环境缓存维护
 
-只要任务需要使用 Maven/JDK/Node/Python/小程序开发者工具等本机工具链执行构建、编译、测试、lint、typecheck、运行、预览、打包、发布前校验或代码生成，就自动前置执行本流程；不需要额外提出维护 `.codex/local-environment.json`。具体执行顺序先按 [构建测试前环境缓存门禁](#构建测试前环境缓存门禁) 处理项目根缓存，再进入当前技术栈发现。
+只要任务需要使用 Maven/JDK/Node/Python/小程序开发者工具等本机工具链执行构建、编译、测试、lint、typecheck、运行、预览、打包、发布前校验或代码生成，就自动前置执行本流程；不需要额外提出维护本地环境缓存。具体执行顺序先按 [构建测试前环境缓存门禁](#构建测试前环境缓存门禁) 处理项目根缓存，再进入当前技术栈发现。
 
 触发场景：
 
 - 即将执行 `mvn`、`java`、`node`、`npm`、`pnpm`、`yarn`、`bun`、`python`、`pytest`、`uv`、`poetry`、`tox`、`nox`、微信开发者工具 CLI、`miniprogram-ci`、Taro/uni-app 构建命令，以及 lint、typecheck、compile、codegen 等项目脚本。
 - 构建、编译、测试、运行命令失败，且失败原因可能是工具路径、版本、`JAVA_HOME`、本地 Maven 仓库、包管理器、虚拟环境、开发者工具路径或工作目录不匹配。
-- 任务目标直接涉及强化、补齐或更新 `.codex/local-environment.json`。
+- 任务目标直接涉及强化、补齐或更新 `.codex/local-environment.json`、profile 环境缓存、主机名/用户名区分、跨 Windows/macOS 文件名兼容或 `.codex/` 忽略规则。
 
 执行步骤：
 
 1. 定位工作区根：
    - 优先使用当前任务路径所在的 Git root：`git rev-parse --show-toplevel`。
    - 如果不是 Git 仓库，使用当前工作目录或任务上下文中的路径向上查找项目根标志，例如 `pom.xml`、`package.json`、`pyproject.toml`、`project.config.json`。
-2. 读取 `<workspace>/.codex/local-environment.json`：
+2. 按 [跨系统缓存文件命名](#跨系统缓存文件命名) 解析 active cache path：
    - 文件存在且 JSON 可解析时，逐项验证已记录的 `executable`、`home`、`localRepository`、`devtoolsCli` 等路径。
    - 已验证且仍可用的值直接复用，不重复查找本机候选。
    - 已有缓存满足当前命令所需工具链时，直接用缓存中的路径重新组装命令并执行原构建/编译/测试/运行任务。
@@ -150,7 +187,7 @@
    - Node/Python/小程序命令必须使用项目声明的包管理器、解释器、虚拟环境或开发者工具路径，不回退到未验证全局命令。
    - 若重试仍失败，先区分环境问题、项目历史失败、依赖缺失和本次改动问题，不继续无限重试。
 8. 自动检查忽略文件：
-   - 在 Git root 检查 `.gitignore` 是否已经忽略 `.codex/`：优先用 `git check-ignore -v .codex/local-environment.json .codex/` 验证。
+   - 在 Git root 检查 `.gitignore` 是否已经忽略 `.codex/`：优先用 `git check-ignore -v .codex/ .codex/local-environment*.json` 验证。
    - 若未忽略，读取根 `.gitignore`；存在则追加 `/.codex/`，不存在则新建根 `.gitignore` 并写入 `/.codex/`。
    - 不修改子目录 `.gitignore` 来替代根忽略规则，除非项目本身不是 Git 仓库且用户只给了子项目目录。
    - 写入后再次用 `git check-ignore -v` 验证。
@@ -203,17 +240,31 @@
 缓存文件路径：
 
 ```text
-.codex/local-environment.json
+.codex/local-environment.<os>-<arch>-<safe-user>-<safe-host>-<id8>.json
 ```
+
+旧版 `.codex/local-environment.json` 只作为兼容 fallback。新写入优先使用 profile 文件，具体命名规则见 [跨系统缓存文件命名](#跨系统缓存文件命名)。
 
 推荐结构：
 
 ```json
 {
-  "version": 1,
+  "schemaVersion": 2,
   "updatedAt": "YYYY-MM-DDTHH:mm:ssZ",
   "scope": "workspace",
   "workspaceRoot": "/path/to/workspace",
+  "cacheFile": "/path/to/workspace/.codex/local-environment.darwin-arm64-lilinhan-macbook-pro-a1b2c3d4.json",
+  "identity": {
+    "profileId": "a1b2c3d4-1111-2222-3333-444455556666",
+    "os": "darwin|windows|linux",
+    "arch": "arm64|x64",
+    "username": "raw-user-name",
+    "hostname": "raw-host-name",
+    "safeUser": "raw-user-name",
+    "safeHost": "raw-host-name",
+    "createdAt": "YYYY-MM-DDTHH:mm:ssZ",
+    "updatedAt": "YYYY-MM-DDTHH:mm:ssZ"
+  },
   "mavenRoot": "/path/to/workspace/module-root",
   "modulePath": "server/service-a",
   "maven": {
@@ -311,11 +362,12 @@
 - 已有缓存且验证仍通过时，直接使用缓存。
 - 项目配置显式指定路径时，项目配置优先于旧缓存。
 - 缓存失效时，说明原因并重新发现。
-- `.codex/local-environment.json` 是本地状态文件，不提交到仓库。
+- `.codex/local-environment.<profile>.json` 和旧版 `.codex/local-environment.json` 都是本地状态文件，不提交到仓库。
+- hostname 不是唯一 ID，只能作为可读标签；真实区分依赖 `profileId`、`os`、`arch`、用户名、hostname 和 workspaceRoot 共同判断。
 
 ## 写入边界
 
-- 允许写入当前工作区的 `.codex/local-environment.json`。
+- 允许写入当前工作区的 `.codex/local-environment.<profile>.json`；只有迁移或兼容旧工具时才读取旧版 `.codex/local-environment.json`。
 - 不自动修改用户全局 shell 配置、IDE 配置、Maven settings 或系统环境变量。
 - 不把临时失败日志写入缓存。
 - 不把未验证路径写入缓存。

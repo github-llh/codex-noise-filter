@@ -80,7 +80,7 @@ Context Capsule
 
 1. 当前系统、开发者、AGENTS 和当前 skill 最新规则。
 2. 用户当前最新消息和当前任务边界。
-3. 当前工作区真实证据：当前文件原文、`git diff`、`git status`、项目配置、`.codex/local-environment.json`、命令验证结果。
+3. 当前工作区真实证据：当前文件原文、`git diff`、`git status`、项目配置、active cache path、命令验证结果。
 4. 当前会话内已确认的 Context Capsule、任务胶囊、已读证据和回滚点。
 5. 归档会话、历史会话摘要和 rollout summary。
 6. 长期 memory 中的稳定偏好和历史经验。
@@ -118,7 +118,7 @@ Context Capsule
 - Context Capsule 负责跨窗口、压缩和自动继续的可恢复最小状态；必须记录证据锚点和回滚点，而不是只写结论。
 - 归档会话负责历史复盘；只读取与当前任务强相关的 1 到 2 个证据片段，避免把旧任务假设带入当前项目。
 - 长期 memory 负责稳定偏好和重复经验；不能记录或覆盖一次性命令结果、未验证路径、机器私有临时状态、旧错误假设和已被当前证据推翻的结论。
-- 当前项目本地缓存负责环境路径；`.codex/local-environment.json` 只对当前工作区生效，不能用长期 memory 或归档会话中的路径替代。
+- 当前项目本地缓存负责环境路径；active cache path 只对当前工作区、当前用户和当前机器生效，不能用长期 memory 或归档会话中的路径替代。
 
 ### 防冲掉约束
 
@@ -181,7 +181,7 @@ Context Capsule
 Codex 的记忆分三层处理：
 
 1. 会话内上下文：用 Context Capsule 保存当前任务边界、证据、已改、回滚和下一步。
-2. 工作区本地缓存：用 `.codex/local-environment.json` 保存已验证的环境路径，例如 Maven、JDK、Node、包管理器；该文件只服务当前工作区，默认不提交。
+2. 工作区本地缓存：用 `.codex/local-environment.<profile>.json` 保存已验证的环境路径，例如 Maven、JDK、Node、包管理器；旧版 `.codex/local-environment.json` 只作为兼容 fallback。该文件只服务当前工作区、当前用户和当前机器，默认不提交。
 3. 长期 memory：只记录稳定偏好和跨任务复用规则；机器私有绝对路径、临时错误日志、一次性构建结果和未验证猜测不要写入长期记忆。
 
 ### 何时读取

@@ -22,7 +22,7 @@ description: |
 - 当前任务处于上个会话接续、上下文恢复、自动续跑、跨窗口继续、引用上一轮结论、存在 Context Capsule、或 skill/reference 近期在当前工作区发生变更的状态；这类状态必须自动刷新规则，不依赖外部提醒。
 - 任务涉及路径、文件名、类名、方法名、错误日志、调用链、构建、测试、前后端代码规范。
 - 任务目标、代码证据或上下文体现写代码风格、智能化抽象、公共接口/方法/类/文件抽离、泛型/any 边界、减少魔法值、抽常量、枚举化、配置化、去掉硬编码或避免重复逻辑。
-- 代码片段、IDE 截图、diff、lint/typecheck 输出、阅读或检索命中的文件中已经出现明显硬编码、重复 if/set、外部协议常量、平台编码、配置写死、分层错位、导出接口/API 边界缺少必要注释、组件/页面属性使用裸 `any`、前端语法/缩进规范未纳入环境缓存或旧代码继续违背本 skill 规则。
+- 代码片段、IDE 截图、diff、lint/typecheck 输出、阅读或检索命中的文件中已经出现明显硬编码、重复 if/set、外部协议常量、平台编码、配置写死、分层错位、导出接口/API 边界缺少必要注释、组件/页面属性使用裸 `any`、前端语法/缩进规范未纳入环境缓存、环境缓存仍依赖单一固定文件名或 hostname 唯一性、旧代码继续违背本 skill 规则。
 - 输入体现减少 token、压缩噪音、简洁可追溯、可复盘、少读无关文件或保留证据链的需求。
 - 写出 `codex-noise-filter` 只是附加信号；不得把写出 skill 名作为启用前提。
 
@@ -46,7 +46,7 @@ description: |
 - 执行门禁、任务胶囊、调用链、强规则自动升级、补丁写入预判、worktree/分支、Plan/Goal、失败回退和既有代码一致性由 `02-noise-filter-workflow.md` 承载。
 - 语言、工具优先级、修改前确认、文件归属、环境命令、验证策略、安全边界、编码风格预检、硬编码、重复逻辑和注释原则由 `01-global-engineering-rules.md` 承载。
 - 读取完整性、智能扩窗和 Git 历史防回归由 `13-read-expansion-and-history.md` 承载；不能用初始读取窗口、局部 diff 或旧记忆替代必要证据。
-- 当前项目范围、`.codex/local-environment.json`、`.codex/` 忽略规则和工具链缓存由 `06-environment-discovery.md` 与 `14-environment-cache-by-stack.md` 承载；进入构建、测试、运行、lint、typecheck、代码生成等工具链节点前必须自动处理项目根缓存。
+- 当前项目范围、`.codex/local-environment.<profile>.json`、旧版 `.codex/local-environment.json` 兼容、`.codex/` 忽略规则和工具链缓存由 `06-environment-discovery.md` 与 `14-environment-cache-by-stack.md` 承载；进入构建、测试、运行、lint、typecheck、代码生成等工具链节点前必须自动处理项目根缓存。
 - 当前会话、归档会话、长期 memory、Context Capsule、模型/窗口/模式/插件/技能切换和网络错误后的恢复策略由 `05-delivery-templates.md` 承载；恢复时必须按当前文件证据和最新 skill 规则重新校准，不能让旧记忆冲掉硬约束。
 - Java、Python、Vue/React、小程序、并发/异步/批量等落地细节只在命中代码证据、调用链、项目配置、命令节点或风险信号时按 `07`、`08`、`09`、`10`、`11`、`12` 追加读取，避免外层膨胀。
 - 对 JetBrains 项目，优先使用 JetBrains MCP / IDE 工具读取、定位、修改和诊断；只有明确不可用、超时或错误时才使用 Shell。
@@ -64,5 +64,5 @@ description: |
 7. 调用链阅读中发现相关文件强规则违背时，先判断低风险闭环，成立就写入任务胶囊同步处理。
 8. 修改前再次引用任务编号确认目标。
 9. 只做最小闭环改动，并对本次触碰的已有代码做局部规则对齐。
-10. 执行最轻量验证。
+10. 执行最轻量验证；凡进入工具链节点，必须先按 `06` 解析 active cache path，并自动处理 profile 环境缓存命名、旧版缓存兼容、`.codex/` 忽略规则和当前技术栈缓存。
 11. 用中文说明变更内容、影响范围和验证结果。

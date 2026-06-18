@@ -4,9 +4,9 @@
 
 ## 本地 Maven 环境
 
-Maven 配置不要只依赖硬编码路径。执行 Maven 构建前，先按 `14-environment-cache-by-stack.md#mavenjava-环境缓存` 读取缓存、`pom.xml`、`.mvn/*`、wrapper、IDE/项目配置、Java/Maven 版本约束和本机候选路径。
+Maven 配置不要只依赖硬编码路径。执行 Maven 构建前，先按 `06-environment-discovery.md#跨系统缓存文件命名` 解析 active cache path，再按 `14-environment-cache-by-stack.md#mavenjava-环境缓存` 读取缓存、`pom.xml`、`.mvn/*`、wrapper、IDE/项目配置、Java/Maven 版本约束和本机候选路径。
 
-每个使用者的 Maven 安装路径和本地仓库都可能不同，skill 文档不得写死个人目录。构建命令必须使用本工作区 `.codex/local-environment.json` 中已验证的 `maven.executable` 与 `maven.localRepository`；没有缓存时先发现、验证，再写入缓存。
+每个使用者的 Maven 安装路径和本地仓库都可能不同，skill 文档不得写死个人目录。构建命令必须使用本工作区 active cache path 中已验证的 `maven.executable` 与 `maven.localRepository`；没有缓存时先发现、验证，再写入 profile 环境缓存。
 
 构建 Java/Maven 项目时，命令形态为：
 
@@ -17,7 +17,7 @@ Maven 配置不要只依赖硬编码路径。执行 Maven 构建前，先按 `14
 Maven 命令选择顺序：
 
 1. 读取当前目标模块和聚合 root 的 `pom.xml`，解析 `modules`、`parent`、`artifactId`、`java.version`、`maven.compiler.release/source/target` 和关键插件。
-2. 读取 `.codex/local-environment.json` 中仍匹配当前 `mavenRoot`、`modulePath`、Java 版本约束、wrapper 和本地仓库的缓存。
+2. 读取 active cache path 中仍匹配当前 `mavenRoot`、`modulePath`、Java 版本约束、wrapper 和本地仓库的缓存。
 3. 读取 IDE/项目 Maven 配置，例如 `.idea/misc.xml`、`.idea/workspace.xml`、`.mvn/maven.config`、`.mvn/jvm.config`、`.mvn/wrapper/maven-wrapper.properties`。
 4. 如果项目已配置 Maven Wrapper 且项目规则要求使用 Wrapper，使用项目内 `./mvnw`。
 5. 否则查找本机候选 Maven，例如 `~/dev/maven-*/bin/mvn`、`~/.sdkman/candidates/maven/*/bin/mvn`、`/opt/homebrew/bin/mvn`、`/usr/local/bin/mvn`、`mvn`。
