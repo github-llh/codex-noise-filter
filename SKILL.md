@@ -44,6 +44,7 @@ description: |
 - `SKILL.md` 是轻量外层启动器，只保留触发、索引、总门禁和执行节奏；详细规则放在 references 中由 `00-index.md` 内部路由。规则不在外层重复展开，不代表降级或可跳过。
 - 本 skill 的硬约束不因运行方式变化而失效。新增、修改、删除、重构、Plan、Global/Goal、自动续跑、上下文恢复、跨窗口、新指令插入、局部补丁和后续修复，都必须先走索引、确认触碰范围，并执行局部规则对齐。
 - Agent、App、CLI、终端、IDE 插件、MCP/ACP、hook、subagent、CI/chatops/webhook、`cc switch`、模型/供应商路由、gateway/proxy/adapter、自定义 wrapper、未知转发层和未来新增工具只是承载入口，不改变任务性质，也不能绕过本 skill 的索引、门禁、局部对齐和验证流程。
+- AGENTS 文件只是宿主注入的指令链，不是 skill 注册表或自动加载器；第三方 agent/CLI 不一定安装 Codex，也不一定存在 `.codex`。只导入 AGENTS 时，必须先确认 `codex-noise-filter` 是否出现在可用 skill 列表；若没有 discovery 但能读文件，优先取得第三方实际加载的配置文件路径，把其父目录记为 `HOST_CONFIG_DIR`，从 `$HOST_CONFIG_DIR/skills/codex-noise-filter/` 读取 `SKILL.md` 与 `references/00-index.md`；再检查 AGENTS 文件旁边、项目级 `.agents/skills`、用户级 `.agents/skills`、`CODEX_HOME` 和兼容 `.codex` 路径。只有无法发现且无法读取分发文件时，才进入 `fallbackOnly` 兜底闭环。
 - 模型、供应商、工具壳、App、CLI、插件、路由器或转发协议的变化只能触发规则刷新和状态恢复，不能降低本 skill 的内部触发级别，不能跳过任务胶囊、工具快照、调用链、局部对齐、抽象抽离判断、中文乱码/编码检查、环境缓存和验证策略。
 - 所有写成“自动触发”“内部触发”“必须自动”的规则都属于本 skill 执行流程内的高优先级门禁。任务状态、代码证据、触碰范围、调用链、工具链节点、Git/worktree 状态和风险信号是触发依据，外部提醒、显式点名 skill 或固定关键词都不能降低触发级别。
 - 本 skill 一旦被编程任务触发，就必须建立内部触发状态机，而不是只执行一组松散建议。状态机至少包含：激活握手、已读 reference、任务胶囊/快照、读取完整性、调用链、局部对齐、抽象抽离、编码/乱码、环境缓存、验证、恢复交付。每次工具调用、写入、验证和最终回复前都必须自检这些状态；发现缺失时先补齐或记录无法补齐原因，再继续。

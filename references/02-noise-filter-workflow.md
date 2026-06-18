@@ -104,9 +104,42 @@
 
 本节处理“skill 已经触发，但内部自动触发链没有全部接上”的故障。触发不是一次性开关；进入编程任务后，所有后续工具调用、读取、写入、验证和回复都必须带着同一份内部状态推进。
 
+### AGENTS 导入与 Skill Bootstrap 门禁
+
+AGENTS 文件是宿主启动时注入的指令链，不是 Codex skill 注册表，也不会让任意第三方 agent/CLI 自动获得 skill discovery。第三方 agent/CLI 不一定安装 Codex，也不一定有 `.codex` 目录；只把 `templates/global-AGENTS.light.md` 导入第三方工具时，默认只能得到指令。除非宿主同时暴露 skill 元数据或允许从随 AGENTS 分发的目录、项目目录或用户目录读取 `SKILL.md`，否则不能声称“已自动加载本 skill”。
+
+AGENTS 与 skill 路径必须按当前宿主、当前用户和平台解析，不能写死某台机器的绝对路径：
+
+- 第三方工具实际加载的配置文件所在目录记为 `HOST_CONFIG_DIR`；宿主实际导入的 AGENTS 文件所在目录记为 `AGENTS_DIR`。如果配置文件是 `/path/to/vendor/config/agent.md`，则 `HOST_CONFIG_DIR=/path/to/vendor/config`。
+- 先检查第三方配置目录下的扩展路径：`$HOST_CONFIG_DIR/skills/codex-noise-filter/SKILL.md`、`$HOST_CONFIG_DIR/skills/codex-noise-filter/references/00-index.md`；也兼容 `$HOST_CONFIG_DIR/codex-noise-filter/SKILL.md`。Windows 使用同等反斜杠路径。
+- 再检查随 AGENTS 分发的相对路径：`$AGENTS_DIR/skills/codex-noise-filter/SKILL.md`、`$AGENTS_DIR/codex-noise-filter/SKILL.md`、`$AGENTS_DIR/.agents/skills/codex-noise-filter/SKILL.md`。
+- 仓库级 skill 仍优先检查当前工作区的 `<repo>/.agents/skills/codex-noise-filter/SKILL.md`；若存在，它比用户级副本更贴近当前项目。
+- 用户级 Agent Skills 路径：macOS/Linux 检查 `$HOME/.agents/skills/codex-noise-filter/SKILL.md`；Windows 检查 `%USERPROFILE%\.agents\skills\codex-noise-filter\SKILL.md`。
+- Codex 兼容路径只作为补充：`CODEX_HOME` 已设置时检查 `$CODEX_HOME/skills/codex-noise-filter/SKILL.md` 或 `%CODEX_HOME%\skills\codex-noise-filter\SKILL.md`；未设置时检查 `$HOME/.codex/skills/codex-noise-filter/SKILL.md` 或 `%USERPROFILE%\.codex\skills\codex-noise-filter\SKILL.md`。
+- 若第三方完全不支持文件读取，也没有内置 skill discovery，才能进入 `fallbackOnly`；不能因为没有 `.codex` 就直接兜底。
+
+编程任务开始时先判定加载状态：
+
+- `nativeSkill`：宿主可用 skill 列表中已出现 `codex-noise-filter`，且本轮按 skill 机制读取了 `SKILL.md`。
+- `manualFileBootstrap`：宿主没有自动暴露 skill，但允许文件读取；已按上述跨平台路径读取 `SKILL.md`，并继续读取同目录 `references/00-index.md`。
+- `fallbackOnly`：宿主既没有 skill discovery，也不能读取 `SKILL.md` 或 references；只能执行 AGENTS 内嵌兜底矩阵，并在 Capsule 或最终回复中说明无法加载完整 skill 的原因。
+
+接入修复优先级：
+
+1. 对支持 Codex/Agent Skills 的第三方宿主，把本 skill 安装、复制或软链到宿主可扫描目录，优先 `<repo>/.agents/skills/codex-noise-filter/`、`$HOME/.agents/skills/codex-noise-filter/` 或 Windows 的 `%USERPROFILE%\.agents\skills\codex-noise-filter\`；若宿主有自定义 skill 路径配置，显式配置到 `SKILL.md`。
+2. 对没有 Codex 但能导入 AGENTS、也能读取文件的宿主，按宿主配置方式分发 `codex-noise-filter/`：优先在第三方配置文件所在目录新建 `skills/codex-noise-filter/`，放入完整 `SKILL.md`、`references/`、`templates/`；如果 AGENTS 是单独导入文件，则放在 `AGENTS_DIR/skills/codex-noise-filter/` 或 `AGENTS_DIR/codex-noise-filter/`，让 Skill Bootstrap 用相对路径手动读取 `SKILL.md` 和 `references/00-index.md`。
+3. 对完全不能读文件的宿主，只能 `fallbackOnly`，但仍必须执行第三方兜底闭环、状态机自检、任务胶囊和验证策略。
+
+不能接受：
+
+- 把“AGENTS 里写了先读取 skill”当成第三方已经自动加载 skill。
+- 只导入 `global-AGENTS.light.md`，却没有把完整 skill 放到第三方配置目录的 `skills/codex-noise-filter/`，也没有放到 AGENTS 相对目录、宿主扫描目录或显式配置 `SKILL.md` 路径。
+- 因为第三方没有 Codex skill discovery，就跳过任务胶囊、调用链、局部对齐、抽象抽离、环境缓存或验证。
+
 状态机字段：
 
 - `activated`：已按编程任务触发本 skill，来源是用户意图、代码证据、第三方载荷、cwd、文件、命令、日志、diff 或恢复信号。
+- `loadState`：记录 `nativeSkill`、`manualFileBootstrap` 或 `fallbackOnly`；不能把 AGENTS 导入本身记录为 skill 已加载。
 - `references`：已读取 `SKILL.md`、`00-index.md` 和当前任务命中的 reference；若只读到 AGENTS 兜底矩阵，也要记录为 `fallbackOnly`，并尽快补读 skill。
 - `capsule`：已有任务胶囊或 Context Capsule，记录目标、阶段、允许/禁止范围、已读文件、工具计数、已写入/未写入、验证状态和回滚点。
 - `scope`：已确认触碰范围、禁止范围、当前 Git root/worktree、当前文件原文和 diff。

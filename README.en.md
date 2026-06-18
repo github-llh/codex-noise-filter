@@ -50,6 +50,8 @@ Codex skills can be used from the Codex App, CLI, IDE extension, and as the inte
 
 If a request arrives through any third-party invocation, third-party agent, desktop/web app, terminal/TUI/CLI, IDE plugin, MCP/ACP, hook, subagent, CI/chatops/webhook, `cc switch`, model/provider router, gateway/proxy/adapter, custom wrapper, unknown forwarding layer, or model router, it follows the same rule: recover the original task, cwd, files, commands, logs, diffs, and tool actions first, then route through `references/00-index.md`. A third-party tool's "changed", "validated", or "no skill needed" conclusion, model switch, or provider choice is only a clue; it cannot replace checks against the current worktree files, diff, environment cache, and validation commands.
 
+Importing only `templates/global-AGENTS.light.md` does not make a third-party agent or CLI discover this skill automatically. AGENTS is an instruction chain, not a skill registry. The third-party machine may not have Codex installed and may not have a `.codex` directory. Hosts that support Agent Skills must install this directory in a scanned location or explicitly expose the `SKILL.md` path in host configuration. If the host only imports AGENTS but can read files, first get the real third-party configuration file path, treat its parent directory as `HOST_CONFIG_DIR`, then create `$HOST_CONFIG_DIR/skills/codex-noise-filter/` and copy the full skill directory there, including at least `SKILL.md`, `references/00-index.md`, and the matched references. If AGENTS is imported as a standalone file, the skill may also live next to AGENTS as `skills/codex-noise-filter/` or `codex-noise-filter/`. Enter `fallbackOnly` only when the host cannot discover the skill and cannot read the distributed files.
+
 ### Repository Scope
 
 Use this when a team should share the same engineering rules.
@@ -68,7 +70,7 @@ $codex-noise-filter inspect and fix this Maven backend issue using the indexed w
 
 ### User Scope
 
-Use this when the skill should apply across multiple repositories. Put this directory in the user-level skills directory supported by your Codex setup. If you use `CODEX_HOME`, place it under that profile's skills directory. Restart Codex if the skill does not appear in the selector.
+Use this when the skill should apply across multiple repositories. On macOS/Linux, prefer copying or symlinking this directory to `$HOME/.agents/skills/codex-noise-filter/`. On Windows, prefer copying it to `%USERPROFILE%\.agents\skills\codex-noise-filter\`. If you use `CODEX_HOME` or another custom skill directory, also confirm the host scans the matching `SKILL.md`. If the skill does not appear in the selector after an update, verify the scanned path first, then restart the host.
 
 ### Codex App
 

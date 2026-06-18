@@ -35,20 +35,32 @@
 - 任务经任意第三方调用、App、终端/CLI、IDE 插件、MCP/ACP、hook、subagent、CI/chatops、`cc switch`、模型/供应商路由、未知 wrapper 或未来新增工具转发，只要载荷涉及代码证据或工具链动作，仍按编程任务触发。
 - 输入体现减少 token、压缩噪音、简洁可追溯、可复盘、少读无关文件或保留证据链的需求。
 
+全局安装与跨平台路径：
+
+- 第三方 agent/CLI 不一定安装 Codex，也不一定存在 `.codex` 目录；不能把 `.codex` 当成唯一入口。
+- AGENTS 可能安装在任意用户级目录、第三方配置目录或当前项目内；先以第三方工具实际加载的配置文件所在目录作为 `HOST_CONFIG_DIR`，以宿主实际导入的 AGENTS 文件所在目录作为 `AGENTS_DIR`。如果配置文件是 `/path/to/vendor/config/agent.md`，则 `HOST_CONFIG_DIR=/path/to/vendor/config`。
+- 若第三方要求在自己的配置目录下放扩展能力，最高优先级是在该配置目录中新建 `skills/codex-noise-filter/` 并放入完整 skill：`$HOST_CONFIG_DIR/skills/codex-noise-filter/SKILL.md`、`$HOST_CONFIG_DIR/skills/codex-noise-filter/references/00-index.md`；也兼容 `$HOST_CONFIG_DIR/codex-noise-filter/SKILL.md`。Windows 使用同等反斜杠路径。
+- 若随 AGENTS 一起分发 skill，继续检查相对路径：`$AGENTS_DIR/skills/codex-noise-filter/SKILL.md`、`$AGENTS_DIR/codex-noise-filter/SKILL.md`、`$AGENTS_DIR/.agents/skills/codex-noise-filter/SKILL.md`。
+- 若设置了 `CODEX_HOME`，兼容检查 `$CODEX_HOME/AGENTS.override.md`、`$CODEX_HOME/AGENTS.md` 和 `$CODEX_HOME/skills/codex-noise-filter/SKILL.md`；Windows 对应 `%CODEX_HOME%\AGENTS.override.md`、`%CODEX_HOME%\AGENTS.md` 和 `%CODEX_HOME%\skills\codex-noise-filter\SKILL.md`。
+- macOS/Linux 用户级兼容路径包括 `$HOME/.agents/skills/codex-noise-filter/SKILL.md` 和 `$HOME/.codex/skills/codex-noise-filter/SKILL.md`；Windows 包括 `%USERPROFILE%\.agents\skills\codex-noise-filter\SKILL.md` 和 `%USERPROFILE%\.codex\skills\codex-noise-filter\SKILL.md`。
+- 不能把某台机器的绝对路径写死给其他用户；每次在第三方 agent/CLI 中导入 AGENTS 后，先按当前系统、当前用户和环境变量解析真实路径，再判断是否能加载 skill。
+
 执行入口：
 
-1. 先读取 `codex-noise-filter` 的 `SKILL.md`。
-2. 再按 `references/00-index.md` 渐进读取对应规则文件。
-3. 第三方调用、模型切换、CLI/App/插件/路由器变化不能降低内部触发级别；仍执行任务胶囊/快照、调用链、局部对齐、抽象抽离、编码/中文乱码检查、环境缓存和验证策略。
-4. 修改前确认目标文件、问题根因、最小修改方案、调用链、影响面和不影响范围。
-5. Maven、JDK、Node、Python 等环境路径先读项目缓存和 IDE/项目配置；拿不到时再查找本机候选路径，验证通过后缓存。
-6. 遇到中文字符乱码、`encoding`、`charset`、UTF-8/GBK、locale、终端输出或页面文案异常时，先确认项目编码依据和最小验证方式，不把它当成第三方展示问题跳过。
-7. 长任务、切换窗口或上下文压缩前，输出 Context Capsule。
-8. 一旦进入编程任务，后续每次工具调用、写入、验证和最终回复前都必须自检内部状态：已读规则、任务胶囊/快照、触碰范围、调用链、局部对齐、抽象抽离、环境缓存和验证；缺项时先补齐，不能只总结最后一个工具结果。
+1. 先执行 Skill Bootstrap：AGENTS 只是指令文件，不等同于 skill 自动加载器；若当前宿主支持 Codex/Agent Skills，先确认可用 skill 列表中存在 `codex-noise-filter`，不存在时不要声称已加载 skill。
+2. 若宿主未自动暴露该 skill，但允许读取文件，按顺序查找并读取首个存在的 `SKILL.md`：第三方配置目录 `skills/codex-noise-filter/`、随 AGENTS 分发的相对路径、`<repo>/.agents/skills/codex-noise-filter/SKILL.md`、用户级 `.agents` 路径、`CODEX_HOME` 路径、兼容 `.codex` 路径；读取成功后把状态记为 `manualFileBootstrap`，继续读取同目录 `references/00-index.md`。
+3. 只有在宿主既不支持 skill 发现、也不能读取上述文件时，才把状态记为 `fallbackOnly`，执行下方“第三方兜底闭环”；兜底不是自动加载成功。
+4. 再按 `references/00-index.md` 渐进读取对应规则文件。
+5. 第三方调用、模型切换、CLI/App/插件/路由器变化不能降低内部触发级别；仍执行任务胶囊/快照、调用链、局部对齐、抽象抽离、编码/中文乱码检查、环境缓存和验证策略。
+6. 修改前确认目标文件、问题根因、最小修改方案、调用链、影响面和不影响范围。
+7. Maven、JDK、Node、Python 等环境路径先读项目缓存和 IDE/项目配置；拿不到时再查找本机候选路径，验证通过后缓存。
+8. 遇到中文字符乱码、`encoding`、`charset`、UTF-8/GBK、locale、终端输出或页面文案异常时，先确认项目编码依据和最小验证方式，不把它当成第三方展示问题跳过。
+9. 长任务、切换窗口或上下文压缩前，输出 Context Capsule。
+10. 一旦进入编程任务，后续每次工具调用、写入、验证和最终回复前都必须自检内部状态：已读规则、任务胶囊/快照、触碰范围、调用链、局部对齐、抽象抽离、环境缓存和验证；缺项时先补齐，不能只总结最后一个工具结果。
 
 第三方兜底闭环：
 
-如果当前宿主、第三方 agent 或模型路由不能读取/不执行 `codex-noise-filter` 的 `SKILL.md` 和 references，也不能跳过工作流；必须直接执行以下最小矩阵：
+如果当前宿主、第三方 agent 或模型路由不能发现、读取或执行 `codex-noise-filter` 的 `SKILL.md` 和 references，也不能跳过工作流；必须直接执行以下最小矩阵，并明确记录 `fallbackOnly` 原因：
 
 1. 入口恢复：恢复原始意图、cwd、项目根、目标文件、命令、日志、diff 和工具动作。
 2. 任务胶囊/快照：复杂任务开始、读取 3 个文件、执行 2 次工具调用、耗时工具调用前、每次写入前、阶段完成后都输出或刷新 Capsule。
