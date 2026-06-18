@@ -1,6 +1,6 @@
 # 前端规则
 
-本文件只处理通用前端布局、状态契约和前后端协同。文件归属、环境命令、验证策略、安全边界、硬编码和重复逻辑先按 `01-global-engineering-rules.md` 判断；本 skill 根据文件证据、项目配置、命令节点、报错输出、触碰范围和调用链内部判定是否继续读取技术栈 reference。命中 Vue 2、Vue 3、React、Vite、组件语法、包管理、运行、测试、lint/format/type check 或前端构建时，继续读取 `11-frontend-vue-react.md`；命中微信小程序、uni-app、Taro、分包、开发者工具模拟器、`project.config.json`、`app.json`、`pages.json` 或 `app.config.*` 时，继续读取 `12-miniprogram-development.md`。
+本文件只处理通用前端布局、状态契约、局部对齐和前后端协同。文件归属、环境命令、验证策略、安全边界、硬编码和重复逻辑先按 `01-global-engineering-rules.md` 判断；本 skill 根据文件证据、项目配置、命令节点、报错输出、触碰范围和调用链内部判定是否继续读取技术栈 reference。命中原生 HTML/CSS/JavaScript/TypeScript、Vue 2、Vue 3、React、Vite、组件语法、包管理、运行、测试、lint/format/type check 或前端构建时，继续读取 `11-frontend-vue-react.md`；命中微信小程序、uni-app、Taro、分包、开发者工具模拟器、`project.config.json`、`app.json`、`pages.json` 或 `app.config.*` 时，继续读取 `12-miniprogram-development.md`。
 
 ## 基本原则
 
@@ -38,6 +38,30 @@
 - 业务判断优先集中到已有领域层或组合函数，避免模板里堆复杂表达式。
 - 不随意变更路由、接口路径、请求参数名、响应字段和权限 key。
 - 注释只解释复杂业务原因、兼容边界、魔法值来源和风险，不重复 UI 行为。
+
+## 前端自动局部对齐门禁
+
+这是本 skill 执行中的内部自动触发规则，不依赖用户额外说“补注释”“抽魔法值”“格式化”或“检查前端”。只要新增、修改、阅读、检索、lint/format/typecheck 修复、构建失败定位、截图/diff 审查或调用链确认触碰前端文件，就必须在同一语义单元内同步执行局部对齐判断。
+
+触发文件和对象：
+
+- 文件：`.vue`、`.js`、`.jsx`、`.ts`、`.tsx`、`.mjs`、`.cjs`、`.html`、`.css`、`.scss`、`.less`、`.wxml`、`.wxss`、`package.json`、`tsconfig.json`、`jsconfig.json`、`vite.config.*`、`vue.config.js`、`next.config.*`、`nuxt.config.*`、`app.config.*`、`pages.json`、`project.config.json`。
+- 对象：组件、页面、hook、composable、store、router、api client、service、model、schema、mapper、adapter、mock、fixture、测试、样式 token、构建和 lint 配置。
+- 信号：前端控制台错误、Node 构建失败、TypeScript 报错、ESLint/Prettier/Biome/Stylelint 报错、UI 截图中的源码、接口字段不一致、模板/JSX/wxml 中业务判断、重复展示映射、裸 `any` 或无类型公开属性。
+
+自动检查项：
+
+1. 注释契约：导出类型、组件 props/emits/slots/children、hook/composable 返回值、api request/response、路由 meta、权限字段、外部协议字段和配置项，必须按项目已有 JSDoc、类型声明、Story、测试或 README 风格补最小必要说明。
+2. 魔法值和常量：状态、类型、来源、平台、权限 code、路由 name、事件名、storage key、query key、content type、错误码、阈值、展示映射、mock code 和 fixture key，必须先查现有 constants、model、dict、i18n、router、api contract、生成类型或 SDK 常量；能低风险闭环时同步集中。
+3. 类型边界：TypeScript 项目不得把业务 props、请求响应、页面参数、事件回调和公开组件 API 写成裸 `any`、`Object`、`Function` 或过宽 `Record<string, any>`；JavaScript 项目也要复用 PropTypes、Vue `type`/`validator`、JSDoc 或运行期校验范式。
+4. 抽象边界：重复条件、重复展示映射、重复字段转换、重复默认值、重复请求适配和跨页面复用逻辑，先判断是否进入 hook/composable、selector、mapper、adapter、store、service 或局部 helper；页面私有且一次性语义清楚时可以只局部集中。
+5. 格式化与验证：格式错误先按项目 ESLint/Prettier/EditorConfig/Biome/Stylelint/TypeScript 配置修触碰范围；修完后仍必须回扫同一组件、函数、类型或配置块的注释、魔法值、类型和契约缺口，不能只让 formatter 通过。
+
+补齐和修改边界：
+
+- 低风险闭环：问题落在当前组件/页面/函数/类型/config 或直接调用链内，兼容路由、接口字段、权限 key、序列化值、展示文案和测试 fixture 时，直接按 `11` 或 `12` 同步补齐。
+- 不直接修改：缺少业务语义、会改变 API/路由/权限/接口 code、需要新增依赖、跨多个业务域迁移、可能影响后端契约或生成代码来源不明时，只记录风险和所需证据。
+- 不扩大范围：只处理触碰范围、直接调用链和为完成任务必须读取的相关文件；全仓历史风格问题不借机重构。
 
 ## 前端验证
 

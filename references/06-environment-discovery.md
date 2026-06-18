@@ -33,7 +33,7 @@
 触发后先做轻量核对：
 
 1. 定位当前任务工作区根，优先用 `git rev-parse --show-toplevel`，失败时用当前路径和项目根标志。
-2. 按 [跨系统缓存文件命名](#跨系统缓存文件命名) 解析当前用户、当前机器、当前工作区的 active cache path；优先读取 `.codex/local-environment.<profile>.json`，兼容读取旧版 `.codex/local-environment.json`。
+2. 按 [跨系统缓存文件命名](#跨系统缓存文件命名) 解析当前用户、当前机器、当前工作区的 active cache path；强制使用 `.codex/local-environment.<profile>.json`。若只发现旧版 `.codex/local-environment.json`，必须先迁移替换为 profile 缓存，不能继续把旧版当 fallback。
 3. 核对 `workspaceRoot`、`scope`、工具链缓存项和当前工作区是否一致；缓存缺少 `workspaceRoot` 时不能据此扩大范围，只能记录“缓存缺少范围字段，本轮按当前 Git root 保守处理”。
 4. 用 `git check-ignore -v .codex/ .codex/local-environment*.json` 核对 `.codex/` 和所有环境缓存 profile 是否被当前项目根 `.gitignore` 覆盖；未覆盖时按“自动环境缓存维护”补根忽略规则。
 5. 若本轮不执行构建、测试、运行、预览、代码生成或工具链命令，不查找本机候选、不验证版本、不更新工具路径，只在任务胶囊记录“已核对缓存存在性和项目范围，本轮不使用工具链路径”。
@@ -54,8 +54,8 @@
 
 - 缓存目录固定为 `<project-root>/.codex/`，目录本身必须被 Git root 的 `.gitignore` 忽略。
 - 新写入优先使用 profile 文件：`<project-root>/.codex/local-environment.<profile>.json`。
-- 旧版兼容文件 `<project-root>/.codex/local-environment.json` 只作为读取和迁移 fallback；新规则下不要依赖它区分不同用户、不同机器或不同系统。
-- 若旧版文件存在且没有 profile 文件，读取旧版内容后生成 profile 文件，并把 `identity.migratedFrom` 记录为 `.codex/local-environment.json`；除非当前任务明确要求兼容旧工具，不主动覆盖旧版文件。
+- 旧版文件 `<project-root>/.codex/local-environment.json` 只允许作为一次性迁移输入；新规则下不再作为 fallback，也不再为旧工具保留兼容写入。
+- 若旧版文件存在，读取其中可解析且仍适用于当前工作区的字段，立即生成或更新 active profile 文件，并把 `identity.migratedFrom` 记录为 `.codex/local-environment.json`。迁移成功后优先删除旧版文件；删除失败时记录原因，但后续命令选择仍只能使用 profile 文件。
 
 `<profile>` 生成规则：
 
@@ -114,7 +114,7 @@
 
 ## 发现顺序
 
-1. 读取工作区缓存：先按 [跨系统缓存文件命名](#跨系统缓存文件命名) 解析 active cache path，再读取 profile 文件；旧版 `.codex/local-environment.json` 只作为 fallback。
+1. 读取工作区缓存：先按 [跨系统缓存文件命名](#跨系统缓存文件命名) 解析 active cache path，再读取 profile 文件；旧版 `.codex/local-environment.json` 存在时先强制迁移替换，不作为 fallback。
 2. 读取 IDE/项目配置，按当前项目实际命中的技术栈选择，不一次性读取所有配置：
    - IDE：`.idea/misc.xml`、`.idea/workspace.xml`、`.idea/compiler.xml`、`.idea/jarRepositories.xml`。
    - Java/Maven：`.mvn/maven.config`、`.mvn/jvm.config`、`.mvn/wrapper/maven-wrapper.properties`、`pom.xml`。
@@ -153,7 +153,7 @@
 
 - 即将执行 `mvn`、`java`、`node`、`npm`、`pnpm`、`yarn`、`bun`、`python`、`pytest`、`uv`、`poetry`、`tox`、`nox`、微信开发者工具 CLI、`miniprogram-ci`、Taro/uni-app 构建命令，以及 lint、typecheck、compile、codegen 等项目脚本。
 - 构建、编译、测试、运行命令失败，且失败原因可能是工具路径、版本、`JAVA_HOME`、本地 Maven 仓库、包管理器、虚拟环境、开发者工具路径或工作目录不匹配。
-- 任务目标直接涉及强化、补齐或更新 `.codex/local-environment.json`、profile 环境缓存、主机名/用户名区分、跨 Windows/macOS 文件名兼容或 `.codex/` 忽略规则。
+- 任务目标直接涉及强化、补齐或更新 `.codex/local-environment.json`、profile 环境缓存、主机名/用户名区分、跨 Windows/macOS 文件名兼容或 `.codex/` 忽略规则；其中旧版 `.codex/local-environment.json` 必须自动迁移替换为 profile 缓存。
 
 执行步骤：
 
@@ -243,7 +243,7 @@
 .codex/local-environment.<os>-<arch>-<safe-user>-<safe-host>-<id8>.json
 ```
 
-旧版 `.codex/local-environment.json` 只作为兼容 fallback。新写入优先使用 profile 文件，具体命名规则见 [跨系统缓存文件命名](#跨系统缓存文件命名)。
+旧版 `.codex/local-environment.json` 不再作为 fallback。发现旧版时必须先迁移替换到 profile 文件，具体命名规则见 [跨系统缓存文件命名](#跨系统缓存文件命名)。
 
 推荐结构：
 
@@ -362,12 +362,12 @@
 - 已有缓存且验证仍通过时，直接使用缓存。
 - 项目配置显式指定路径时，项目配置优先于旧缓存。
 - 缓存失效时，说明原因并重新发现。
-- `.codex/local-environment.<profile>.json` 和旧版 `.codex/local-environment.json` 都是本地状态文件，不提交到仓库。
+- `.codex/local-environment.<profile>.json` 是当前唯一有效的本地环境缓存文件；旧版 `.codex/local-environment.json` 迁移成功后不再保留或使用。环境缓存不提交到仓库。
 - hostname 不是唯一 ID，只能作为可读标签；真实区分依赖 `profileId`、`os`、`arch`、用户名、hostname 和 workspaceRoot 共同判断。
 
 ## 写入边界
 
-- 允许写入当前工作区的 `.codex/local-environment.<profile>.json`；只有迁移或兼容旧工具时才读取旧版 `.codex/local-environment.json`。
+- 允许写入当前工作区的 `.codex/local-environment.<profile>.json`；旧版 `.codex/local-environment.json` 只在强制迁移替换时读取，迁移后不再读取或写入旧版格式。
 - 不自动修改用户全局 shell 配置、IDE 配置、Maven settings 或系统环境变量。
 - 不把临时失败日志写入缓存。
 - 不把未验证路径写入缓存。

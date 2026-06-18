@@ -1,6 +1,6 @@
 # Vue / React 前端开发规则
 
-本文件按需读取。是否打开由本 skill 根据文件证据、项目配置、命令节点、报错输出、触碰范围和调用链内部判定；命中 Vue、React、Vite、前端包管理、运行、测试、组件语法、状态管理、路由、lint/format/type check 或构建时必须打开，外部点名不作为前提。文件归属、环境命令、验证策略、安全边界、硬编码、重复逻辑和注释的跨技术栈判断先按 `01-global-engineering-rules.md` 执行；通用布局、状态契约和前后端协同仍见 `04-frontend-rules.md`；不可绕过门禁和既有代码局部对齐仍见 `02-noise-filter-workflow.md`；Node/包管理器环境发现见 `06-environment-discovery.md`。
+本文件按需读取。是否打开由本 skill 根据文件证据、项目配置、命令节点、报错输出、触碰范围和调用链内部判定；命中 Vue、React、原生 JavaScript/TypeScript、JSX/TSX、Vite/webpack/Next/Nuxt、前端包管理、运行、测试、组件语法、状态管理、路由、lint/format/type check 或构建时必须打开，外部点名不作为前提。文件归属、环境命令、验证策略、安全边界、硬编码、重复逻辑和注释的跨技术栈判断先按 `01-global-engineering-rules.md` 执行；通用布局、状态契约、前端局部对齐和前后端协同仍见 `04-frontend-rules.md`；不可绕过门禁和既有代码局部对齐仍见 `02-noise-filter-workflow.md`；Node/包管理器环境发现见 `06-environment-discovery.md`。
 
 参考来源：Vue 3 官方文档、Vue 2 官方文档、React 官方文档、Vite、Vue Test Utils、Testing Library、Vitest 官方文档。
 
@@ -13,6 +13,7 @@
 - [Vue 2 规则](#vue-2-规则)
 - [Vue 3 规则](#vue-3-规则)
 - [React 规则](#react-规则)
+- [原生 JavaScript / TypeScript 规则](#原生-javascript--typescript-规则)
 - [组件注释位置](#组件注释位置)
 - [TypeScript 与 API 契约注释](#typescript-与-api-契约注释)
 - [属性类型与 any 边界](#属性类型与-any-边界)
@@ -27,8 +28,9 @@
 
 ## 触发与读取
 
-- 看到 `package.json`、`.vue`、`.jsx`、`.tsx`、`vite.config.*`、`vue.config.js`、`next.config.*`、`vitest.config.*`、`jest.config.*`、`playwright.config.*`、`cypress.config.*`、`eslint.config.*` 时按本文件路由。
+- 看到 `package.json`、`.vue`、`.js`、`.jsx`、`.ts`、`.tsx`、`.mjs`、`.cjs`、`tsconfig.json`、`jsconfig.json`、`vite.config.*`、`vue.config.js`、`next.config.*`、`nuxt.config.*`、`webpack.config.*`、`vitest.config.*`、`jest.config.*`、`playwright.config.*`、`cypress.config.*`、`eslint.config.*` 时按本文件路由。
 - 默认组合：`02` + `11`。只涉及通用布局/表单/状态契约时可用 `02` + `04`；执行编译、构建、typecheck、lint 或测试前必须加 `06` 读取/复用 Node 前端环境缓存；涉及接口契约或后端数据问题再按索引追加后端 reference。
+- 只要本次触碰前端组件、页面、hook/composable、store、api/service/model/type、router、mock、fixture、样式或前端配置，就同步执行 `04#前端自动局部对齐门禁`：注释契约、魔法值、类型边界、抽象边界、格式化和验证是同一闭环，不因当前显性任务只是缩进、类型报错或构建失败而跳过。
 - 不为 Vue/React 任务一次性读取 Java、Python、Maven reference；触碰范围扩大时再追加。
 
 ## 项目识别
@@ -98,6 +100,16 @@
 - React 版本相关 API 必须先确认版本；不要在 React 17/18 项目中直接使用只在更高版本或特定框架中可用的 API。
 - Next/Remix 等框架项目要区分客户端组件、服务端组件、loader/action、路由约定和构建边界，不把纯客户端写法硬塞进服务端文件。
 
+## 原生 JavaScript / TypeScript 规则
+
+- 原生前端项目也必须执行本文件和 `04#前端自动局部对齐门禁`；没有 Vue/React 组件并不代表可以跳过注释、魔法值、类型边界、格式化和验证。
+- 先确认运行环境：浏览器、Node 脚本、构建配置、Web Component、微前端入口、SDK、工具脚本或测试 fixture；不要把浏览器 API、Node API 和构建时 API 混用。
+- TypeScript 项目优先复用现有 `interface/type`、生成类型、SDK 类型、DOM 类型和框架配置；业务模型、请求响应、事件 payload、配置对象和公开函数签名不得使用裸 `any`。
+- JavaScript 项目优先复用 JSDoc、项目已有类型声明、PropTypes、运行期 schema 或最小校验；公开 API、SDK 方法、事件 payload、配置对象和复杂数据结构不能完全无契约。
+- DOM 事件、定时器、storage、URL、query、postMessage、BroadcastChannel、WebSocket、Worker、上传下载和第三方 SDK 交互要明确来源、清理时机、错误处理和安全边界。
+- 固定状态、类型、来源、平台、事件名、storage key、query key、CSS class 前缀、data attribute、错误码和展示映射要集中到项目已有 contract、constants、dict、router、i18n、schema 或局部常量，不在事件处理和渲染函数中散写。
+- 前端脚本和构建配置中的路径、端口、base URL、环境模式、feature flag 和超时重试优先走项目配置或环境变量；客户端 bundle 不得写入 secret。
+
 ## 组件注释位置
 
 - 注释遵循通用原则：解释业务原因、边界、兼容性、风险和非显然契约，不重复模板/JSX 正在做什么。
@@ -107,6 +119,7 @@
 - React：组件用途写在组件导出或函数定义上方；复杂 props 契约写在 props type/interface 字段附近；复杂 Hook、副作用、memoization、ref、context 边界写在对应 hook 附近；JSX 内只保留非显然分支、可访问性或兼容注释。
 - 测试文件注释解释场景、夹具来源和回归原因；不要注释每一步点击和断言。
 - 如果注释必须跨文件解释，优先把契约沉淀到类型、props、emits、slot、hook、composable、README/Story 示例或测试用例中，不用散落的长注释替代清晰 API。
+- 原生 JavaScript/TypeScript：导出函数、SDK 方法、事件 payload、配置对象、复杂类型和外部协议适配在定义处写最小 JSDoc 或类型注释；普通 DOM 查询和简单局部变量不加噪音注释。
 
 ## TypeScript 与 API 契约注释
 
@@ -124,6 +137,7 @@ TypeScript 的类型只能表达形状，不能完整表达业务语义、来源
 - 简单局部类型、只在单文件内部使用且命名已完整表达语义的字段，可以不补注释；但必须在任务胶囊或最终回复说明保留原因，避免把未判断误当成无需注释。
 - 补注释不得改变序列化字段名、接口 code、路由、权限、状态值、请求方法和 loading/cache 行为。
 - 对 `react/jsx-indent-props`、`jsx-indent`、Prettier 缩进这类格式问题，先按项目 lint 风格修缩进，再检查同一 JSX/组件/type/API 语义单元是否存在契约注释缺口；低风险时同步补齐。
+- 对 `.js/.ts` 中的 `no-explicit-any`、`no-unsafe-*`、`prefer-const`、`no-magic-numbers`、`no-restricted-syntax`、导入排序或格式化错误，先修触碰语义单元，再回扫同一单元是否存在契约注释、魔法值、类型和重复逻辑缺口；低风险时同步补齐。
 
 ## 属性类型与 any 边界
 

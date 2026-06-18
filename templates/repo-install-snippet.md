@@ -19,6 +19,6 @@
 团队约定：
 
 - 不把个人机器绝对路径写进 skill 文档。
-- 环境发现结果写入当前工作区 `.codex/local-environment.json`。
+- 环境发现结果写入当前工作区 `.codex/local-environment.<profile>.json`；旧版 `.codex/local-environment.json` 只作为一次性迁移输入，迁移成功后不再 fallback。
 - README、README.en、SKILL.md、references/00-index.md 发生触发或目录变化时保持同步。
 - 示例和模板只表达接入方式，不承载必须执行的规则；硬约束以 `SKILL.md` 和 `references/` 为准。

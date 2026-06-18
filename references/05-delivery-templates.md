@@ -181,7 +181,7 @@ Context Capsule
 Codex 的记忆分三层处理：
 
 1. 会话内上下文：用 Context Capsule 保存当前任务边界、证据、已改、回滚和下一步。
-2. 工作区本地缓存：用 `.codex/local-environment.<profile>.json` 保存已验证的环境路径，例如 Maven、JDK、Node、包管理器；旧版 `.codex/local-environment.json` 只作为兼容 fallback。该文件只服务当前工作区、当前用户和当前机器，默认不提交。
+2. 工作区本地缓存：用 `.codex/local-environment.<profile>.json` 保存已验证的环境路径，例如 Maven、JDK、Node、包管理器；旧版 `.codex/local-environment.json` 只作为一次性迁移输入，迁移成功后不再 fallback。该文件只服务当前工作区、当前用户和当前机器，默认不提交。
 3. 长期 memory：只记录稳定偏好和跨任务复用规则；机器私有绝对路径、临时错误日志、一次性构建结果和未验证猜测不要写入长期记忆。
 
 ### 何时读取

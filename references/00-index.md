@@ -28,8 +28,8 @@
 - Python 修改通常打开 `02` + `10`；需要运行、测试、lint 或 type check 前先按 `06` + `14` 验证并复用环境缓存，命中跨服务/后端调用链时再加对应 reference。
 - 涉及事务、高并发、幂等、异步、批量时，在 `07` 基础上加 `09`。
 - 涉及 Maven 构建但不改代码时，优先 `03`，执行前先按 `06` + `14` 验证并复用 Maven/JDK 缓存。
-- 涉及通用前端布局/表单/状态契约时优先 `04`；涉及 Vue/React/Vite/测试/构建时优先 `11`，接口契约或后端联动明确时再加后端 reference。
-- 涉及小程序原生、uni-app、Taro、分包、模拟器、`project.config.json`、`app.json`、`pages.json` 或 `app.config.*` 时优先 `12`；uni-app/Taro 命中 Vue/React 语法再加 `11`，运行、预览、构建或发布前校验时先按 `06` + `14` 验证并复用环境缓存。
+- 涉及通用前端布局/表单/状态契约、原生 HTML/CSS/JavaScript/TypeScript、浏览器端脚本、状态流转、接口展示或页面组件时优先 `04`；涉及 Vue 2、Vue 3、React、JSX/TSX、Vite/webpack/Next/Nuxt、测试、构建、lint/format/typecheck 或前端包管理时优先 `11`，接口契约或后端联动明确时再加后端 reference。
+- 涉及小程序原生、uni-app、Taro、用户误写 `raro` 但上下文指向 Taro、分包、模拟器、`project.config.json`、`app.json`、`pages.json` 或 `app.config.*` 时优先 `12`；uni-app/Taro 命中 Vue/React 语法再加 `11`，运行、预览、构建或发布前校验时先按 `06` + `14` 验证并复用环境缓存。
 - 不为了“保险”一次性读取所有 reference；如果执行中发现触碰范围扩大，再按任务状态、代码证据、调用链和风险信号追加读取。
 
 约束保真：
@@ -134,6 +134,7 @@
 - 后端验证命令：`03-maven-backend-build.md#后端构建与验证`
 - 前端布局与组件：`04-frontend-rules.md#布局与组件`
 - 前端状态与契约：`04-frontend-rules.md#状态契约与安全`
+- 前端自动局部对齐：`04-frontend-rules.md#前端自动局部对齐门禁`
 - 前端验证：`04-frontend-rules.md#前端验证`
 - 各技术栈默认无操作验证：`01-global-engineering-rules.md#跨技术栈验证策略`
 - 交付格式：`05-delivery-templates.md#最终回复结构`
@@ -157,18 +158,19 @@
 | Java 事务/并发/批量/异步 | `02` + `07` + `09` | 需要构建验证时加 `03` |
 | Java 枚举/配置/校验/Lombok/重复 if-set | `02` + `01` + `08` | 进入写入、局部对齐或规则争议流程时保持 `02`；涉及分层或接口注释加 `07` |
 | 文件归属/目录位置/依赖边界/生成目录 | `02` + `01` | 进入新增、移动、生成目录或依赖边界判断时保持 `02`；Java 加 `07`，Python 加 `10`，Vue/React 加 `11`，小程序加 `12` |
-| 环境/运行/命令/包管理器/root/workspace | `02` + `01` + `06` + `14` | 流程进入工具链命令节点前必须先从项目根解析 active cache path，优先读取 `.codex/local-environment.<profile>.json`，兼容旧版 `.codex/local-environment.json`；缺失或不满足再发现并创建/更新缓存，再按技术栈加 `03`/`10`/`11`/`12` |
+| 环境/运行/命令/包管理器/root/workspace | `02` + `01` + `06` + `14` | 流程进入工具链命令节点前必须先从项目根解析 active cache path，强制使用 `.codex/local-environment.<profile>.json`；若发现旧版 `.codex/local-environment.json`，只作为一次性迁移输入，迁移成功后替换为 profile 缓存且不再 fallback，再按技术栈加 `03`/`10`/`11`/`12` |
 | 测试/验证/lint/typecheck/build/模拟器 | `02` + `01` + `06` + `14` | 流程进入验证或工具链节点前必须先从项目根解析 active cache path，优先读取 profile 环境缓存；缺失或不满足再发现并创建/更新缓存，再按技术栈追加 `03`/`04`/`10`/`11`/`12` |
 | 密钥/权限/租户/审计/外部调用/上传下载/动态内容 | `02` + `01` | 进入风险评估或写入流程时保持 `02`；并发副作用加 `09`，再按技术栈追加对应 reference |
 | 注释/契约缺口/导出类型/API 边界 | `02` + `01` | 命中 Java Service/DTO/VO/Entity 加 `07`；命中 Python 公共模块/类/函数加 `10`；命中 Vue/React props/emits/slots、导出 `interface/type`、api client/request/response 加 `11`；命中小程序 Page/Component/properties 加 `12` |
 | 属性定义/props/properties/any | `02` + `01` | 命中 Vue/React/TypeScript 追加 `11#属性类型与-any-边界`；命中原生小程序/uni-app/Taro 追加 `12#属性与数据类型`；若要执行 typecheck/lint 再加 `06` + `14` |
 | 编码风格智能化/魔法值/常量放置/抽象边界 | `02` + `01` | 命中公共接口/方法/类/文件、helper、base、hook/composable、schema、mapper/converter、adapter、策略、handler map、泛型、`any` 或 `Object` 时，先执行 `01#跨技术栈抽象抽离时机`；Java 加 `08`，Python 加 `10`，Vue/React 加 `11`，小程序加 `12`；触碰后端分层或业务抽象再加 `07` |
+| 前端注释、魔法值、类型、格式化或局部对齐失效 | `02` + `01` + `04` | 只要触碰 `.vue/.js/.jsx/.ts/.tsx/.mjs/.cjs/.html/.css/.scss/.less`、组件、页面、hook/composable、store、api/service/model/type、router、mock、fixture 或前端配置，就自动追加 `11`；命中原生小程序/uni-app/Taro 追加 `12`；进入 lint/format/typecheck/build/test 前再加 `06` + `14` |
 | Python 语法/脚本/服务/包/测试 | `02` + `10` | 运行/测试/lint/type check 前加 `06`，跨系统调用再加对应 reference |
 | Maven 构建/测试/多模块 root | `06` + `14` + `03` | 先验证/复用 Maven/JDK 缓存，再执行 Maven 命令 |
 | 环境路径发现/缓存/忽略规则/当前项目范围 | `02` + `06` | 任务边界、workspace root、cwd、禁止项或用户输入指向当前项目、当前工作区、不跨项目、不要同步到全局时，内部先核对 active cache path 和 `.codex/` 忽略规则；需要栈级缓存细节时加 `14`，需要构建命令时加 `03` |
-| 前端页面/布局/表单/状态契约 | `02` + `04` | 涉及 Vue/React 语法或构建测试加 `11` |
-| Vue/React/Vite/组件测试/前端构建 | `02` + `11` | 通用布局状态加 `04`；只要是前端项目，执行构建/typecheck/lint/format/test 前必须加 `06` + `14`，识别并缓存 ESLint/Prettier/EditorConfig/Biome/Stylelint/TypeScript 等规范文件 |
-| 小程序原生/uni-app/Taro/分包/模拟器 | `02` + `12` | uni-app/Taro 语法加 `11`，通用布局状态加 `04`；执行构建/编译/CI 前加 `06`；只有当前任务目标本身包含模拟器、预览、上传、真机或发布链路，且权限边界清楚时才查开发者工具路径 |
+| 前端页面/布局/表单/状态契约 | `02` + `04` | 涉及原生 JS/TS、Vue/React 语法、组件契约、状态、接口、路由、构建测试或局部对齐加 `11`；命中小程序/uni-app/Taro 加 `12` |
+| Vue2/Vue3/React/JS/TS/Vite/组件测试/前端构建 | `02` + `11` | 通用布局状态加 `04`；只要是前端项目，执行构建/typecheck/lint/format/test 前必须加 `06` + `14`，识别并缓存 ESLint/Prettier/EditorConfig/Biome/Stylelint/TypeScript/jsconfig/tsconfig 等规范文件；格式化修复后仍要回扫同一语义单元的注释、魔法值、类型和契约缺口 |
+| 小程序原生/uni-app/Taro/raro/分包/模拟器 | `02` + `12` | uni-app/Taro 语法加 `11`，通用布局状态加 `04`；执行构建/编译/CI 前加 `06`；只有当前任务目标本身包含模拟器、预览、上传、真机或发布链路，且权限边界清楚时才查开发者工具路径 |
 | 最终回复/交接/压缩上下文/模型或窗口恢复 | `05` | 长任务恢复、自动续跑、上下文丢失、模型切换、窗口切换、模式切换、插件/技能加载、网络错误恢复或需要重建任务边界时加 `02` |
 
 最小组合不是放宽规则；它只是延迟打开无关 reference。执行中一旦触碰范围命中其他规则，立即追加对应 reference。
@@ -202,7 +204,7 @@
 - `新建文件`、`文件归属`、`目录位置`、`放哪`、`module 归属`、`package`、`workspace`、`生成目录`、`构建产物`、`dist`、`build`、`target`、`unpackage/dist`、`miniprogram_npm`、`依赖方向`、`循环依赖`、`接口和实现分离`、`测试目录`：先读 `01-global-engineering-rules.md#跨技术栈文件归属与依赖边界`；Java 追加 `07`，Python 追加 `10`，Vue/React 追加 `11`，小程序追加 `12`。
 - `环境`、`命令`、`运行`、`包管理器`、`lockfile`、`root`、`workspace`、`filter`、`版本`、`版本不匹配`、`构建失败后重算`、`JDK`、`Maven`、`Node`、`Python`、`虚拟环境`、`模拟器`、`开发者工具`、`CLI`、`全局安装`：先读 `01-global-engineering-rules.md#跨技术栈环境与命令`；只要流程进入工具链命令节点就追加 `06`，先从项目根解析 active cache path，缺失或不满足再按技术栈发现、验证、创建或更新缓存，并按技术栈追加 `03`/`10`/`11`/`12`。
 - `构建`、`编译`、`测试`、`lint`、`format`、`typecheck`、`build`、`运行`、`预览`、`打包`、`代码生成`、`mvn test`、`npm run build`、`pnpm run build`、`pytest`、`uv run`：当本 skill 流程进入这些验证或工具链节点时，先读 `06-environment-discovery.md#构建测试前环境缓存门禁`，再按技术栈追加 `14` 和命令规则；前端项目必须先识别 ESLint/Prettier/EditorConfig/Biome/Stylelint/TypeScript 规范文件并写入/更新 active cache path；命令失败疑似环境问题时必须重算并更新缓存后重试一次。
-- `当前项目`、`当前工作区`、`只修改当前项目`、`只改当前项目`、`不跨项目`、`不要同步到全局`、`不要改其他目录`、`workspaceRoot`、`local-environment.json 没触发`、`local-environment 没触发`、`.codex/local-environment.json`、`local-environment.<profile>.json`、`hostname`、`主机名`、`电脑名`、`用户名`、`Windows 文件名`、`macOS 文件名`、`profileId`：先读 `06-environment-discovery.md#当前项目范围门禁` 和 `06-environment-discovery.md#跨系统缓存文件命名`；若后续要执行构建、测试、运行或代码生成，再追加对应技术栈缓存规则和命令规则。
+- `当前项目`、`当前工作区`、`只修改当前项目`、`只改当前项目`、`不跨项目`、`不要同步到全局`、`不要改其他目录`、`workspaceRoot`、`local-environment.json 没触发`、`local-environment 没触发`、`.codex/local-environment.json`、`local-environment.<profile>.json`、`hostname`、`主机名`、`电脑名`、`用户名`、`Windows 文件名`、`macOS 文件名`、`profileId`：先读 `06-environment-discovery.md#当前项目范围门禁` 和 `06-environment-discovery.md#跨系统缓存文件命名`；旧版 `.codex/local-environment.json` 存在时必须强制迁移替换为 profile 缓存，不继续兼容；若后续要执行构建、测试、运行或代码生成，再追加对应技术栈缓存规则和命令规则。
 - `测试`、`验证`、`lint`、`format`、`typecheck`、`build`、`unit test`、`e2e`、`pytest`、`mvn test`、`Vitest`、`Jest`、`Playwright`、`Cypress`、`浏览器点击`、`电脑屏幕`、`Browser`、`Computer Use`、`模拟器验证`、`真机验证`、`无法验证`：先读 `01-global-engineering-rules.md#跨技术栈验证策略`，再按技术栈追加 `03`/`04`/`10`/`11`/`12`。
 - `ESLint`、`eslint.config`、`.eslintrc`、`react/jsx-indent-props`、`jsx-indent`、`indent`、`Prettier`、`.prettierrc`、`prettier.config`、`.editorconfig`、`EditorConfig`、`Biome`、`biome.json`、`Stylelint`、`.stylelintrc`、`oxlint`、`tsconfig.json`、`jsconfig.json`、`格式化报错`、`缩进规范`、`语法规范`、`飘红`、`飘黄`：前端项目先读 `14-environment-cache-by-stack.md#node前端环境缓存`，把规范文件、命令和缓存有效性写入/更新 active cache path；执行验证时再读 `11-frontend-vue-react.md#lint格式化与类型检查`，不能只依赖 IDE 警告或手工观察。
 - `注释`、`契约注释`、`缺注释`、`JSDoc`、`docstring`、`public API`、`export interface`、`export type`、`interface`、`type.ts`、`api.ts`、`request`、`response`、`DTO`、`VO`、`props 注释`、`slot 注释`、`hook 注释`、`配置注释`、`SQL 注释`、`react/jsx-indent-props`、`jsx-indent`、`lint 缩进`、`格式化报错`：先读 `01-global-engineering-rules.md#跨技术栈注释原则` 和 `01-global-engineering-rules.md#注释契约自动触发`；若 lint/格式化/阅读/检索暴露的是 Vue/React/TypeScript 导出类型、组件契约或 api client，追加 `11-frontend-vue-react.md#typescript-与-api-契约注释`，不能只修缩进后跳过契约缺口。
@@ -213,10 +215,10 @@
 - `重复 if`、`重复 set`、`重复赋值`、`重复映射`、`重复转换`、`字段不同逻辑相同`、`默认值填充`、`策略`、`handler map`、`mapper`、`converter`、`adapter`：先读 `01-global-engineering-rules.md#跨技术栈重复逻辑治理` 和 `01-global-engineering-rules.md#跨技术栈抽象抽离时机`；Java 落地追加 `08`，其他技术栈按文件类型追加对应 reference。
 - `Enum`、`yml`、`properties`、`@ConfigurationProperties`、`@Value`、`Bean Validation`、`Lombok`、`@Data`、`getter/setter`、`Optional`、`Stream`、`MapStruct`、`BeanUtils`、`BiConsumer`、`Function`：Java 项目读 `08-java-style-patterns.md`。
 - `Python`、`.py`、`pyproject.toml`、`requirements.txt`、`requirements-dev.txt`、`setup.py`、`tox.ini`、`noxfile.py`、`Pipfile`、`poetry.lock`、`uv.lock`、`.python-version`、`.venv/pyvenv.cfg`、`pytest`、`unittest`、`ruff`、`black`、`isort`、`mypy`、`pyright`、`venv`、`.venv`、`typing`、`dataclass`、`asyncio`、`脚本`、`包管理`、`虚拟环境`：读 `10-python-development.md`；执行命令前追加 `14-environment-cache-by-stack.md#python-环境缓存`。
-- `Vue`、`Vue2`、`Vue 2`、`Vue3`、`Vue 3`、`.vue`、`SFC`、`Composition API`、`Options API`、`script setup`、`defineProps`、`defineEmits`、`props`、`emits`、`slots`、`Vuex`、`Pinia`、`Vue Router`、`React`、`JSX`、`TSX`、`Hooks`、`children`、`render prop`、`useState`、`useEffect`、`Vite`、`Vitest`、`Jest`、`Testing Library`、`Vue Test Utils`、`Cypress`、`Playwright`、`组件创建`、`组件使用`、`组件注释`、`package.json`、`pnpm`、`yarn`、`npm`、`bun`：读 `11-frontend-vue-react.md`。
+- `Vue`、`Vue2`、`Vue 2`、`Vue3`、`Vue 3`、`.vue`、`SFC`、`Composition API`、`Options API`、`script setup`、`defineProps`、`defineEmits`、`props`、`emits`、`slots`、`Vuex`、`Pinia`、`Vue Router`、`React`、`JSX`、`TSX`、`Hooks`、`children`、`render prop`、`useState`、`useEffect`、`.js`、`.jsx`、`.ts`、`.tsx`、`.mjs`、`.cjs`、`jsconfig.json`、`tsconfig.json`、`Vite`、`webpack`、`Next`、`Nuxt`、`Vitest`、`Jest`、`Testing Library`、`Vue Test Utils`、`Cypress`、`Playwright`、`组件创建`、`组件使用`、`组件注释`、`package.json`、`pnpm`、`yarn`、`npm`、`bun`、`前端魔法值`、`前端注释`、`前端格式化`、`前端没触发`：读 `11-frontend-vue-react.md`。
 - `小程序`、`微信小程序`、`weapp`、`mp-weixin`、`mini program`、`project.config.json`、`project.private.config.json`、`app.json`、`app.wxss`、`app.js`、`sitemap.json`、`wxml`、`wxss`、`wxs`、`wx:`、`setData`、`Component`、`Page`、`Behavior`、`miniprogramRoot`、`miniprogram_npm`、`subPackages`、`subpackages`、`preloadRule`、`independent`、`分包`、`主包`、`独立分包`、`分包预下载`、`分包异步化`、`模拟器`、`微信开发者工具`、`miniprogram-ci`、`miniprogram-simulate`：读 `12-miniprogram-development.md`；执行构建/编译/CI 前追加 `14-environment-cache-by-stack.md#小程序环境缓存`。
 - `uni-app`、`uniapp`、`pages.json`、`manifest.json`、`App.vue`、`uni.scss`、`uni_modules`、`#ifdef MP`、`#ifdef MP-WEIXIN`、`unpackage/dist`：读 `12-miniprogram-development.md`；涉及 Vue 语法继续读 `11-frontend-vue-react.md`。
-- `Taro`、`@tarojs`、`Taro.`、`app.config.js`、`app.config.ts`、`page.config.*`、`config/index.js`、`config/index.ts`、`TARO_ENV`、`dev:weapp`、`build:weapp`、`taro build --type weapp`：读 `12-miniprogram-development.md`；涉及 React/Vue 语法继续读 `11-frontend-vue-react.md`。
+- `Taro`、`raro`、`@tarojs`、`Taro.`、`app.config.js`、`app.config.ts`、`page.config.*`、`config/index.js`、`config/index.ts`、`TARO_ENV`、`dev:weapp`、`build:weapp`、`taro build --type weapp`：读 `12-miniprogram-development.md`；涉及 React/Vue 语法继续读 `11-frontend-vue-react.md`。
 - `注释位置`、`注释原则`、`docstring`、`Javadoc`、`props 注释`、`slot 注释`、`hook 注释`、`配置注释`、`SQL 注释`：读 `01-global-engineering-rules.md#跨技术栈注释原则` 和 `01-global-engineering-rules.md#注释契约自动触发`，再按技术栈追加对应 reference。
 - `高并发`、`幂等`、`死锁`、`异步`、`MQ`、`事件`、`线程池`、`虚拟线程`、`批量`、`用户上下文`、`创建人`、`修改人`：读 `09-concurrency-async-batch.md`。
 - `mvn`、`pom.xml`、`.mvn/maven.config`、`.mvn/jvm.config`、`maven-wrapper.properties`、`JAVA_HOME`、`maven.compiler.release`、`java.version`、`-pl`、`-am`、`多模块构建`、`测试命令`：先读 `14-environment-cache-by-stack.md#mavenjava-环境缓存`，再读 `03-maven-backend-build.md`。

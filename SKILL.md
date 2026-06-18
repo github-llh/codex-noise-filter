@@ -46,7 +46,7 @@ description: |
 - 执行门禁、任务胶囊、调用链、强规则自动升级、补丁写入预判、worktree/分支、Plan/Goal、失败回退和既有代码一致性由 `02-noise-filter-workflow.md` 承载。
 - 语言、工具优先级、修改前确认、文件归属、环境命令、验证策略、安全边界、编码风格预检、硬编码、重复逻辑和注释原则由 `01-global-engineering-rules.md` 承载。
 - 读取完整性、智能扩窗和 Git 历史防回归由 `13-read-expansion-and-history.md` 承载；不能用初始读取窗口、局部 diff 或旧记忆替代必要证据。
-- 当前项目范围、`.codex/local-environment.<profile>.json`、旧版 `.codex/local-environment.json` 兼容、`.codex/` 忽略规则和工具链缓存由 `06-environment-discovery.md` 与 `14-environment-cache-by-stack.md` 承载；进入构建、测试、运行、lint、typecheck、代码生成等工具链节点前必须自动处理项目根缓存。
+- 当前项目范围、`.codex/local-environment.<profile>.json`、旧版 `.codex/local-environment.json` 强制迁移替换、`.codex/` 忽略规则和工具链缓存由 `06-environment-discovery.md` 与 `14-environment-cache-by-stack.md` 承载；进入构建、测试、运行、lint、typecheck、代码生成等工具链节点前必须自动处理项目根缓存。
 - 当前会话、归档会话、长期 memory、Context Capsule、模型/窗口/模式/插件/技能切换和网络错误后的恢复策略由 `05-delivery-templates.md` 承载；恢复时必须按当前文件证据和最新 skill 规则重新校准，不能让旧记忆冲掉硬约束。
 - Java、Python、Vue/React、小程序、并发/异步/批量等落地细节只在命中代码证据、调用链、项目配置、命令节点或风险信号时按 `07`、`08`、`09`、`10`、`11`、`12` 追加读取，避免外层膨胀。
 - 对 JetBrains 项目，优先使用 JetBrains MCP / IDE 工具读取、定位、修改和诊断；只有明确不可用、超时或错误时才使用 Shell。
@@ -64,5 +64,5 @@ description: |
 7. 调用链阅读中发现相关文件强规则违背时，先判断低风险闭环，成立就写入任务胶囊同步处理。
 8. 修改前再次引用任务编号确认目标。
 9. 只做最小闭环改动，并对本次触碰的已有代码做局部规则对齐。
-10. 执行最轻量验证；凡进入工具链节点，必须先按 `06` 解析 active cache path，并自动处理 profile 环境缓存命名、旧版缓存兼容、`.codex/` 忽略规则和当前技术栈缓存。
+10. 执行最轻量验证；凡进入工具链节点，必须先按 `06` 解析 active cache path，并自动处理 profile 环境缓存命名、旧版缓存强制迁移替换、`.codex/` 忽略规则和当前技术栈缓存。
 11. 用中文说明变更内容、影响范围和验证结果。

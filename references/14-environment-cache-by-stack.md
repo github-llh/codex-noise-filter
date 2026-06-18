@@ -82,7 +82,7 @@ Maven/Java 命令失败后的重算：
 7. 写入缓存：
    - 写入目标 package 的 `packageJson`、`packageRoot`、`workspaceRoot`、Node 版本约束、实际 Node 路径和版本、包管理器名称/路径/版本、lockfile、选定 scripts、最终命令，以及 `frontendQuality`。
    - `frontendQuality` 至少记录：`eslint`、`prettier`、`editorconfig`、`biome`、`stylelint`、`typescript`、`javascript`/`ecma` 相关配置文件路径，来源字段来自 `packageJson` 还是文件，文件 `mtime`/`size` 或可用 hash，匹配的验证脚本名，是否存在 format check 脚本。
-   - 旧缓存若只有字符串形式的 `node.packageManager`，在下一次前端命令前按当前 schema 重写为对象，补齐 `name`、`executable`、`version`、`declared` 和 `commandRunner`；如果来自旧版 `.codex/local-environment.json`，先迁移到当前 profile 文件。
+   - 旧缓存若只有字符串形式的 `node.packageManager`，在下一次前端命令前按当前 schema 重写为对象，补齐 `name`、`executable`、`version`、`declared` 和 `commandRunner`；如果来自旧版 `.codex/local-environment.json`，必须先强制迁移替换到当前 profile 文件，之后不再读取旧版文件。
    - 只写项目声明和已验证结果，不写安装日志、token、registry 凭据或临时失败详情。
 
 前端命令失败后的重算：
