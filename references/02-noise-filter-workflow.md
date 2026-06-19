@@ -108,6 +108,8 @@
 
 AGENTS 文件是宿主启动时注入的指令链，不是 Codex skill 注册表，也不会让任意第三方 agent/CLI 自动获得 skill discovery。第三方 agent/CLI 不一定安装 Codex，也不一定有 `.codex` 目录；只把 `templates/global-AGENTS.light.md` 导入第三方工具时，默认只能得到指令。除非宿主同时暴露 skill 元数据或允许从随 AGENTS 分发的目录、项目目录或用户目录读取 `SKILL.md`，否则不能声称“已自动加载本 skill”。
 
+跨宿主能力分层、官方平台差异、加载顺序、触发条件、路径探测上限和第三方接入验收统一由 `15-host-skill-portability.md` 承载。这里保留执行门禁：平台名只是高频提示，真正优先级是宿主是否提供原生 Agent Skills、slash command/workflow、rules/instructions、delegated tool/subagent/hook/MCP，还是只能进入 `fallbackOnly`。
+
 AGENTS 与 skill 路径必须按当前宿主、当前用户和平台解析，不能写死某台机器的绝对路径：
 
 - 第三方工具实际加载的配置文件所在目录记为 `HOST_CONFIG_DIR`；宿主实际导入的 AGENTS 文件所在目录记为 `AGENTS_DIR`。如果配置文件是 `/path/to/vendor/config/agent.md`，则 `HOST_CONFIG_DIR=/path/to/vendor/config`。
@@ -139,6 +141,7 @@ AGENTS 与 skill 路径必须按当前宿主、当前用户和平台解析，不
 状态机字段：
 
 - `activated`：已按编程任务触发本 skill，来源是用户意图、代码证据、第三方载荷、cwd、文件、命令、日志、diff 或恢复信号。
+- `hostCapability`：记录当前宿主能力类型：`nativeSkill`、`nativeCommand`、`rulesOnly`、`delegatedTool`、`manualFileBootstrap` 或 `fallbackOnly`；不得只记录产品名。
 - `loadState`：记录 `nativeSkill`、`manualFileBootstrap` 或 `fallbackOnly`；不能把 AGENTS 导入本身记录为 skill 已加载。
 - `references`：已读取 `SKILL.md`、`00-index.md` 和当前任务命中的 reference；若只读到 AGENTS 兜底矩阵，也要记录为 `fallbackOnly`，并尽快补读 skill。
 - `dynamicScope`：已从当前宿主、当前工具调用、cwd/workspace、文件扩展名、配置文件、命令、日志、diff、补丁、active cache path 和本机环境证据推导本轮技术栈、工具链、验证范围和追加 reference；平台名、agent 名和技术栈名只作为提示，不是白名单。

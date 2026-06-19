@@ -49,16 +49,17 @@
 执行入口：
 
 1. 先执行 Skill Bootstrap：AGENTS 只是指令文件，不等同于 skill 自动加载器；若当前宿主支持 Codex/Agent Skills，先确认可用 skill 列表中存在 `codex-noise-filter`，不存在时不要声称已加载 skill。
-2. 若宿主未自动暴露该 skill，但允许读取文件，按顺序查找并读取首个存在的 `SKILL.md`：第三方配置目录 `skills/codex-noise-filter/`、随 AGENTS 分发的相对路径、`<repo>/.agents/skills/codex-noise-filter/SKILL.md`、用户级 `.agents` 路径、`CODEX_HOME` 路径、兼容 `.codex` 路径；读取成功后把状态记为 `manualFileBootstrap`，继续读取同目录 `references/00-index.md`。
-3. 只有在宿主既不支持 skill 发现、也不能读取上述文件时，才把状态记为 `fallbackOnly`，执行下方“第三方兜底闭环”；兜底不是自动加载成功。
-4. 再按 `references/00-index.md` 渐进读取对应规则文件。
-5. 第三方调用、模型切换、CLI/App/插件/路由器变化不能降低内部触发级别；仍执行任务胶囊/快照、调用链、局部对齐、抽象抽离、编码/中文乱码检查、环境缓存和验证策略。
-6. 内部追加范围不按固定平台或技术栈清单裁剪；先从当前宿主、当前工具动作、cwd/workspace、文件扩展名、配置文件、命令、日志、diff、active cache path 和本机环境证据判断本轮需要的 reference、环境缓存和最小验证项。
-7. 修改前确认目标文件、问题根因、最小修改方案、调用链、影响面和不影响范围。
-8. Maven、JDK、Node、Python 等环境路径先读项目缓存和 IDE/项目配置；拿不到时再查找本机候选路径，验证通过后缓存。未列名工具链也要先确认项目根、命令来源、active cache path 和最轻量验证边界。
-9. 遇到中文字符乱码、`encoding`、`charset`、UTF-8/GBK、locale、终端输出或页面文案异常时，先确认项目编码依据和最小验证方式，不把它当成第三方展示问题跳过。
-10. 长任务、切换窗口、模型切换、上下文窗口压力升高、手动/自动 compact 或大输出工具调用前，输出 Context Capsule；compact 后先读当前文件、`git diff`、`git status` 和最新规则，再继续。
-11. 一旦进入编程任务，后续每次工具调用、写入、验证和最终回复前都必须自检内部状态：已读规则、任务胶囊/快照、触碰范围、调用链、局部对齐、抽象抽离、环境缓存和验证；缺项时先补齐，不能只总结最后一个工具结果。
+2. 先按宿主能力分层记录 `hostCapability`：原生 Agent Skills 为 `nativeSkill`，slash command/workflow 为 `nativeCommand`，AGENTS/CLAUDE/GEMINI/Cline/Cursor/Windsurf/Copilot rules 为 `rulesOnly`，subagent/hook/MCP/ACP/CI/model router 为 `delegatedTool`；不要只记录平台名。
+3. 若宿主未自动暴露该 skill，但允许读取文件，按顺序查找并读取首个存在的 `SKILL.md`：第三方配置目录 `skills/codex-noise-filter/`、随 AGENTS 分发的相对路径、`<repo>/.agents/skills/codex-noise-filter/SKILL.md`、用户级 `.agents` 路径、`CODEX_HOME` 路径、兼容 `.codex` 路径；读取成功后把状态记为 `manualFileBootstrap`，继续读取同目录 `references/00-index.md`。
+4. 只有在宿主既不支持 skill 发现、也不能读取上述文件时，才把状态记为 `fallbackOnly`，执行下方“第三方兜底闭环”；兜底不是自动加载成功。
+5. 再按 `references/00-index.md` 渐进读取对应规则文件；第三方宿主执行顺序、触发条件和性能预算先按 `references/15-host-skill-portability.md` 归类。
+6. 第三方调用、模型切换、CLI/App/插件/路由器变化不能降低内部触发级别；仍执行任务胶囊/快照、调用链、局部对齐、抽象抽离、编码/中文乱码检查、环境缓存和验证策略。
+7. 内部追加范围不按固定平台或技术栈清单裁剪；先从当前宿主、当前工具动作、cwd/workspace、文件扩展名、配置文件、命令、日志、diff、active cache path 和本机环境证据判断本轮需要的 reference、环境缓存和最小验证项。
+8. 修改前确认目标文件、问题根因、最小修改方案、调用链、影响面和不影响范围。
+9. Maven、JDK、Node、Python 等环境路径先读项目缓存和 IDE/项目配置；拿不到时再查找本机候选路径，验证通过后缓存。未列名工具链也要先确认项目根、命令来源、active cache path 和最轻量验证边界。
+10. 遇到中文字符乱码、`encoding`、`charset`、UTF-8/GBK、locale、终端输出或页面文案异常时，先确认项目编码依据和最小验证方式，不把它当成第三方展示问题跳过。
+11. 长任务、切换窗口、模型切换、上下文窗口压力升高、手动/自动 compact 或大输出工具调用前，输出 Context Capsule；compact 后先读当前文件、`git diff`、`git status` 和最新规则，再继续。
+12. 一旦进入编程任务，后续每次工具调用、写入、验证和最终回复前都必须自检内部状态：已读规则、任务胶囊/快照、触碰范围、调用链、局部对齐、抽象抽离、环境缓存和验证；缺项时先补齐，不能只总结最后一个工具结果。
 
 第三方兜底闭环：
 

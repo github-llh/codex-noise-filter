@@ -5,20 +5,21 @@
 
 判断时不要只看是否显式写出 skill 名，也不要受调用入口影响。任务来自任意第三方调用、App、终端/CLI、IDE 插件、MCP/ACP、hook、subagent、CI/chatops、`cc switch`、模型/供应商路由、未知 wrapper 或未来新增工具时，只要载荷包含代码、路径、命令、日志、diff、截图里的错误、项目结构、中文乱码、编码/charset 信号或工具链动作，就按本 skill 内部触发。平台名、agent 名和技术栈名只是示例；如果当前宿主、当前工具、cwd、文件扩展名、配置文件、命令、日志、diff、补丁、active cache path 或本机环境证据指向未列名平台/技术栈，也要按未知第三方中转处理，并动态追加本轮 reference、环境缓存和验证范围。
 
-触发后先检查加载状态：如果当前宿主可用 skill 列表中存在 `codex-noise-filter`，标记为 `nativeSkill`；如果第三方没有 Codex 或只导入了 AGENTS 但文件可读，先取得第三方实际加载的配置文件路径，把其父目录记为 `HOST_CONFIG_DIR`，优先查找 `$HOST_CONFIG_DIR/skills/codex-noise-filter/SKILL.md` 和 `$HOST_CONFIG_DIR/codex-noise-filter/SKILL.md`，再从 AGENTS 文件所在目录查找随包分发路径，最后查项目级、用户级、`CODEX_HOME` 和兼容 `.codex` 路径；读取 `SKILL.md` 和 `references/00-index.md` 后标记为 `manualFileBootstrap`；如果既没有 skill discovery 也不能读取分发文件，标记为 `fallbackOnly`，并说明只能执行第三方兜底闭环。
+触发后先检查宿主能力和加载状态：如果当前宿主可用 skill 列表中存在 `codex-noise-filter`，标记为 `nativeSkill`；如果是 slash command/workflow/custom command 进入，标记为 `nativeCommand` 后继续尝试读取完整 skill；如果只有 AGENTS/CLAUDE/GEMINI/Cline/Cursor/Windsurf/Copilot rules，标记为 `rulesOnly` 后继续 Skill Bootstrap；如果来自 subagent/hook/MCP/ACP/CI/model router，标记为 `delegatedTool` 并把输出只当证据。若第三方没有 Codex 或只导入了 rules 但文件可读，先取得第三方实际加载的配置文件路径，把其父目录记为 `HOST_CONFIG_DIR`，优先查找 `$HOST_CONFIG_DIR/skills/codex-noise-filter/SKILL.md` 和 `$HOST_CONFIG_DIR/codex-noise-filter/SKILL.md`，再从 AGENTS 文件所在目录查找随包分发路径，最后查项目级、用户级、`CODEX_HOME` 和兼容 `.codex` 路径；读取 `SKILL.md` 和 `references/00-index.md` 后标记为 `manualFileBootstrap`；如果既没有 skill discovery 也不能读取分发文件，标记为 `fallbackOnly`，并说明只能执行第三方兜底闭环。
 
 如果触发，请只输出：
 1. 命中的 skill 名称。
-2. 加载状态：`nativeSkill` / `manualFileBootstrap` / `fallbackOnly`。
-3. 实际读取或准备读取的 `SKILL.md` 路径。
-4. 需要读取的最小 reference 列表。
-5. 动态追加依据：当前宿主/工具、文件/配置/命令/日志/diff、active cache path 和命中的技术栈或未知技术栈处理方式。
-6. 本次触碰范围。
-7. 禁止触碰范围。
-8. 修改前必须闭环的调用链或影响面。
-9. 是否需要任务胶囊/快照、局部对齐、抽象抽离、编码/中文乱码检查、环境缓存。
-10. 上下文窗口/compact 风险：是否需要在大输出、模型切换、`PreCompact`/`PostCompact`/`SessionStart compact` 前后刷新 Context Capsule，以及哪些日志/搜索结果只摘要不保留原文。
-11. 最小验证项。
+2. 宿主能力类型：`nativeSkill` / `nativeCommand` / `rulesOnly` / `delegatedTool` / `manualFileBootstrap` / `fallbackOnly`，不要只写平台名。
+3. 加载状态：已通过原生 skill 读取、已通过命令进入后继续 bootstrap、已通过 rules 触发后继续 bootstrap、已读取文件 bootstrap，或只能 `fallbackOnly`。
+4. 实际读取或准备读取的 `SKILL.md` 路径。
+5. 需要读取的最小 reference 列表。
+6. 动态追加依据：当前宿主/工具、文件/配置/命令/日志/diff、active cache path 和命中的技术栈或未知技术栈处理方式。
+7. 本次触碰范围。
+8. 禁止触碰范围。
+9. 修改前必须闭环的调用链或影响面。
+10. 是否需要任务胶囊/快照、局部对齐、抽象抽离、编码/中文乱码检查、环境缓存。
+11. 上下文窗口/compact 风险：是否需要在大输出、模型切换、`PreCompact`/`PostCompact`/`SessionStart compact` 前后刷新 Context Capsule，以及哪些日志/搜索结果只摘要不保留原文。
+12. 最小验证项。
 
 如果不触发，请说明不触发原因，并只问一个最关键的澄清问题。
 ```

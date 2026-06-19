@@ -54,6 +54,8 @@ If a request arrives through any third-party invocation, third-party agent, desk
 
 Importing only `templates/global-AGENTS.light.md` does not make a third-party agent or CLI discover this skill automatically. AGENTS is an instruction chain, not a skill registry. The third-party machine may not have Codex installed and may not have a `.codex` directory. Hosts that support Agent Skills must install this directory in a scanned location or explicitly expose the `SKILL.md` path in host configuration. If the host only imports AGENTS but can read files, first get the real third-party configuration file path, treat its parent directory as `HOST_CONFIG_DIR`, then create `$HOST_CONFIG_DIR/skills/codex-noise-filter/` and copy the full skill directory there, including at least `SKILL.md`, `references/00-index.md`, and the matched references. If AGENTS is imported as a standalone file, the skill may also live next to AGENTS as `skills/codex-noise-filter/` or `codex-noise-filter/`. Enter `fallbackOnly` only when the host cannot discover the skill and cannot read the distributed files.
 
+Cross-platform execution is capability-based, not product-name-based. Native Agent Skills use `nativeSkill`; slash commands and workflows use `nativeCommand` and then try to read the full skill; `AGENTS.md`, `CLAUDE.md`, `GEMINI.md`, Cline/Cursor/Windsurf/Copilot rules are only `rulesOnly` and must continue through Skill Bootstrap; subagent, hook, MCP/ACP, CI, or model-router output is only `delegatedTool` evidence; use `fallbackOnly` only when discovery and file reads are both unavailable. See `references/15-host-skill-portability.md` for the full matrix.
+
 ### Repository Scope
 
 Use this when a team should share the same engineering rules.
@@ -227,6 +229,7 @@ references/
   12-miniprogram-development.md
   13-read-expansion-and-history.md
   14-environment-cache-by-stack.md
+  15-host-skill-portability.md
 ```
 
 `SKILL.md` is intentionally small. It routes the agent to indexed reference files instead of loading every rule at once.
@@ -236,6 +239,7 @@ references/
 - Keep each reference file topic-focused instead of allowing one file to grow to several hundred lines.
 - `01-global-engineering-rules.md` only contains globally shared rules, including file ownership, commands, validation, security boundaries, hardcoded values, repeated logic, and comment placement.
 - `02-noise-filter-workflow.md` only contains cross-stack execution gates, context budgets, call-chain checks, and touched-scope alignment. Smart read expansion and Git history regression guards live in `13-read-expansion-and-history.md`, while stack-specific differences route to the matching reference files.
+- `15-host-skill-portability.md` only contains the cross-host Skill/Rules/Workflow/Command/Subagent compatibility matrix, execution order, trigger conditions, and performance budget, so platform lists do not return to the entry file.
 - Java backend architecture rules live in `07-java-backend-architecture.md` and should be opened only for layering, file placement, comments, or call chains.
 - Java style rules live in `08-java-style-patterns.md` and should be opened only for enums, validation, Lombok, Optional, functional style, or repeated logic.
 - Concurrency, async, and batch rules live in `09-concurrency-async-batch.md` and should be opened only for high concurrency, idempotency, deadlocks, events, middleware, thread pools, virtual threads, or user-context propagation.
