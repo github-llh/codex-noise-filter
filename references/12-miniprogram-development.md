@@ -179,8 +179,8 @@
 - 微信小程序分包加载: https://developers.weixin.qq.com/miniprogram/dev/framework/subpackages.html
 - 微信小程序 npm 支持: https://developers.weixin.qq.com/miniprogram/dev/devtools/npm.html
 - 微信开发者工具 CI / miniprogram-ci: https://developers.weixin.qq.com/miniprogram/dev/devtools/ci.html
-- miniprogram-ci npm: https://www.npmjs.com/package/miniprogram-ci
-- miniprogram-simulate npm: https://www.npmjs.com/package/miniprogram-simulate
+- miniprogram-ci npm registry: https://registry.npmjs.org/miniprogram-ci/latest
+- miniprogram-simulate npm registry: https://registry.npmjs.org/miniprogram-simulate/latest
 - miniprogram-simulate GitHub: https://github.com/wechat-miniprogram/miniprogram-simulate
 - uni-app pages.json: https://uniapp.dcloud.net.cn/collocation/pages.html
 - uni-app manifest.json: https://uniapp.dcloud.net.cn/collocation/manifest.html

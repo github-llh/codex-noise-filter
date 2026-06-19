@@ -294,7 +294,7 @@
   "updatedAt": "YYYY-MM-DDTHH:mm:ssZ",
   "scope": "workspace",
   "workspaceRoot": "/path/to/workspace",
-  "cacheFile": "/path/to/workspace/.codex/local-environment.darwin-arm64-lilinhan-macbook-pro-a1b2c3d4.json",
+  "cacheFile": "/path/to/workspace/.codex/local-environment.darwin-arm64-safe-user-safe-host-a1b2c3d4.json",
   "identity": {
     "profileId": "a1b2c3d4-1111-2222-3333-444455556666",
     "os": "darwin|windows|linux",

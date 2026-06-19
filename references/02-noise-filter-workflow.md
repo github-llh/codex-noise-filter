@@ -116,7 +116,8 @@ AGENTS 与 skill 路径必须按当前宿主、当前用户和平台解析，不
 - 先检查第三方配置目录下的扩展路径：`$HOST_CONFIG_DIR/skills/codex-noise-filter/SKILL.md`、`$HOST_CONFIG_DIR/skills/codex-noise-filter/references/00-index.md`；也兼容 `$HOST_CONFIG_DIR/codex-noise-filter/SKILL.md`。Windows 使用同等反斜杠路径。
 - 再检查随 AGENTS 分发的相对路径：`$AGENTS_DIR/skills/codex-noise-filter/SKILL.md`、`$AGENTS_DIR/codex-noise-filter/SKILL.md`、`$AGENTS_DIR/.agents/skills/codex-noise-filter/SKILL.md`。
 - 仓库级 skill 仍优先检查当前工作区的 `<repo>/.agents/skills/codex-noise-filter/SKILL.md`；若存在，它比用户级副本更贴近当前项目。
-- 用户级 Agent Skills 路径：macOS/Linux 检查 `$HOME/.agents/skills/codex-noise-filter/SKILL.md`；Windows 检查 `%USERPROFILE%\.agents\skills\codex-noise-filter\SKILL.md`。
+- 宿主原生目录只作为候选，不当成白名单：Claude Code 检查 `<repo>/.claude/skills/codex-noise-filter/SKILL.md`；Gemini CLI 检查 `<repo>/.gemini/skills/codex-noise-filter/SKILL.md`；Roo Code 检查 `<repo>/.roo/skills/codex-noise-filter/SKILL.md` 和必要的 `.roo/skills-{mode}/codex-noise-filter/SKILL.md`；OpenCode/MiMo Code 检查宿主文档确认的 `.opencode/skills/`、`.mimocode/skills/` 或等价配置目录。
+- 用户级 Agent Skills 路径：macOS/Linux 检查 `$HOME/.agents/skills/codex-noise-filter/SKILL.md`、`$HOME/.claude/skills/codex-noise-filter/SKILL.md`、`$HOME/.gemini/skills/codex-noise-filter/SKILL.md`、`$HOME/.roo/skills/codex-noise-filter/SKILL.md`；Windows 检查 `%USERPROFILE%\.agents\skills\codex-noise-filter\SKILL.md` 以及对应宿主用户目录。
 - Codex 兼容路径只作为补充：`CODEX_HOME` 已设置时检查 `$CODEX_HOME/skills/codex-noise-filter/SKILL.md` 或 `%CODEX_HOME%\skills\codex-noise-filter\SKILL.md`；未设置时检查 `$HOME/.codex/skills/codex-noise-filter/SKILL.md` 或 `%USERPROFILE%\.codex\skills\codex-noise-filter\SKILL.md`。
 - 若第三方完全不支持文件读取，也没有内置 skill discovery，才能进入 `fallbackOnly`；不能因为没有 `.codex` 就直接兜底。
 
@@ -128,7 +129,7 @@ AGENTS 与 skill 路径必须按当前宿主、当前用户和平台解析，不
 
 接入修复优先级：
 
-1. 对支持 Codex/Agent Skills 的第三方宿主，把本 skill 安装、复制或软链到宿主可扫描目录，优先 `<repo>/.agents/skills/codex-noise-filter/`、`$HOME/.agents/skills/codex-noise-filter/` 或 Windows 的 `%USERPROFILE%\.agents\skills\codex-noise-filter\`；若宿主有自定义 skill 路径配置，显式配置到 `SKILL.md`。
+1. 对支持 Codex/Agent Skills 的第三方宿主，把本 skill 安装、复制或软链到宿主可扫描目录，优先跨宿主共享的 `<repo>/.agents/skills/codex-noise-filter/`、`$HOME/.agents/skills/codex-noise-filter/` 或 Windows 的 `%USERPROFILE%\.agents\skills\codex-noise-filter\`；若宿主官方要求使用 `.claude/skills`、`.gemini/skills`、`.roo/skills`、`.opencode/skills`、`.mimocode/skills` 或其他原生目录，也可同步放置，但必须以当前宿主实际扫描结果为准。若宿主有自定义 skill 路径配置，显式配置到 `SKILL.md`。
 2. 对没有 Codex 但能导入 AGENTS、也能读取文件的宿主，按宿主配置方式分发 `codex-noise-filter/`：优先在第三方配置文件所在目录新建 `skills/codex-noise-filter/`，放入完整 `SKILL.md`、`references/`、`templates/`；如果 AGENTS 是单独导入文件，则放在 `AGENTS_DIR/skills/codex-noise-filter/` 或 `AGENTS_DIR/codex-noise-filter/`，让 Skill Bootstrap 用相对路径手动读取 `SKILL.md` 和 `references/00-index.md`。
 3. 对完全不能读文件的宿主，只能 `fallbackOnly`，但仍必须执行第三方兜底闭环、状态机自检、任务胶囊和验证策略。
 

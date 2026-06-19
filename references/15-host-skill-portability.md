@@ -11,23 +11,40 @@
 - OpenAI Codex Agent Skills：`https://developers.openai.com/codex/skills`
 - Claude Code Skills：`https://code.claude.com/docs/en/skills`
 - OpenCode Skills：`https://opencode.ai/docs/skills/`
+- Roo Code Skills / Custom Instructions：`https://docs.roocode.com/features/skills`、`https://docs.roocode.com/features/custom-instructions`
 - MiMo Code Skills / Rules：`https://mimo.xiaomi.com/mimocode/skills`、`https://mimo.xiaomi.com/mimocode/rules`
 - Gemini CLI Agent Skills / Commands：`https://geminicli.com/docs/cli/skills/`、`https://geminicli.com/docs/reference/commands/`
 - VS Code Agent Skills：`https://code.visualstudio.com/docs/agent-customization/agent-skills`
+- Cursor Rules：`https://cursor.com/docs/rules`
 - Cline Rules：`https://docs.cline.bot/customization/cline-rules`
+- Continue Rules / MCP：`https://docs.continue.dev/customize/deep-dives/rules`、`https://docs.continue.dev/customize/deep-dives/mcp`
 - GitHub Copilot custom instructions：`https://docs.github.com/copilot/how-tos/configure-custom-instructions/add-repository-instructions`
-- Windsurf/Cascade Workflows：`https://docs.devin.ai/workflows`
+- Windsurf/Cascade Rules / MCP / Workflows：`https://docs.windsurf.com/llms-full.txt`
+- aider repo map / read-only context：`https://aider.chat/docs/repomap.html`、`https://aider.chat/docs/faq.html`
 - AGENTS.md spec：`https://agents.md/`
 
 | 能力类型 | 代表宿主或机制 | 当前可确认行为 | 本 skill 的处理方式 |
 | --- | --- | --- | --- |
-| 原生 Agent Skills | Codex、Claude Code、Gemini CLI、OpenCode、MiMo Code、VS Code/GitHub Copilot Agent Skills | 通过 `SKILL.md`、`name`、`description`、可用 skill 列表、`skill` tool 或 `activate_skill` 按需加载完整内容 | 标记 `nativeSkill`，先加载 `SKILL.md`，再读 `references/00-index.md` |
-| Slash command / workflow | Claude Code `/skill-name`、Gemini CLI custom commands、Windsurf/Cascade Workflows、MiMo Code commands | 命令或 workflow 是显式调用入口，可能不等同于完整 Agent Skills discovery | 标记 `nativeCommand`；若可读文件，继续执行 Skill Bootstrap；不可读时转 `fallbackOnly` |
-| 持久规则 / instruction 文件 | `AGENTS.md`、`CLAUDE.md`、`GEMINI.md`、Cline Rules、Cursor Rules、Windsurf Rules、Copilot custom instructions | 多数是持续注入或按路径匹配的提示规则，不代表完整 skill 已加载 | 标记 `rulesOnly`；只作为触发与 bootstrap 指令，不能声称已加载 skill |
+| 原生 Agent Skills | Codex、Claude Code、Gemini CLI、OpenCode、MiMo Code、Roo Code、VS Code/GitHub Copilot Agent Skills | 通过 `SKILL.md`、`name`、`description`、可用 skill 列表、`skill` tool、`activate_skill`、自动目录扫描或等价机制按需加载完整内容 | 标记 `nativeSkill`，先加载 `SKILL.md`，再读 `references/00-index.md` |
+| Slash command / workflow | Claude Code `/skill-name`、Gemini CLI custom commands、Roo Code slash commands、Windsurf/Cascade Workflows、MiMo Code commands | 命令或 workflow 是显式调用入口，可能不等同于完整 Agent Skills discovery | 标记 `nativeCommand`；若可读文件，继续执行 Skill Bootstrap；不可读时转 `fallbackOnly` |
+| 持久规则 / instruction 文件 | `AGENTS.md`、`CLAUDE.md`、`GEMINI.md`、Cline Rules、Cursor Rules、Windsurf Rules、Roo Code custom instructions、Continue Rules、Copilot custom instructions、aider `/read` 或 `.aider.conf.yml` 读取的规则文件 | 多数是持续注入或按路径匹配的提示规则，不代表完整 skill 已加载 | 标记 `rulesOnly`；只作为触发与 bootstrap 指令，不能声称已加载 skill |
 | Agent / subagent / hook / MCP / ACP | 子代理、hook、MCP tool、IDE 工具、CI/chatops、模型路由、provider switch | 常用于工具执行、隔离上下文或生命周期注入，输出可能是摘要或工具结果 | 标记 `delegatedTool`；只把输出当证据，必须回到当前文件、diff、环境和验证 |
 | 无 discovery 且不可读文件 | 受限第三方、只传入一段结果或无法访问分发目录的 wrapper | 只能得到 AGENTS 兜底或转发载荷，无法读取完整 skill | 标记 `fallbackOnly`；执行第三方兜底闭环，不伪装成 skill 已加载 |
 
 平台名只用于识别能力类型。若新平台支持 `SKILL.md`、`skills/`、skill tool、slash command、rules、workflow、subagent 或 MCP 中任一机制，按能力类型处理；若资料不足，按当前宿主暴露的文件、命令、工具和载荷证据处理。
+
+## 常见宿主目录提示
+
+这些路径只用于安装建议和手动 bootstrap 的候选，不是触发白名单；宿主官方文档或用户配置给出更具体路径时，以当前宿主事实为准。
+
+| 宿主 | 原生 skill 或规则候选 |
+| --- | --- |
+| Codex | `<repo>/.agents/skills/<name>/SKILL.md`、`$HOME/.agents/skills/<name>/SKILL.md`、`CODEX_HOME` 下的 Codex skill 目录 |
+| Claude Code | `<repo>/.claude/skills/<name>/SKILL.md`、`$HOME/.claude/skills/<name>/SKILL.md`、`.claude/commands/*.md` |
+| Gemini CLI | `<repo>/.agents/skills/<name>/SKILL.md`、`<repo>/.gemini/skills/<name>/SKILL.md`、`$HOME/.agents/skills/<name>/SKILL.md`、`$HOME/.gemini/skills/<name>/SKILL.md`、`GEMINI.md` |
+| OpenCode / MiMo Code | `.agents/skills/<name>/SKILL.md`、宿主自身配置目录下的 `skills/<name>/SKILL.md`、`AGENTS.md` 或宿主 rules |
+| Roo Code | `<repo>/.roo/skills/<name>/SKILL.md`、`<repo>/.agents/skills/<name>/SKILL.md`、`$HOME/.roo/skills/<name>/SKILL.md`、`$HOME/.agents/skills/<name>/SKILL.md`，以及 `.roo/skills-{mode}/` / `.agents/skills-{mode}/` |
+| Cline / Cursor / Windsurf / Continue / Copilot / aider | 多数先作为 `rulesOnly` 或 `delegatedTool` 处理；若宿主另行支持 Agent Skills 或可读分发目录，再转 `manualFileBootstrap` 或 `nativeSkill` |
 
 ## 跨宿主执行顺序
 
@@ -45,7 +62,7 @@
 5. **最小加载**：
    - `nativeSkill`：读取 `SKILL.md` -> `references/00-index.md` -> 仅打开命中的 reference。
    - `nativeCommand`：先读取命令/workflow 当前内容；若可读文件，再按 Skill Bootstrap 读取 `SKILL.md` 和 `00-index.md`。
-   - `manualFileBootstrap` / `rulesOnly`：按宿主配置目录、AGENTS 目录、项目级 `.agents/skills`、兼容 `.claude/.codex/.opencode/.mimocode`、用户级 `.agents`、`CODEX_HOME` 的顺序查找首个存在的 `SKILL.md`，读取成功后立即停止查找。
+   - `manualFileBootstrap` / `rulesOnly`：按宿主配置目录、AGENTS 目录、项目级 `.agents/skills`、宿主原生目录、用户级 `.agents`、`CODEX_HOME` 和兼容 `.codex` 的顺序查找首个存在的 `SKILL.md`，读取成功后立即停止查找。
    - `fallbackOnly`：不再查找平台清单，直接执行第三方兜底闭环。
 6. **内部状态机**：建立 `activated/loadState/hostCapability/references/dynamicScope/capsule/scope/callChain/localAlignment/environment/validation`，后续工具调用、写入、验证和最终回复前都自检。
 7. **动态追加范围**：根据触碰文件、最近配置、命令、错误、diff、active cache path 和本机环境追加 `01`、`02`、`06`、`14` 和命中的技术栈 reference。

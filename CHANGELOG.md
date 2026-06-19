@@ -4,6 +4,8 @@
 
 ## Unreleased
 
+- 按官方/第三方资料刷新跨宿主接入矩阵：补充 Roo Code 原生 Agent Skills、Gemini CLI `.gemini/skills`、OpenCode/MiMo Code skills、VS Code/GitHub Copilot Agent Skills、Continue rules/MCP、aider repo map/read-only context 和 Windsurf MCP/Rules 资料；同步 `SKILL.md`、`00`、`02`、`15`、README 与模板的 bootstrap 路径说明，避免把 rules/custom instructions 误判为 skill 已加载。
+- 全文核验 15 个 reference：补齐 Python `StrEnum` 的 3.11+ 边界，去掉环境缓存示例中的个人机器名，并把小程序 npm 包参考链接替换为可自动校验的 npm registry API。
 - 增加跨宿主 Skill 兼容矩阵：新增 `references/15-host-skill-portability.md`，按 `nativeSkill`、`nativeCommand`、`rulesOnly`、`delegatedTool`、`manualFileBootstrap`、`fallbackOnly` 统一第三方平台执行顺序、触发条件和性能预算，避免继续把平台名写成白名单。
 - 强化 Codex 上下文窗口与自动 compact 处理：结合官方 thread/context window、automatic compaction、subagent 噪音隔离、`PreCompact`/`PostCompact`/`SessionStart compact` 事件和 memory 边界，补充上下文预算、压缩前后恢复协议、Context Capsule 字段和团队接入模板，避免大日志、重复搜索和旧假设污染主上下文。
 - 增加第三方中转动态追加范围：平台名、agent 名、CLI/IDE/MCP/ACP 名称和技术栈名不再作为封闭白名单；从当前宿主、工具动作、cwd/workspace、文件扩展名、配置文件、命令、日志、diff、补丁、active cache path 和本机环境证据动态追加 reference、环境缓存和最小验证范围。

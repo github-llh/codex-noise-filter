@@ -43,14 +43,14 @@
 - 若第三方要求在自己的配置目录下放扩展能力，最高优先级是在该配置目录中新建 `skills/codex-noise-filter/` 并放入完整 skill：`$HOST_CONFIG_DIR/skills/codex-noise-filter/SKILL.md`、`$HOST_CONFIG_DIR/skills/codex-noise-filter/references/00-index.md`；也兼容 `$HOST_CONFIG_DIR/codex-noise-filter/SKILL.md`。Windows 使用同等反斜杠路径。
 - 若随 AGENTS 一起分发 skill，继续检查相对路径：`$AGENTS_DIR/skills/codex-noise-filter/SKILL.md`、`$AGENTS_DIR/codex-noise-filter/SKILL.md`、`$AGENTS_DIR/.agents/skills/codex-noise-filter/SKILL.md`。
 - 若设置了 `CODEX_HOME`，兼容检查 `$CODEX_HOME/AGENTS.override.md`、`$CODEX_HOME/AGENTS.md` 和 `$CODEX_HOME/skills/codex-noise-filter/SKILL.md`；Windows 对应 `%CODEX_HOME%\AGENTS.override.md`、`%CODEX_HOME%\AGENTS.md` 和 `%CODEX_HOME%\skills\codex-noise-filter\SKILL.md`。
-- macOS/Linux 用户级兼容路径包括 `$HOME/.agents/skills/codex-noise-filter/SKILL.md` 和 `$HOME/.codex/skills/codex-noise-filter/SKILL.md`；Windows 包括 `%USERPROFILE%\.agents\skills\codex-noise-filter\SKILL.md` 和 `%USERPROFILE%\.codex\skills\codex-noise-filter\SKILL.md`。
+- macOS/Linux 用户级兼容路径包括 `$HOME/.agents/skills/codex-noise-filter/SKILL.md`、宿主原生用户 skill 目录（例如 `.claude/skills`、`.gemini/skills`、`.roo/skills`）和 `$HOME/.codex/skills/codex-noise-filter/SKILL.md`；Windows 包括 `%USERPROFILE%\.agents\skills\codex-noise-filter\SKILL.md`、对应宿主用户目录和 `%USERPROFILE%\.codex\skills\codex-noise-filter\SKILL.md`。
 - 不能把某台机器的绝对路径写死给其他用户；每次在第三方 agent/CLI 中导入 AGENTS 后，先按当前系统、当前用户和环境变量解析真实路径，再判断是否能加载 skill。
 
 执行入口：
 
 1. 先执行 Skill Bootstrap：AGENTS 只是指令文件，不等同于 skill 自动加载器；若当前宿主支持 Codex/Agent Skills，先确认可用 skill 列表中存在 `codex-noise-filter`，不存在时不要声称已加载 skill。
-2. 先按宿主能力分层记录 `hostCapability`：原生 Agent Skills 为 `nativeSkill`，slash command/workflow 为 `nativeCommand`，AGENTS/CLAUDE/GEMINI/Cline/Cursor/Windsurf/Copilot rules 为 `rulesOnly`，subagent/hook/MCP/ACP/CI/model router 为 `delegatedTool`；不要只记录平台名。
-3. 若宿主未自动暴露该 skill，但允许读取文件，按顺序查找并读取首个存在的 `SKILL.md`：第三方配置目录 `skills/codex-noise-filter/`、随 AGENTS 分发的相对路径、`<repo>/.agents/skills/codex-noise-filter/SKILL.md`、用户级 `.agents` 路径、`CODEX_HOME` 路径、兼容 `.codex` 路径；读取成功后把状态记为 `manualFileBootstrap`，继续读取同目录 `references/00-index.md`。
+2. 先按宿主能力分层记录 `hostCapability`：原生 Agent Skills 为 `nativeSkill`，slash command/workflow 为 `nativeCommand`，AGENTS/CLAUDE/GEMINI/Cline/Cursor/Windsurf/Roo/Continue/Copilot/aider rules 或 custom instructions 为 `rulesOnly`，subagent/hook/MCP/ACP/CI/model router 为 `delegatedTool`；不要只记录平台名。
+3. 若宿主未自动暴露该 skill，但允许读取文件，按顺序查找并读取首个存在的 `SKILL.md`：第三方配置目录 `skills/codex-noise-filter/`、随 AGENTS 分发的相对路径、`<repo>/.agents/skills/codex-noise-filter/SKILL.md`、宿主原生 skill 目录、用户级 `.agents` 路径、`CODEX_HOME` 路径、兼容 `.codex` 路径；读取成功后把状态记为 `manualFileBootstrap`，继续读取同目录 `references/00-index.md`。
 4. 只有在宿主既不支持 skill 发现、也不能读取上述文件时，才把状态记为 `fallbackOnly`，执行下方“第三方兜底闭环”；兜底不是自动加载成功。
 5. 再按 `references/00-index.md` 渐进读取对应规则文件；第三方宿主执行顺序、触发条件和性能预算先按 `references/15-host-skill-portability.md` 归类。
 6. 第三方调用、模型切换、CLI/App/插件/路由器变化不能降低内部触发级别；仍执行任务胶囊/快照、调用链、局部对齐、抽象抽离、编码/中文乱码检查、环境缓存和验证策略。
