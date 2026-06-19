@@ -123,6 +123,7 @@
 - 判空与函数式风格：`08-java-style-patterns.md#判空与函数式风格`
 - Lombok 使用标准：`08-java-style-patterns.md#lombok-使用标准`
 - token 预算与读取窗口：`02-noise-filter-workflow.md#上下文预算`
+- 上下文污染与噪音治理：`02-noise-filter-workflow.md#上下文预算`
 - 调用链闭环：`02-noise-filter-workflow.md#调用链确认`
 - 补丁写入策略预判：`02-noise-filter-workflow.md#补丁写入策略预判`
 - Codex worktree 与项目分支门禁：`02-noise-filter-workflow.md#codex-worktree-与项目分支门禁`
@@ -149,6 +150,8 @@
 - 交付格式：`05-delivery-templates.md#最终回复结构`
 - Context Capsule：`05-delivery-templates.md#上下文胶囊`
 - Codex 会话上下文管理：`05-delivery-templates.md#codex-上下文管理`
+- Codex 上下文窗口与自动 compact：`05-delivery-templates.md#codex-上下文管理`
+- 压缩前后恢复协议：`05-delivery-templates.md#压缩前后协议`
 - 上下文权威与恢复门禁：`05-delivery-templates.md#上下文权威与恢复门禁`
 - 上下文压缩恢复与自动胶囊：`05-delivery-templates.md#codex-上下文管理`
 - Codex 记忆管理：`05-delivery-templates.md#codex-记忆管理`
@@ -239,4 +242,4 @@
 - `mvn`、`pom.xml`、`.mvn/maven.config`、`.mvn/jvm.config`、`maven-wrapper.properties`、`JAVA_HOME`、`maven.compiler.release`、`java.version`、`-pl`、`-am`、`多模块构建`、`测试命令`：先读 `14-environment-cache-by-stack.md#mavenjava-环境缓存`，再读 `03-maven-backend-build.md`。
 - `MAVEN_HOME`、`JAVA_HOME`、`Node`、`pnpm`、`IDE 配置路径`、`.codex/local-environment.json`、`local-environment.json`、`local-environment.<profile>.json`、`.codex/`、`.gitignore`、`check-ignore`、`环境缓存`、`缓存失效`、`验证路径`、`本机候选路径`、`项目配置变化`、`工具版本不匹配`、`ESLint 配置变化`、`Prettier 配置变化`、`.editorconfig 变化`：读 `06-environment-discovery.md#自动环境缓存维护`，涉及文件名或多人多机器隔离时追加 `06-environment-discovery.md#跨系统缓存文件命名`。
 - `flex`、`grid`、`组件`、`页面`、`路由守卫`、`加载/空状态`：读 `04-frontend-rules.md`。
-- `Context Capsule`、`最终回复`、`记忆管理`、`会话切换`、`归档会话`、`当前会话`、`上下文压缩`、`压缩窗口`、`自动压缩`、`上下文丢失`、`不丢失重要信息`、`自动胶囊`、`恢复边界`、`证据锚点`、`回滚点丢失`、`模型切换`、`切换模型`、`新建窗口`、`切换窗口`、`切换模式`、`插件`、`技能`、`网络错误`、`自动继续`：读 `05-delivery-templates.md#上下文权威与恢复门禁`；如果恢复后继续修改或自动续跑，再追加 `02-noise-filter-workflow.md#skill-规则刷新与会话恢复`。
+- `Context Capsule`、`最终回复`、`记忆管理`、`会话切换`、`归档会话`、`当前会话`、`上下文压缩`、`压缩窗口`、`自动压缩`、`上下文窗口`、`context window`、`remaining context`、`compact`、`PreCompact`、`PostCompact`、`SessionStart compact`、`context rot`、`context pollution`、`上下文污染`、`上下文腐化`、`上下文丢失`、`不丢失重要信息`、`自动胶囊`、`恢复边界`、`证据锚点`、`回滚点丢失`、`模型切换`、`切换模型`、`新建窗口`、`切换窗口`、`切换模式`、`插件`、`技能`、`网络错误`、`自动继续`：读 `05-delivery-templates.md#上下文权威与恢复门禁` 和 `05-delivery-templates.md#压缩前后协议`；如果恢复后继续修改或自动续跑，再追加 `02-noise-filter-workflow.md#skill-规则刷新与会话恢复`；如果问题是输出过长、日志污染或读取预算失控，再追加 `02-noise-filter-workflow.md#上下文预算`。

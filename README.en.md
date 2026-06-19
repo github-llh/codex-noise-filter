@@ -202,7 +202,7 @@ More scenarios are in [`examples/`](examples/). Team rollout templates are in [`
 | Frontend and Mini Programs | Covers general frontend, native JavaScript/TypeScript, Vue 2/3, React, Vite/webpack, native Mini Programs, uni-app, Taro, subpackages, builds, tests, and frontend local alignment. |
 | Environment discovery | For builds, compilation, tests, runs, previews, or pre-release checks, read stack-specific project facts such as `pom.xml`, `pyproject.toml`, `package.json`, and Mini Program config, then validate and reuse `.codex/local-environment.<profile>.json`; legacy `.codex/local-environment.json` is only a one-time migration input and is no longer used as a fallback after migration. If the cache does not satisfy the command or a failure looks environment-related, discover local candidates, update the cache, retry the original command, and protect it with a root `/.codex/` ignore rule. |
 | Dynamic tool/stack scope | Third-party forwarding, unknown wrappers, unlisted platforms, or new stacks are not judged by a fixed list. Add the smallest references, environment cache checks, and validation scope from the current host, tool action, files/configs/commands/logs/diffs, active cache path, and local environment evidence. |
-| Context management | Uses Context Capsules for long tasks so goals, evidence, changes, rollback points, and next steps survive context switches. |
+| Context management | Treats the Codex model context window and automatic compaction as first-class constraints. Long tasks use Context Capsules to preserve goals, evidence, changes, rollback points, window/compaction state, and next steps, while large logs, repeated search output, and stale hypotheses are summarized to reduce context pollution. |
 
 ## Layout
 
@@ -339,7 +339,8 @@ references/
 - When editing existing code, locally align the touched scope. Do not refactor the whole module, but do not apply the rules only to newly added lines.
 - When a code snippet, IDE screenshot, or call-chain read exposes an obvious rule violation, locate the real file and direct call chain first. If impact is shallow, file count is small, and compatibility is clear, write it into the task capsule, apply the matching reference, and fix it instead of only listing a follow-up.
 - In Global/Goal mode, restore the Context Capsule before each round. Goal pursuit must not bypass indexing, call-chain checks, or touched-scope alignment.
-- Before switching windows or compacting context, emit a Context Capsule so goals, evidence, rollback points, and next steps are preserved.
+- Before and after window switches, model switches, context-window pressure, manual/automatic compact, `PreCompact`, `PostCompact`, or `SessionStart compact`, emit or restore a Context Capsule so goals, evidence, rollback points, and next steps are preserved.
+- Large tool logs, repeated search output, stale reasoning, and long third-party wrapper narratives should be summarized into key errors, commands, paths/lines, and conclusions instead of being copied back into the main context.
 - When the user inserts a new goal, treat it as an incremental task first and do not reset confirmed call chains by default.
 - The global `AGENTS.md` no longer needs to carry every detail, but it should remain as a fallback entry point.
 - Long-term memory should only store stable preferences and reusable rules, not machine-private absolute paths, temporary logs, one-off failures, or unverified guesses.

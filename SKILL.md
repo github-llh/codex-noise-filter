@@ -57,6 +57,7 @@ description: |
 - 读取完整性、智能扩窗和 Git 历史防回归由 `13-read-expansion-and-history.md` 承载；不能用初始读取窗口、局部 diff 或旧记忆替代必要证据。
 - 当前项目范围、`.codex/local-environment.<profile>.json`、旧版 `.codex/local-environment.json` 强制迁移替换、`.codex/` 忽略规则和工具链缓存由 `06-environment-discovery.md` 与 `14-environment-cache-by-stack.md` 承载；进入构建、测试、运行、lint、typecheck、代码生成等工具链节点前必须自动处理项目根缓存。
 - 当前会话、归档会话、长期 memory、Context Capsule、模型/窗口/模式/插件/技能切换和网络错误后的恢复策略由 `05-delivery-templates.md` 承载；恢复时必须按当前文件证据和最新 skill 规则重新校准，不能让旧记忆冲掉硬约束。
+- 上下文窗口压力、自动 compact、手动 compact、`PreCompact`、`PostCompact`、`SessionStart compact`、模型切换和窗口切换都属于恢复事件；压缩前刷新 Capsule，压缩后先重建当前文件/diff/status/规则状态，再继续读取、写入或验证。
 - Java、Python、Vue/React、小程序、并发/异步/批量等落地细节只在命中代码证据、调用链、项目配置、命令节点或风险信号时按 `07`、`08`、`09`、`10`、`11`、`12` 追加读取，避免外层膨胀。
 - 对 JetBrains 项目，优先使用 JetBrains MCP / IDE 工具读取、定位、修改和诊断；只有明确不可用、超时或错误时才使用 Shell。
 - 不修改无关文件，不随意重构，不新增依赖，不改 API、DTO、数据库字段、权限、路由、配置键和公共契约，除非当前任务目标已明确授权并完成影响评估。

@@ -4,6 +4,7 @@
 
 ## Unreleased
 
+- 强化 Codex 上下文窗口与自动 compact 处理：结合官方 thread/context window、automatic compaction、subagent 噪音隔离、`PreCompact`/`PostCompact`/`SessionStart compact` 事件和 memory 边界，补充上下文预算、压缩前后恢复协议、Context Capsule 字段和团队接入模板，避免大日志、重复搜索和旧假设污染主上下文。
 - 增加第三方中转动态追加范围：平台名、agent 名、CLI/IDE/MCP/ACP 名称和技术栈名不再作为封闭白名单；从当前宿主、工具动作、cwd/workspace、文件扩展名、配置文件、命令、日志、diff、补丁、active cache path 和本机环境证据动态追加 reference、环境缓存和最小验证范围。
 - 强化 Skill Bootstrap 三态验证：`nativeSkill`、`manualFileBootstrap`、`fallbackOnly` 必须和当前宿主真实 discovery/file-read 能力对应，AGENTS 导入本身不再被视为 skill 已加载；第三方只导入 AGENTS 时必须优先在 `HOST_CONFIG_DIR/skills/codex-noise-filter/` 或 AGENTS 相对目录分发完整 skill。
 - 增加第三方全流程执行矩阵：任意第三方调用、模型路由、IDE/MCP、CLI wrapper、hook/subagent、CI/chatops、未知转发层进入本 skill 后，必须串联入口恢复、任务胶囊/快照、读取、调用链、局部对齐、抽象抽离、编码/中文乱码、环境缓存、验证、恢复与交付，不能只执行搜索、写入或验证其中一部分。
