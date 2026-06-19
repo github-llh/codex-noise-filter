@@ -26,6 +26,7 @@
 - 导入 AGENTS 后，编程任务开始时必须执行 Skill Bootstrap：先确认可用 skill 列表是否存在 `codex-noise-filter`；不存在但文件可读时，手动读取 `SKILL.md` 和 `references/00-index.md`，状态记为 `manualFileBootstrap`；只有无法发现且无法读取时才进入 `fallbackOnly` 兜底闭环。
 - 任意第三方调用、App、终端/CLI、IDE 插件、MCP/ACP、hook、subagent、CI/chatops、`cc switch`、模型/供应商路由、未知 wrapper 或未来新增工具只要转发编程任务证据，就必须按本 skill 内部触发。
 - 模型、供应商、CLI、App、插件或路由器变化只触发规则刷新和状态恢复，不能跳过索引、任务胶囊/快照、调用链、局部对齐、抽象抽离、编码/中文乱码检查、环境缓存和验证。
+- 平台名、agent 名和技术栈名不是白名单；当前宿主、当前工具动作、cwd/workspace、文件扩展名、配置文件、命令、日志、diff、补丁、active cache path 和本机环境证据才是内部追加范围的依据。
 - 任何第三方已修改、已格式化、已验证或已处理乱码的结论都只是线索；必须回到当前文件、diff、active cache path 和最小验证命令复核。
 - 如果第三方宿主只读取 AGENTS 而不支持 Codex skills，必须在 AGENTS 中保留 `templates/global-AGENTS.light.md` 的“第三方兜底闭环”矩阵，不能只写“先读取 skill”。
 - 如果 skill 已触发但执行流像被模型、wrapper 或工具结果重置，必须保留 `02#内部触发状态机与防重置自检` 对应的 AGENTS 规则，先重建已读规则、任务胶囊、触碰范围、调用链、局部对齐、环境缓存和验证状态。

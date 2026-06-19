@@ -9,7 +9,7 @@ Reduce context noise · enforce call-chain checks · load rules progressively ·
 ![Skill](https://img.shields.io/badge/Codex%20Skill-codex--noise--filter-2563eb)
 ![Routing](https://img.shields.io/badge/Routing-indexed%20references-16a34a)
 ![Mode](https://img.shields.io/badge/Mode-non--bypassable-f97316)
-![Stacks](https://img.shields.io/badge/Stacks-Java%20%7C%20Python%20%7C%20Vue%2FReact%20%7C%20MiniProgram-7c3aed)
+![Routing](https://img.shields.io/badge/Scope-dynamic%20tool%20%2B%20stack%20evidence-7c3aed)
 [![License](https://img.shields.io/badge/License-Apache--2.0-blue)](LICENSE)
 
 [Quick Start](#quick-start) · [Why Use It](#why-use-it) · [Usage](#usage) · [Activation Examples](#activation-examples) · [Capabilities](#capabilities) · [Layout](#layout) · [Community Health](#community-health) · [License](#license) · [简体中文](README.md)
@@ -18,7 +18,7 @@ Reduce context noise · enforce call-chain checks · load rules progressively ·
 
 ## Quick Start
 
-`codex-noise-filter` is a coding-focused Codex skill. It makes "read rules first, narrow context first, confirm call chains before editing" the default workflow, and uses `references/00-index.md` to progressively load rules for Java backend, Maven, frontend, Python, Mini Programs, concurrency/transactions, and delivery templates.
+`codex-noise-filter` is a coding-focused Codex skill. It makes "read rules first, narrow context first, confirm call chains before editing" the default workflow, and uses `references/00-index.md` to progressively load rules for Java backend, Maven, frontend, Python, Mini Programs, concurrency/transactions, and delivery templates. Product, agent, CLI, IDE, MCP/ACP, and stack names in these docs are common examples, not closed lists; the real trigger and added scope come from the current host, current tool action, cwd, files, configs, commands, logs, diffs, active cache path, and local environment evidence.
 
 Use it for:
 
@@ -26,6 +26,7 @@ Use it for:
 - Pasted error logs, stack traces, build/test failures, IDE screenshots, code snippets, or diffs where Codex should infer whether to debug, fix, or validate.
 - Multi-file investigation, cross-module backend analysis, Maven builds, frontend fixes, Mini Program native/uni-app/Taro work, and Python script/service/package/test work.
 - Requests forwarded through any third-party invocation, Claude Code, Gemini CLI, Cline, Roo Code, aider, OpenCode, Continue, Cursor/Windsurf, ACP/MCP, hooks, subagents, CI/chatops, `cc switch`, model/provider routers, gateways, proxies, custom wrappers, unknown forwarding layers, or future tools when the payload still involves code reads, edits, builds, tests, lint, format, typecheck, debugging, or refactoring.
+- Current tools or stacks not listed in this README when the payload still includes cwd, file extensions, config files, commands, logs, diffs, patches, encoding/mojibake signals, or toolchain actions. Treat those as unknown third-party forwarding and dynamically add the closest references, environment cache checks, and validation scope.
 - Signals that the task needs lower token usage, concise evidence, reproducible reasoning, narrower file reads, or preserved evidence chains.
 
 ## Why Use It
@@ -43,12 +44,13 @@ Many coding-task failures are not caused by missing coding ability. They come fr
 | Build commands may be guessed from habit, such as `npm run build`, system `python`, or the current shell's `mvn`, then require manual environment hints after failure. | Match toolchains, commands, and cache entries from Java/Maven, Python, Node/frontend, and Mini Program project configuration; if a failure looks environment-related, recompute the cache and retry once. |
 | Plan/Goal, resume, or cross-window work can forget constraints. | Plan/Goal/context restoration must still use indexed rules and Context Capsules. |
 | A task forwarded by any third-party invocation, agent, app, CLI, hook, MCP/ACP, subagent, CI bot, unknown wrapper, or `cc switch`/router may be treated as plain tool execution. | Treat the entrypoint and router as evidence only; recover the original task from cwd, files, commands, logs, diffs, and tool actions, then trigger indexing, local alignment, and validation internally. |
+| Unlisted platforms, agents, or new stacks may be misread as "outside the rules". | Names are only routing hints. Scope is added dynamically from tools, files, configs, commands, cache, and local environment evidence; unknown stacks still use cross-stack gates and the lightest validation. |
 
 ## Usage
 
 Codex skills can be used from the Codex App, CLI, IDE extension, and as the internal rule entrypoint after any third-party invocation, wrapper, router, or model switch. Day-to-day activation should not depend on mentioning `$codex-noise-filter`; code, logs, stack traces, command output, screenshots with errors, paths, project structure, resume state, or rule-failure signals should be enough for the skill to treat the request as a coding task.
 
-If a request arrives through any third-party invocation, third-party agent, desktop/web app, terminal/TUI/CLI, IDE plugin, MCP/ACP, hook, subagent, CI/chatops/webhook, `cc switch`, model/provider router, gateway/proxy/adapter, custom wrapper, unknown forwarding layer, or model router, it follows the same rule: recover the original task, cwd, files, commands, logs, diffs, and tool actions first, then route through `references/00-index.md`. A third-party tool's "changed", "validated", or "no skill needed" conclusion, model switch, or provider choice is only a clue; it cannot replace checks against the current worktree files, diff, environment cache, and validation commands.
+If a request arrives through any third-party invocation, third-party agent, desktop/web app, terminal/TUI/CLI, IDE plugin, MCP/ACP, hook, subagent, CI/chatops/webhook, `cc switch`, model/provider router, gateway/proxy/adapter, custom wrapper, unknown forwarding layer, or model router, it follows the same rule: recover the original task, cwd, files, commands, logs, diffs, and tool actions first, then route through `references/00-index.md`. A third-party tool's "changed", "validated", or "no skill needed" conclusion, model switch, or provider choice is only a clue; it cannot replace checks against the current worktree files, diff, environment cache, and validation commands. If the platform or stack is not listed, use `02#第三方中转动态追加范围` to add scope from the current evidence; unknown stacks still run `01` cross-stack gates, `06` current-project/environment-cache gates, and the lightest non-interactive validation that covers the touched scope.
 
 Importing only `templates/global-AGENTS.light.md` does not make a third-party agent or CLI discover this skill automatically. AGENTS is an instruction chain, not a skill registry. The third-party machine may not have Codex installed and may not have a `.codex` directory. Hosts that support Agent Skills must install this directory in a scanned location or explicitly expose the `SKILL.md` path in host configuration. If the host only imports AGENTS but can read files, first get the real third-party configuration file path, treat its parent directory as `HOST_CONFIG_DIR`, then create `$HOST_CONFIG_DIR/skills/codex-noise-filter/` and copy the full skill directory there, including at least `SKILL.md`, `references/00-index.md`, and the matched references. If AGENTS is imported as a standalone file, the skill may also live next to AGENTS as `skills/codex-noise-filter/` or `codex-noise-filter/`. Enter `fallbackOnly` only when the host cannot discover the skill and cannot read the distributed files.
 
@@ -199,6 +201,7 @@ More scenarios are in [`examples/`](examples/). Team rollout templates are in [`
 | Default validation across stacks | Java, Python, frontend, Mini Programs, and other stacks default to non-interactive syntax, compile, type-check, or build validation, without browser clicking, desktop operations, simulators, real devices, or external-system integration. |
 | Frontend and Mini Programs | Covers general frontend, native JavaScript/TypeScript, Vue 2/3, React, Vite/webpack, native Mini Programs, uni-app, Taro, subpackages, builds, tests, and frontend local alignment. |
 | Environment discovery | For builds, compilation, tests, runs, previews, or pre-release checks, read stack-specific project facts such as `pom.xml`, `pyproject.toml`, `package.json`, and Mini Program config, then validate and reuse `.codex/local-environment.<profile>.json`; legacy `.codex/local-environment.json` is only a one-time migration input and is no longer used as a fallback after migration. If the cache does not satisfy the command or a failure looks environment-related, discover local candidates, update the cache, retry the original command, and protect it with a root `/.codex/` ignore rule. |
+| Dynamic tool/stack scope | Third-party forwarding, unknown wrappers, unlisted platforms, or new stacks are not judged by a fixed list. Add the smallest references, environment cache checks, and validation scope from the current host, tool action, files/configs/commands/logs/diffs, active cache path, and local environment evidence. |
 | Context management | Uses Context Capsules for long tasks so goals, evidence, changes, rollback points, and next steps survive context switches. |
 
 ## Layout

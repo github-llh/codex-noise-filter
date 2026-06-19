@@ -12,6 +12,7 @@
 ## 目录
 
 - [当前项目范围门禁](#当前项目范围门禁)
+- [当前工具与技术栈动态追加门禁](#当前工具与技术栈动态追加门禁)
 - [跨系统缓存文件命名](#跨系统缓存文件命名)
 - [构建测试前环境缓存门禁](#构建测试前环境缓存门禁)
 - [发现顺序](#发现顺序)
@@ -45,6 +46,39 @@
 - 不能把全局 `~/.codex/skills/...` 的缓存或路径当成当前项目范围证据。
 - 不能为了补齐缓存 schema 查找无关技术栈或写入未验证路径。
 - 不能在用户已限定当前项目时，只用当前 cwd 口头说明范围而不核对本项目 active cache path 和忽略规则。
+
+## 当前工具与技术栈动态追加门禁
+
+本节用于第三方工具、中转层、模型路由、IDE/MCP、CLI wrapper、hook/subagent、CI/chatops 或未知宿主把编程任务转入当前上下文时的环境判断。环境缓存不能被限定为某个固定平台、固定技术栈或某台机器路径；必须由当前使用的工具、当前命令和当前触碰文件动态决定。
+
+触发信号：
+
+- 当前任务准备执行或复核构建、编译、测试、lint、format、typecheck、运行、预览、打包、发布前校验或代码生成。
+- 第三方输出里出现命令、工具名、工作目录、模块路径、版本、环境变量、lockfile、虚拟环境、开发者工具、IDE 运行配置或 CI job。
+- 任务来自未知宿主或中转层，但载荷包含文件扩展名、配置文件、错误日志、diff、补丁或工具动作。
+- 现有缓存、命令输出或页面/日志出现中文乱码、`encoding`、`charset`、locale、跨平台文件名或终端输出异常。
+
+处理顺序：
+
+1. 先确定当前任务的项目根和触碰范围，不能把全局 skill 目录、用户级 `.codex` 或第三方配置目录当成业务项目根。
+2. 从当前证据识别实际工具链：命令名、脚本名、文件扩展名、最近配置文件、lockfile、错误类型、IDE 配置和 active cache path。产品名或 agent 名只作为线索，不参与工具链优先级。
+3. 只读取命中的技术栈配置：Java/Maven、Node/前端、小程序、Python 或其他最贴近的项目配置。未命中某技术栈时，不为补齐缓存去扫描、验证或写入该技术栈字段。
+4. 若未知技术栈没有专属 reference，仍使用本文件的 active cache path、`.codex/` 忽略规则、locale/encoding 证据和 `01` 的跨技术栈验证策略；命令选择来自项目脚本、README、CI 或第三方载荷，不能凭个人习惯臆造。
+5. 第三方已经执行过命令时，只有能证明 root/workspace、命令、工具版本、active cache path、触碰范围覆盖和当前 diff 匹配，才可作为验证证据；否则补做最轻量非交互验证或说明无法验证。
+
+写入缓存时必须记录当前证据来源：
+
+- `toolContext.host`：当前宿主或中转层；未知时写 `unknownHost`。
+- `toolContext.action`：build/test/lint/typecheck/format/run/codegen 等动作。
+- `toolContext.evidence`：触发本次工具链判断的命令、文件、配置、日志或 diff。
+- `toolContext.references`：本轮实际追加的技术栈 reference；未追加其他技术栈的原因。
+
+禁止行为：
+
+- 不能把当前 shell 可用的 `mvn/node/python` 当作项目工具链事实。
+- 不能把某个第三方 agent 的默认工作目录当作项目根。
+- 不能把未列名工具或未列名技术栈视为“不需要缓存/验证”；至少要完成项目根、命令来源、active cache path 和最轻量验证边界。
+- 不能为了第三方兼容写入个人绝对路径、token、密钥、上传凭证或供应商特有的不可迁移路径。
 
 ## 跨系统缓存文件命名
 
@@ -120,7 +154,7 @@
 ## 发现顺序
 
 1. 读取工作区缓存：先按 [跨系统缓存文件命名](#跨系统缓存文件命名) 解析 active cache path，再读取 profile 文件；旧版 `.codex/local-environment.json` 存在时先强制迁移替换，不作为 fallback。
-2. 读取 IDE/项目配置，按当前项目实际命中的技术栈选择，不一次性读取所有配置：
+2. 读取 IDE/项目配置，按当前项目、当前工具动作和实际命中的技术栈选择，不一次性读取所有配置：
    - IDE：`.idea/misc.xml`、`.idea/workspace.xml`、`.idea/compiler.xml`、`.idea/jarRepositories.xml`。
    - Java/Maven：`.mvn/maven.config`、`.mvn/jvm.config`、`.mvn/wrapper/maven-wrapper.properties`、`pom.xml`。
    - Node/前端：目标 package 的 `package.json`、lockfile、`engines`、`packageManager`、`scripts`、`.nvmrc`、`.node-version`、`.tool-versions`、Volta 配置、`.npmrc`、`.yarnrc.yml`、构建工具配置。

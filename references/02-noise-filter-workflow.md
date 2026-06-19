@@ -141,6 +141,7 @@ AGENTS 与 skill 路径必须按当前宿主、当前用户和平台解析，不
 - `activated`：已按编程任务触发本 skill，来源是用户意图、代码证据、第三方载荷、cwd、文件、命令、日志、diff 或恢复信号。
 - `loadState`：记录 `nativeSkill`、`manualFileBootstrap` 或 `fallbackOnly`；不能把 AGENTS 导入本身记录为 skill 已加载。
 - `references`：已读取 `SKILL.md`、`00-index.md` 和当前任务命中的 reference；若只读到 AGENTS 兜底矩阵，也要记录为 `fallbackOnly`，并尽快补读 skill。
+- `dynamicScope`：已从当前宿主、当前工具调用、cwd/workspace、文件扩展名、配置文件、命令、日志、diff、补丁、active cache path 和本机环境证据推导本轮技术栈、工具链、验证范围和追加 reference；平台名、agent 名和技术栈名只作为提示，不是白名单。
 - `capsule`：已有任务胶囊或 Context Capsule，记录目标、阶段、允许/禁止范围、已读文件、工具计数、已写入/未写入、验证状态和回滚点。
 - `scope`：已确认触碰范围、禁止范围、当前 Git root/worktree、当前文件原文和 diff。
 - `callChain`：已确认直接调用方、被调方、配置入口、影响面和回滚点；未闭环时不得写入。
@@ -159,6 +160,7 @@ AGENTS 与 skill 路径必须按当前宿主、当前用户和平台解析，不
 fail-closed 规则：
 
 - 若 `activated` 为真但缺少 `references`，先补读 `SKILL.md`、`00-index.md` 和命中的 reference；无法补读时按 AGENTS 兜底矩阵执行，并记录风险。
+- 若缺少 `dynamicScope`，先从当前证据重建宿主/工具/技术栈/命令/缓存映射，再追加对应 reference；不能因为当前工具、平台、语言或框架未列名就只执行普通聊天或简化工作流。
 - 若缺少 `capsule`，先输出或刷新任务胶囊；如果宿主不支持中间输出，必须在下一次可输出内容中补发。
 - 若准备写入但缺少 `scope` 或 `callChain`，停止写入，补读当前文件、diff 和直接调用链。
 - 若已写入但缺少 `localAlignment`，先回扫同一语义单元和直接调用链，不直接进入最终回复。
@@ -236,6 +238,43 @@ fail-closed 规则：
 - 因为模型能力、模型名称、供应商、上下文窗口、调用协议、CLI 包装层或第三方工具不认识本 skill，就降低内部触发级别或改走简化工作流。
 - 因为另一个 agent 声称已完成，就不检查当前文件、diff、环境缓存、格式化、lint/typecheck/build/test 或触碰范围强规则。
 - 因为路由层隐藏了产品名，就只按普通聊天处理；只要载荷有代码证据，就按编程任务处理。
+
+## 第三方中转动态追加范围
+
+本节解决第三方工具使用、第三方中转和未知 wrapper 场景下“载荷已进入当前上下文，但外层无法原生触发本 skill”的问题。内部触发范围必须由当前证据动态追加，不由固定平台、固定 agent 名或固定技术栈清单决定。
+
+先恢复入口事实：
+
+1. 当前宿主：Codex App/CLI/IDE、第三方 agent、终端/TUI、IDE 插件、MCP/ACP、hook、subagent、CI/chatops、SDK、webhook、model/provider router、gateway/proxy/adapter、自定义 wrapper 或未知中转层；无法识别名称时记录为 `unknownHost`。
+2. 当前工具动作：搜索、读取、写入、格式化、构建、测试、lint、typecheck、运行、预览、代码生成、git 历史、浏览器/模拟器/外部服务验证、文件上传下载或安全相关动作。
+3. 当前工程证据：cwd/workspace、Git root、文件扩展名、目录名、最近配置文件、lockfile、构建脚本、错误关键行、diff、patch、截图里的路径或日志。
+4. 当前本机证据：active cache path、已有 `.codex/local-environment.<profile>.json`、旧版缓存迁移状态、工具版本、locale/encoding、IDE 配置、环境变量和项目根 `.gitignore`。
+
+再按证据追加本轮范围：
+
+- 命中代码读取、修改、重构、补丁、解释后继续修改：保底追加 `01` + `02`，并按触碰文件选择最贴近的技术栈 reference；未知语言也必须执行文件归属、调用链、注释契约、硬编码、重复逻辑、抽象抽离、安全边界和验证策略。
+- 命中构建、编译、测试、lint、format、typecheck、运行、预览、打包、发布前校验或代码生成：追加 `06` + `14`，从当前项目根解析 active cache path，只读取当前命令所需技术栈配置；不得为了“完整”扫描所有语言。
+- 命中 Java/Maven 证据：`.java`、`pom.xml`、`.mvn/*`、`mvn`、`BUILD FAILURE`、`Failed to execute goal`、JDK/Maven 版本、Spring Controller/Service/DTO/Entity 等，按任务追加 `03`/`07`/`08`/`09`。
+- 命中 Node/前端证据：`package.json`、lockfile、`npm/pnpm/yarn/bun`、`.vue/.jsx/.tsx/.ts/.js`、Vite/webpack/Next/Nuxt、ESLint/Prettier/EditorConfig/Biome/Stylelint/TypeScript 等，追加 `04`/`11`，执行工具链前追加 `06` + `14`。
+- 命中 Python 证据：`.py`、`pyproject.toml`、`requirements*.txt`、`uv.lock`、`poetry.lock`、`.venv`、`pytest`、`Traceback`、`ruff`、`mypy`、`pyright` 等，追加 `10`，执行工具链前追加 `06` + `14`。
+- 命中小程序或跨端证据：`project.config.json`、`app.json`、`pages.json`、`manifest.json`、`app.config.*`、`miniprogram-ci`、`uni-app`、`Taro`、`mp-weixin`、`setData`、`wxml/wxss` 等，追加 `12`；uni-app/Taro 命中 Vue/React 语法时追加 `11`。
+- 命中中文、非 ASCII 文案、乱码、`encoding`、`charset`、`UTF-8`、`GBK`、locale、终端输出或跨平台文件名：追加 `01#跨技术栈编码与中文乱码门禁`；若进入工具链节点，再追加 `06` + `14` 并把编码/locale 证据写入缓存状态。
+
+动态追加必须写入任务胶囊或状态机，最少记录：
+
+- `host/tool`: 当前宿主与工具动作，未知时写 `unknownHost`/`unknownTool`。
+- `evidence`: 用于判断技术栈和验证范围的文件、配置、命令、日志、diff 或缓存路径。
+- `references`: 本轮实际追加的 reference 和不追加其他技术栈的原因。
+- `environment`: 是否需要 active cache path；需要时当前缓存路径、迁移状态和命令覆盖范围。
+- `validation`: 最轻量验证项，以及不做浏览器、模拟器、真机、外部服务或桌面操作验证的边界。
+
+不能接受：
+
+- 用 `Claude Code`、`Gemini CLI`、`Cursor`、`MCP`、`cc switch` 等产品名决定是否触发；产品名只是入口证据。
+- 只因当前项目不是 Java/Python/Vue/React/小程序，就跳过本 skill。未知技术栈也必须走跨技术栈公共门禁和当前工具链验证。
+- 在混合仓库里根据仓库根的单一配置判断全部任务；必须按触碰文件最近配置、当前命令和 active cache path 选择范围。
+- 第三方已执行命令但没有 root、命令、工具版本、active cache path 和触碰范围证据，就把它记作验证通过。
+- 为了支持第三方中转，把某台机器的绝对路径、某个供应商名称或某个技术栈写成唯一入口。
 
 ## Skill 规则刷新与会话恢复
 

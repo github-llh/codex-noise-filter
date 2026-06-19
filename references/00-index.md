@@ -8,6 +8,8 @@
 
 自动触发优先级：凡 `SKILL.md` 或 reference 中写明“自动触发”“内部触发”“必须自动”的规则，都按 skill 执行流程内的高优先级门禁处理。路由关键词只是发现信号，不是触发前提；任务状态、代码证据、触碰范围、调用链、工具链节点、Git/worktree 状态、风险信号或任何第三方调用载荷命中时，必须内部追加对应 reference，外部提醒、显式点名、模型类型、供应商、App、CLI、插件、路由器或转发协议不参与触发级别判断。
 
+动态追加原则：本索引列出的平台、agent、CLI、IDE、MCP/ACP、hook、技术栈和框架名称都是高频示例，不是封闭白名单。若当前宿主、当前使用工具、文件扩展名、配置文件、命令、日志、diff、补丁或环境缓存证据指向未列名平台或未列名技术栈，先按 `02` 的第三方/状态机门禁恢复原始任务，再按 `01` 执行跨技术栈公共治理，按 `06` + `14` 解析本机 active cache path 和当前工具链，最后把最贴近的现有 reference 追加到本轮读取列表；无法映射到 Java/Python/前端/小程序等既有技术栈时，仍必须完成触碰范围、调用链、局部对齐、编码/乱码、环境缓存和最轻量验证。
+
 外层与内部实现分层：
 
 - `SKILL.md` 是轻量外层，只承载触发、索引、总门禁和执行节奏，不复制各 reference 的完整细则。
@@ -18,7 +20,7 @@
 读取顺序按三段执行：
 
 1. 先判定运行门禁和意图证据：涉及读取、修改、构建、测试、重构、报错日志、异常堆栈、构建/测试失败、Plan、Global/Goal、自动续跑、上下文恢复、任意第三方调用、agent/app/CLI/IDE 扩展、MCP/ACP、hook、subagent、CI/chatops/webhook、`cc switch`、router/gateway/proxy/adapter、自定义 wrapper、未知转发层或模型路由时，读 `02-noise-filter-workflow.md` 对应章节；涉及智能扩窗或 Git 历史时读 `13-read-expansion-and-history.md`。
-2. 再判定业务域：Java 后端读 `07`，Java 风格读 `08`，Python 读 `10`，Vue/React 读 `11`，小程序读 `12`，通用前端读 `04`，并发/异步/批量读 `09`，构建读 `03`，统一环境发现读 `06`，栈级环境缓存读 `14`。
+2. 再判定本轮实际技术栈和工具链：优先使用触碰文件、最近配置、命令和错误输出，而不是平台名称。Java 后端读 `07`，Java 风格读 `08`，Python 读 `10`，Vue/React/原生 JS/TS 读 `11`，小程序读 `12`，通用前端读 `04`，并发/异步/批量读 `09`，Maven/构建读 `03`，统一环境发现读 `06`，栈级环境缓存读 `14`。未列名语言或工具先落到 `01` + `02` + `06` 的公共闭环，再选择能覆盖命令和验证的最近 reference。
 3. 最后按需补充：只在需要交付模板、Context Capsule、语言/工具细则、高风险说明时读 `05` 或 `01`。
 
 性能优先级：
@@ -43,6 +45,7 @@
 - 不可绕过执行门禁：`02-noise-filter-workflow.md#不可绕过执行门禁`
 - 第三方 Agent 与路由转发门禁：`02-noise-filter-workflow.md#第三方-agent-与路由转发门禁`
 - 第三方全流程执行矩阵：`02-noise-filter-workflow.md#第三方全流程执行矩阵`
+- 第三方中转动态追加范围：`02-noise-filter-workflow.md#第三方中转动态追加范围`
 - 内部触发状态机与防重置自检：`02-noise-filter-workflow.md#内部触发状态机与防重置自检`
 - AGENTS 导入与 Skill Bootstrap 门禁：`02-noise-filter-workflow.md#agents-导入与-skill-bootstrap-门禁`
 - IDE 集成与长工具调用胶囊门禁：`02-noise-filter-workflow.md#ide-集成与长工具调用胶囊门禁`
@@ -159,7 +162,7 @@
 | 只问规则、解释 skill、优化索引 | `00` + 目标 reference | 需要同步说明时加 README |
 | 报错日志/异常堆栈/构建失败/测试失败/启动失败 | `02` | 按日志识别技术栈：Maven 加 `06` + `03`，Python 加 `06` + `10`，Vue/React/Node 加 `06` + `11`，小程序加 `06` + `12`；触碰代码再加 `01` 和对应业务 reference |
 | Plan/Global/Goal/续跑/上下文恢复 | `02` | 涉及代码层再加对应业务 reference |
-| 任意第三方调用/agent/App/终端/CLI/IDE 扩展/MCP/ACP/hooks/subagent/CI/chatops/路由转发/cc switch/未知 wrapper/模型路由 | `02` | 从转发载荷恢复原始任务、cwd、文件、命令、日志、diff 和工具动作；先执行 `02#AGENTS 导入与 Skill Bootstrap 门禁`，确认 `nativeSkill`/`manualFileBootstrap`/`fallbackOnly`；再执行 `02#第三方全流程执行矩阵` 与 `02#内部触发状态机与防重置自检`，强制串联任务胶囊/快照、读取、调用链、局部对齐、抽象抽离、编码乱码、环境缓存和验证；按技术栈追加 `01`/`03`/`04`/`06`/`10`/`11`/`12`/`14`；涉及中断恢复、长工具调用或阶段胶囊时加 `05` |
+| 任意第三方调用/agent/App/终端/CLI/IDE 扩展/MCP/ACP/hooks/subagent/CI/chatops/路由转发/cc switch/未知 wrapper/模型路由 | `02` | 从转发载荷恢复原始任务、cwd、文件、命令、日志、diff 和工具动作；先执行 `02#AGENTS 导入与 Skill Bootstrap 门禁`，确认 `nativeSkill`/`manualFileBootstrap`/`fallbackOnly`；再执行 `02#第三方全流程执行矩阵`、`02#第三方中转动态追加范围` 与 `02#内部触发状态机与防重置自检`，强制串联任务胶囊/快照、读取、调用链、局部对齐、抽象抽离、编码乱码、环境缓存和验证；根据当前文件、配置、命令、日志、diff 和 active cache path 追加 `01`/`03`/`04`/`06`/`10`/`11`/`12`/`14` 或最贴近的现有 reference，不按固定平台清单裁剪；涉及中断恢复、长工具调用或阶段胶囊时加 `05` |
 | Git 历史/提交记录/回归风险/历史兼容/worktree/分支 | `13` | worktree/分支状态先读 `02`；历史语义按文件类型和风险追加 `13` 与业务 reference；需要同步任务胶囊时加 `02` |
 | Java Controller/Service/Entity/DTO 修改 | `02` + `07` | 枚举/校验/Lombok/Optional/重复逻辑加 `08` |
 | Java 事务/并发/批量/异步 | `02` + `07` + `09` | 需要构建验证时加 `03` |
@@ -201,7 +204,7 @@
 - `Plan`、`计划`、`执行计划`、`分步实现`：先读 `02-noise-filter-workflow.md#plan-阶段门禁`。
 - `Global`、`Goal`、`目标追踪`、`长期推进`、`自动续跑`、`跨轮推进`：先读 `02-noise-filter-workflow.md#globalgoal-模式门禁`。
 - 上下文恢复、自动续跑、跨窗口继续、存在 Context Capsule、引用上一轮结论、当前工作区 skill/reference 有变更，或出现 `上个会话`、`接着问`、`刚更新 skill`、`更新了skill`、`为什么没触发`、`没触发skill`、`不符合skill约束`、`还是没执行`、`为什么没有改` 等恢复/规则失效信号：先读 `02-noise-filter-workflow.md#skill-规则刷新与会话恢复`，再按当前任务证据、触碰范围和技术栈追加对应 reference。
-- `任意第三方调用`、`第三方 agent`、`coding agent`、`AI agent`、`Agent SDK`、`App`、`desktop app`、`web app`、`终端 agent`、`terminal agent`、`TUI`、`CLI wrapper`、`IDE 插件`、`VS Code extension`、`JetBrains plugin`、`Claude Code`、`claude-code`、`Gemini CLI`、`Cline`、`Cursor`、`Windsurf`、`Roo Code`、`aider`、`OpenCode`、`Continue`、`Copilot`、`Antigravity`、`Zed`、`ACP`、`MCP`、`hook`、`pretool`、`posttool`、`subagent`、`orchestrator`、`chatops`、`Slack`、`webhook`、`CI bot`、`cc switch`、`cc-switch`、`ccswitch`、`model router`、`provider switch`、`gateway`、`proxy`、`adapter`、`forwarder`、`relay`、`route`、`switcher`、`unknown wrapper`、`custom wrapper`、`tool wrapper`、`模型路由`、`供应商切换`、`未知转发`：先读 `02-noise-filter-workflow.md#第三方-agent-与路由转发门禁` 和 `02-noise-filter-workflow.md#第三方全流程执行矩阵`；若载荷涉及续跑或规则争议，再读 `02#skill-规则刷新与会话恢复`；若出现代码、文件、命令、日志或 diff，再按技术栈追加对应 reference。
+- `任意第三方调用`、`第三方 agent`、`coding agent`、`AI agent`、`Agent SDK`、`App`、`desktop app`、`web app`、`终端 agent`、`terminal agent`、`TUI`、`CLI wrapper`、`IDE 插件`、`VS Code extension`、`JetBrains plugin`、`Claude Code`、`claude-code`、`Gemini CLI`、`Cline`、`Cursor`、`Windsurf`、`Roo Code`、`aider`、`OpenCode`、`Continue`、`Copilot`、`Antigravity`、`Zed`、`ACP`、`MCP`、`hook`、`pretool`、`posttool`、`subagent`、`orchestrator`、`chatops`、`Slack`、`webhook`、`CI bot`、`cc switch`、`cc-switch`、`ccswitch`、`model router`、`provider switch`、`gateway`、`proxy`、`adapter`、`forwarder`、`relay`、`route`、`switcher`、`unknown wrapper`、`custom wrapper`、`tool wrapper`、`模型路由`、`供应商切换`、`未知转发`：这些名称只作为高频示例；任何未列名宿主或中转层只要载荷涉及代码证据，也先读 `02-noise-filter-workflow.md#第三方-agent-与路由转发门禁`、`02-noise-filter-workflow.md#第三方全流程执行矩阵` 和 `02-noise-filter-workflow.md#第三方中转动态追加范围`；若载荷涉及续跑或规则争议，再读 `02#skill-规则刷新与会话恢复`；若出现代码、文件、命令、日志或 diff，再按当前证据和 active cache path 追加对应 reference。
 - `findUsages`、`find usages`、`searchFiles`、`search files`、`executeCommand`、`execute command`、`Shell 命令`、`批量文件操作`、`耗时工具`、`长工具调用`、`30s`、`30 秒`、`超过 5 个文件`、`工具调用前`、`工具中断`、`IDE 集成中断`、`网络断开`、`重连`、`断点恢复`、`未完成 Capsule`、`阶段胶囊`、`中间 Capsule`、`读取 3 个文件`、`2 个工具调用`、`定位 读取 确认调用链 修改 验证`：先读 `02-noise-filter-workflow.md#ide-集成与长工具调用胶囊门禁` 和 `05-delivery-templates.md#上下文胶囊`；若是恢复后继续修改，再读 `02#skill-规则刷新与会话恢复`。
 - `任务胶囊没执行`、`快照没执行`、`对齐修改没执行`、`抽离没执行`、`编译验证没执行`、`环境变量没执行`、`第三方里没执行`、`好多步骤没有执行`、`workflow 没走完`、`只执行了工具`、`内部触发没接上`、`内部触发断了`、`像被模型重置`、`模型强制重置`、`skill 执行了但没全部触发`、`只会在第三方兜底闭环`、`没有自动加载本skill`、`没有自动加载 skill`、`只导入 AGENTS`、`只导入了 AGENTS`、`AGENTS 不能加载 skill`、`Skill Bootstrap`、`全局 AGENTS`、`用户目录`、`当前用户目录`、`第三方配置文件`、`第三方配置目录`、`HOST_CONFIG_DIR`、`配置文件路径`、`skills 目录`、`macOS`、`Windows`、`USERPROFILE`、`CODEX_HOME`：先读 `02-noise-filter-workflow.md#agents-导入与-skill-bootstrap-门禁`、`02-noise-filter-workflow.md#第三方全流程执行矩阵`、`02-noise-filter-workflow.md#内部触发状态机与防重置自检`、`02-noise-filter-workflow.md#不可绕过执行门禁` 和 `05-delivery-templates.md#上下文权威与恢复门禁`。
 - `新增代码`、`修改已有代码`、`旧代码`、`自动续跑`、`跨窗口`、`不可绕过`、`强制执行`、`不可容忍`、`最小改动冲突`、`为什么没有更改`、`调用链深不深`、`涉及文件没几个`、`调用链相关文件`、`列入计划`、`任务胶囊`、`当前任务清单`、`同步修改`、`同时修改`：先读 `02-noise-filter-workflow.md#不可绕过执行门禁` 和 `02-noise-filter-workflow.md#强规则命中后的自动升级`。

@@ -4,6 +4,8 @@
 
 ## Unreleased
 
+- 增加第三方中转动态追加范围：平台名、agent 名、CLI/IDE/MCP/ACP 名称和技术栈名不再作为封闭白名单；从当前宿主、工具动作、cwd/workspace、文件扩展名、配置文件、命令、日志、diff、补丁、active cache path 和本机环境证据动态追加 reference、环境缓存和最小验证范围。
+- 强化 Skill Bootstrap 三态验证：`nativeSkill`、`manualFileBootstrap`、`fallbackOnly` 必须和当前宿主真实 discovery/file-read 能力对应，AGENTS 导入本身不再被视为 skill 已加载；第三方只导入 AGENTS 时必须优先在 `HOST_CONFIG_DIR/skills/codex-noise-filter/` 或 AGENTS 相对目录分发完整 skill。
 - 增加第三方全流程执行矩阵：任意第三方调用、模型路由、IDE/MCP、CLI wrapper、hook/subagent、CI/chatops、未知转发层进入本 skill 后，必须串联入口恢复、任务胶囊/快照、读取、调用链、局部对齐、抽象抽离、编码/中文乱码、环境缓存、验证、恢复与交付，不能只执行搜索、写入或验证其中一部分。
 - 增加跨技术栈编码与中文乱码门禁：中文字符、非 ASCII 文案、`encoding`/`charset`、UTF-8/GBK、locale、终端输出、页面文案或构建资源异常时，自动确认项目编码依据、active cache path、工具链 locale 和最小验证路径。
 - 强化任意第三方调用与模型路由触发口径：不再依赖列举具体 agent、App、CLI、插件或路由器名称；任意第三方调用、未知 wrapper、未来新增工具、模型/供应商切换只要携带编程任务证据，都必须按本 skill 内部触发，继续执行索引、任务胶囊、调用链、局部对齐、环境缓存和验证策略。
