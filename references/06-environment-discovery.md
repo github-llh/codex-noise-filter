@@ -157,10 +157,10 @@
 2. 读取 IDE/项目配置，按当前项目、当前工具动作和实际命中的技术栈选择，不一次性读取所有配置：
    - IDE：`.idea/misc.xml`、`.idea/workspace.xml`、`.idea/compiler.xml`、`.idea/jarRepositories.xml`。
    - Java/Maven：`.mvn/maven.config`、`.mvn/jvm.config`、`.mvn/wrapper/maven-wrapper.properties`、`pom.xml`。
-   - Node/前端：目标 package 的 `package.json`、lockfile、`engines`、`packageManager`、`scripts`、`.nvmrc`、`.node-version`、`.tool-versions`、Volta 配置、`.npmrc`、`.yarnrc.yml`、构建工具配置。
+   - Node/前端：目标 package 的 `package.json`、lockfile、`engines`、`packageManager`、`scripts`、`.nvmrc`、`.node-version`、`.tool-versions`、Volta 配置、nvm/fnm/asdf/corepack 证据、`.npmrc`、`.yarnrc.yml`、构建工具配置。
    - 小程序：`project.config.json`、`project.private.config.json`、`app.json`、`pages.json`、`manifest.json`、`app.config.*`、`config/index.*`。
    - Python：`pyproject.toml`、`requirements*.txt`、`uv.lock`、`poetry.lock`、`Pipfile.lock`、`tox.ini`、`noxfile.py`、`pytest.ini`、`.python-version`、`.tool-versions`、`.venv/pyvenv.cfg`。
-3. 读取 shell 环境和常见命令，只查当前任务需要的候选：`JAVA_HOME`、`MAVEN_HOME`、`M2_HOME`、`PATH`、`which mvn/node/npm/pnpm/yarn/bun/corepack/python/python3/uv/poetry/pytest`、微信开发者工具 CLI 候选路径。
+3. 读取 shell 环境和常见命令，只查当前任务需要的候选：`JAVA_HOME`、`MAVEN_HOME`、`M2_HOME`、`PATH`、`NVM_DIR`、`which mvn/node/npm/pnpm/yarn/bun/corepack/nvm/fnm/asdf/python/python3/uv/poetry/pytest`、微信开发者工具 CLI 候选路径。
 4. 查找本机常见路径，只做小范围候选，不全盘扫描：
    - 当前任务上下文中已提供且可验证的 Maven 路径和本地仓库路径。
    - `~/dev/maven-*/bin/mvn`
@@ -177,6 +177,14 @@
    - `/usr/local/bin/uv`
    - `/opt/homebrew/bin/node`
    - `/usr/local/bin/node`
+   - `$NVM_DIR/nvm.sh`
+   - `$HOME/.nvm/nvm.sh`
+   - `$HOME/.nvm/versions/node/*/bin/node`
+   - `/opt/homebrew/opt/nvm/nvm.sh`
+   - `/usr/local/opt/nvm/nvm.sh`
+   - `/opt/homebrew/bin/fnm`
+   - `/usr/local/bin/fnm`
+   - `$HOME/.asdf/shims/node`
    - `/opt/homebrew/bin/pnpm`
    - `/usr/local/bin/pnpm`
    - `/Applications/wechatwebdevtools.app/Contents/MacOS/cli`
@@ -207,7 +215,7 @@
    - 路径缺失、命令失败、项目配置变化或工具版本明显不匹配时，标记该项失效并重新发现；不要继续用失效路径盲跑。
 3. 读取项目配置并选择最贴近项目的环境：
    - Maven/Java 项目必须先按 `14-environment-cache-by-stack.md#mavenjava-环境缓存` 读取 `pom.xml`、`.mvn/*`、wrapper、Java/Maven 版本约束和模块结构，选择匹配度最高的 JDK、Maven 和构建 root。
-   - Node/前端项目必须先按 `14-environment-cache-by-stack.md#node前端环境缓存` 读取目标 `package.json`、lockfile、`engines`、`packageManager`、`scripts`，以及 ESLint/Prettier/EditorConfig/Biome/Stylelint/TypeScript 等语法、缩进和格式规范文件，选择匹配度最高的 Node、包管理器和脚本命令。
+   - Node/前端项目必须先按 `14-environment-cache-by-stack.md#node前端环境缓存` 读取目标 `package.json`、lockfile、`engines`、`packageManager`、`scripts`、`.nvmrc`、`.node-version`、`.tool-versions`、Volta 配置和当前机器 nvm/fnm/asdf/corepack 证据，以及 ESLint/Prettier/EditorConfig/Biome/Stylelint/TypeScript 等语法、缩进和格式规范文件，选择匹配度最高的 Node、包管理器和脚本命令。
    - Python 项目必须先按 `14-environment-cache-by-stack.md#python-环境缓存` 读取 `pyproject.toml`、锁文件、requirements、tox/nox、版本文件和虚拟环境配置，选择匹配度最高的 Python、管理器和命令入口。
    - 小程序项目必须先按 `14-environment-cache-by-stack.md#小程序环境缓存` 读取平台配置、框架配置、输出目录和必要的 `package.json`，选择匹配度最高的小程序框架、目标平台、源码目录、构建脚本和 Node 包管理器。
    - 只读取当前任务命中的技术栈配置，不为了补全缓存扫描无关技术栈。
@@ -225,7 +233,7 @@
 7. 重试原任务命令：
    - 缓存更新后，使用新缓存路径重新执行原本要跑的构建、编译、测试、运行或预览命令。
    - Maven 命令必须使用缓存中的 `maven.executable` 和 `maven.localRepository`；项目需要特定 JDK 时带上已验证的 `JAVA_HOME`。
-   - Node/Python/小程序命令必须使用项目声明的包管理器、解释器、虚拟环境或开发者工具路径，不回退到未验证全局命令。
+   - Node/Python/小程序命令必须使用项目声明的 Node 版本、包管理器、解释器、虚拟环境或开发者工具路径；若项目通过 `.nvmrc` 或 nvm alias 声明 Node，命令必须在已验证的 nvm 上下文中执行，不回退到未验证全局命令。
    - 若重试仍失败，先区分环境问题、项目历史失败、依赖缺失和本次改动问题，不继续无限重试。
 8. 自动检查忽略文件：
    - 在 Git root 检查 `.gitignore` 是否已经忽略 `.codex/`：优先用 `git check-ignore -v .codex/ .codex/local-environment*.json` 验证。

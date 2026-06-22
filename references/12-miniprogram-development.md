@@ -135,7 +135,7 @@
 先执行 `01-global-engineering-rules.md#跨技术栈环境与命令`，再按 `06-environment-discovery.md#跨系统缓存文件命名` 解析 active cache path，并按 `14-environment-cache-by-stack.md#小程序环境缓存` 读取/复用小程序项目配置、框架平台、源码目录、输出目录、构建脚本和必要的 Node 包管理器。
 
 - 首先读取项目脚本和配置：`package.json`、lockfile、`project.config.json`、`project.private.config.json`、`pages.json`、`manifest.json`、`config/index.*`。
-- 有 `package.json` 的小程序项目必须同时按 `14-environment-cache-by-stack.md#node前端环境缓存` 读取 Node 版本、包管理器、lockfile、`scripts` 和框架依赖版本；缓存命中同一 framework、platform、sourceRoot、outputRoot、packageJson 和构建脚本时直接复用。
+- 有 `package.json` 的小程序项目必须同时按 `14-environment-cache-by-stack.md#node前端环境缓存` 读取 Node 版本、版本管理器、包管理器、lockfile、`scripts` 和框架依赖版本；如果项目存在 `.nvmrc`、`.node-version`、`.tool-versions` 或 Volta 配置，按这些声明选择 Node，存在 nvm 时缓存 `NVM_DIR`/`nvm.sh`、原始声明和解析版本；缓存命中同一 framework、platform、sourceRoot、outputRoot、packageJson、Node versionSource 和构建脚本时直接复用。
 - 原生微信小程序：默认优先执行项目已有构建、编译或 CI 脚本；不默认用微信开发者工具模拟器打开工程。
 - uni-app：CLI 项目默认优先使用项目已有 `build:mp-weixin` 或 `build:custom` 脚本；不默认运行到 HBuilderX/小程序模拟器。
 - Taro：默认优先使用项目已有 `build:weapp` 或 `taro build --type weapp`；构建后不默认用微信开发者工具打开输出目录。

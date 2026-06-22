@@ -58,6 +58,8 @@ Maven/Java 命令失败后的重算：
    - `scripts`：优先选择与当前任务匹配的 `build`、`typecheck`、`lint`、`test`、`compile`、框架自定义脚本；不要臆造不存在的脚本。
    - `dependencies`、`devDependencies`：识别 Vue 2/3、React、Vite、Next、Nuxt、Vue CLI、Taro、uni-app、TypeScript、ESLint、Prettier、Stylelint、Biome、oxlint 等工具链版本。
    - `engines.node`、`engines.npm`、`packageManager`、Volta 配置：作为 Node 和包管理器版本约束。
+   - 从目标 package 目录向上到 workspace root 读取 `.nvmrc`、`.node-version` 和 `.tool-versions`；越靠近目标 package 的版本文件优先级越高，不能用仓库根版本覆盖子项目明确版本。
+   - Node 版本约束优先级：目标 package 的 Volta `node` / `packageManager`、最近 `.nvmrc`、最近 `.node-version`、最近 `.tool-versions`、`engines.node`、CI/README 明确命令、当前缓存。`engines.node` 是范围约束，不等同于固定版本；`.nvmrc` 可包含精确版本、`lts/*`、`node` 或 alias，必须记录原始声明和解析后的实际版本。
 3. 读取语法、缩进和格式规范文件：
    - ESLint flat config：`eslint.config.js`、`eslint.config.mjs`、`eslint.config.cjs`、`eslint.config.ts`、`eslint.config.mts`、`eslint.config.cts`。
    - ESLint legacy config：`.eslintrc`、`.eslintrc.js`、`.eslintrc.cjs`、`.eslintrc.yaml`、`.eslintrc.yml`、`.eslintrc.json`，以及 `package.json` 中的 `eslintConfig`。
@@ -80,17 +82,23 @@ Maven/Java 命令失败后的重算：
 6. 匹配本机环境：
    - 优先复用 active cache path 中同一 `packageJson`、lockfile、Node 约束和包管理器仍匹配的缓存。
    - 缓存中记录的 ESLint/Prettier/EditorConfig/Biome/Stylelint/TypeScript 规范文件不存在、路径集合变化、mtime/size/hash 变化，或 `package.json` 中 scripts/dependencies/devDependencies/packageManager 变化时，必须重新读取规范文件并更新缓存。
-   - 缓存缺失或不匹配时，查找本机 Node、corepack、npm、pnpm、yarn、bun 候选，并验证版本。
-   - Node 版本不满足 `engines.node`、`.nvmrc`、`.node-version`、Volta 或构建工具最低要求时，继续查找本机候选；找不到则说明缺口，不用不匹配版本盲跑。
+   - 缓存缺失或不匹配时，查找本机 Node 版本管理器和 Node 候选：先读取 `NVM_DIR` / `$HOME/.nvm/nvm.sh` / Homebrew nvm 脚本，再看 fnm/asdf/Volta/corepack，最后才使用普通 `node`、`npm`、`pnpm`、`yarn`、`bun` 候选。
+   - 如果存在 nvm，必须把 nvm 作为可缓存工具链能力记录：`node.versionManager.name=nvm`、`nvmDir`、`nvmScript`、项目声明版本、解析后的实际 Node 版本、实际 `node`/`npm`/`corepack` 路径和验证命令。不同 package 的 `.nvmrc` 或版本声明不同，必须写成不同 `packageRoot` / `packageJson` / `versionSource` 组合的缓存项，不能复用另一个项目的 Node。
+   - 使用 nvm 验证时，在非交互 shell 中显式 `source "$NVM_DIR/nvm.sh"` 后执行 `nvm use --silent <declared-or-resolved-version>`，再运行 `node -v`、包管理器 `--version` 和目标脚本；不要假设普通 `which node` 已经处于正确 nvm 版本。
+   - `.nvmrc` 为 alias（如 `lts/*`、`node`、`default`）时，缓存必须同时记录 `declared` 和 `resolvedVersion`；后续执行前要重新解析 alias 是否漂移，漂移则更新缓存后再跑命令。
+   - 项目声明的 Node 版本本机未安装时，不自动执行 `nvm install`、`fnm install` 或联网安装，除非用户明确授权；此时记录 `installNeeded=true`、缺失版本和建议命令，并停止用不匹配版本盲跑。
+   - Node 版本不满足 `engines.node`、`.nvmrc`、`.node-version`、`.tool-versions`、Volta 或构建工具最低要求时，继续查找本机版本管理器和候选；找不到则说明缺口，不用不匹配版本盲跑。
 7. 写入缓存：
-   - 写入目标 package 的 `packageJson`、`packageRoot`、`workspaceRoot`、Node 版本约束、实际 Node 路径和版本、包管理器名称/路径/版本、lockfile、选定 scripts、最终命令，以及 `frontendQuality`。
+   - 写入目标 package 的 `packageJson`、`packageRoot`、`workspaceRoot`、Node 版本约束、版本来源文件、版本管理器、实际 Node 路径和版本、包管理器名称/路径/版本、lockfile、选定 scripts、最终命令，以及 `frontendQuality`。
+   - Node 缓存建议结构：`node.versionSource` 记录 `type`（`volta` / `nvmrc` / `node-version` / `tool-versions` / `engines` / `cache`）、`path`、`declared`、`resolvedVersion` 和 `hash/mtime/size`；`node.versionManager` 记录 `name`、`nvmDir`、`nvmScript`、`useCommand`、`installNeeded`；`node.executable` 只记录验证通过的实际路径。
+   - 选定命令若依赖 nvm 上下文，缓存中的 `selectedCommand` 必须体现 nvm 初始化方式，例如 `bash -lc 'source "$NVM_DIR/nvm.sh" && nvm use --silent <version> && <pm> run build'`；直接缓存 `node` 绝对路径只能作为验证证据，不能替代 alias 版本重新解析。
    - `frontendQuality` 至少记录：`eslint`、`prettier`、`editorconfig`、`biome`、`stylelint`、`typescript`、`javascript`/`ecma`、`charset`/i18n/文本资源相关配置文件路径，来源字段来自 `packageJson` 还是文件，文件 `mtime`/`size` 或可用 hash，匹配的验证脚本名，是否存在 format check 脚本。
    - 旧缓存若只有字符串形式的 `node.packageManager`，在下一次前端命令前按当前 schema 重写为对象，补齐 `name`、`executable`、`version`、`declared` 和 `commandRunner`；如果来自旧版 `.codex/local-environment.json`，必须先强制迁移替换到当前 profile 文件，之后不再读取旧版文件。
    - 只写项目声明和已验证结果，不写安装日志、token、registry 凭据或临时失败详情。
 
 前端命令失败后的重算：
 
-- 如果构建/编译/typecheck/lint 失败信息涉及 Node 版本、包管理器版本、lockfile、依赖解析、`engines`、`corepack`、workspace/filter、找不到脚本、找不到 CLI、ESM/CJS 兼容、框架版本不匹配、终端 locale、HTML/响应 `charset`、i18n 资源或中文文本乱码，必须重新读取目标 `package.json`、依赖版本、lockfile、前端规范/charset 配置和本机候选环境。
+- 如果构建/编译/typecheck/lint 失败信息涉及 Node 版本、nvm/fnm/asdf/Volta 版本选择、`.nvmrc` alias 漂移、包管理器版本、lockfile、依赖解析、`engines`、`corepack`、workspace/filter、找不到脚本、找不到 CLI、ESM/CJS 兼容、框架版本不匹配、终端 locale、HTML/响应 `charset`、i18n 资源或中文文本乱码，必须重新读取目标 `package.json`、Node 版本声明、依赖版本、lockfile、前端规范/charset 配置和本机候选环境。
 - 若发现更匹配的 Node 或包管理器，更新 active cache path 后，用同一目标脚本重试一次。
 - 若重试仍失败，停止连续盲改，区分环境不匹配、依赖未安装、项目历史失败和本次代码问题。
 

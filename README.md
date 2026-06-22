@@ -291,7 +291,7 @@ references/
 - Plan/计划阶段也必须走 skill 索引，计划里要列出适用 reference、触碰范围、局部对齐项和验收检查。
 - Global/Goal/目标追踪模式也必须走 skill 索引，每轮恢复目标、适用 reference、触碰范围、局部对齐项、验收检查和 Context Capsule。
 - 规则同时适用于新增代码和已有代码修改；凡本次触碰的方法、类、DTO、SQL、测试和调用链，都要做局部规则对齐。
-- 工具链命令执行前按技术栈读取项目配置并验证 active cache path：强制写入并使用 `.codex/local-environment.<profile>.json`；若发现旧版 `.codex/local-environment.json`，只作为一次性迁移输入，迁移成功后不再 fallback。Java/Maven 看 `pom.xml`、`.mvn/*`、wrapper 和 Java/Maven 版本约束；Python 看 `pyproject.toml`、锁文件、requirements、tox/nox 和虚拟环境；前端看目标 `package.json`、lockfile、`engines`、`packageManager` 和 scripts；小程序看 `project.config.json`、`app.json`、`pages.json`、`manifest.json`、Taro/uni-app 配置和必要的 `package.json`。
+- 工具链命令执行前按技术栈读取项目配置并验证 active cache path：强制写入并使用 `.codex/local-environment.<profile>.json`；若发现旧版 `.codex/local-environment.json`，只作为一次性迁移输入，迁移成功后不再 fallback。Java/Maven 看 `pom.xml`、`.mvn/*`、wrapper 和 Java/Maven 版本约束；Python 看 `pyproject.toml`、锁文件、requirements、tox/nox 和虚拟环境；前端看目标 `package.json`、lockfile、`engines`、`packageManager`、scripts、`.nvmrc`、`.node-version`、`.tool-versions`、Volta 和 nvm/fnm/asdf/corepack 证据；小程序看 `project.config.json`、`app.json`、`pages.json`、`manifest.json`、Taro/uni-app 配置和必要的 `package.json`。
 - Maven 可执行文件、JDK、本地仓库、Python 解释器、Node 包管理器、小程序构建脚本和开发者工具路径不写死个人目录；缓存满足当前命令时直接使用，缓存缺失、失效或不满足项目配置时才按当前机器和项目配置发现，验证通过后写回缓存，并用新缓存路径重试原构建、编译、测试或运行命令。
 - 更新 profile 环境缓存后自动检查 Git root 的 `.gitignore` 是否覆盖 `/.codex/`；未覆盖时补齐，并用 `git check-ignore -v` 验证。
 - 多模块 Maven 项目默认从聚合 root 节点执行，并使用 `-pl <module> -am`。
@@ -301,8 +301,8 @@ references/
 - Python 代码遵守项目已有 `pyproject.toml`、Ruff/Black/isort/mypy/pyright/pytest 配置；公共函数、复杂返回值、跨模块 DTO/配置对象补类型标注和必要 docstring。
 - Python 运行优先使用项目命令、`python -m ...`、`uv run ...`、`poetry run ...`；测试优先定向运行 `python -m pytest path::test` 或项目已有 `tox/nox` 命令。
 - Python 修改要做最小验证：语法/导入、定向测试、lint/format/type check 中与触碰范围相关的项；无法验证时说明原因。
-- 前端项目先确认 `package.json`、lockfile、`packageManager`、Node 版本和构建工具；不要混用 npm/yarn/pnpm/bun。
-- 前端编译、构建、lint、format、typecheck 或测试前必须先读取目标 `package.json` 的 `scripts`、依赖、`engines`、`packageManager`、lockfile，以及 ESLint/Prettier/EditorConfig/Biome/Stylelint/TypeScript 等语法、缩进和格式规范文件，匹配 Node 版本、包管理器与项目脚本，并写入 active cache path 的 `frontendQuality`；缓存满足当前 package、命令和规范文件集合时直接复用。编译失败且疑似环境/依赖/脚本/规范配置不匹配时，重新读取项目配置和本机环境，更新缓存后重试一次。
+- 前端项目先确认 `package.json`、lockfile、`packageManager`、Node 版本、版本管理器和构建工具；不要混用 npm/yarn/pnpm/bun。
+- 前端编译、构建、lint、format、typecheck 或测试前必须先读取目标 `package.json` 的 `scripts`、依赖、`engines`、`packageManager`、lockfile、`.nvmrc`、`.node-version`、`.tool-versions`、Volta 配置，以及 ESLint/Prettier/EditorConfig/Biome/Stylelint/TypeScript 等语法、缩进和格式规范文件，匹配 Node 版本、包管理器与项目脚本，并写入 active cache path 的 `frontendQuality`；若存在 nvm，缓存 `NVM_DIR`/`nvm.sh`、原始版本声明、解析后的 Node 版本和 nvm 初始化命令，不同 package 或不同 `.nvmrc` 必须分开缓存。缓存满足当前 package、命令和规范文件集合时直接复用。编译失败且疑似环境/依赖/脚本/规范配置不匹配时，重新读取项目配置和本机环境，更新缓存后重试一次。
 - Java、Python、前端、小程序等所有技术栈任务结束后，默认不做运行态、交互态或屏幕级操作验证：不启动浏览器，不使用 Browser/Computer Use，不操控电脑屏幕点击，不打开小程序模拟器或真机，不手工调用外部系统/API 页面。默认以语法检查、编译、类型检查、构建或等价非交互命令通过作为验收；只有当前任务目标本身需要浏览器、截图、页面点击、视觉回归、E2E、模拟器、真机、外部服务联调或电脑屏幕操作证据，且权限与副作用边界清楚时，才执行对应操作验证。
 - Vue 项目必须先区分 Vue 2 与 Vue 3：Vue 2 默认 Options API 和 Vue Test Utils v1，Vue 3 可用 Composition API、`<script setup>`、Pinia 和 Vue Test Utils v2。
 - React 项目先确认 React/React DOM 版本、框架和 TypeScript/JSX 配置；Hooks 只能在组件或自定义 Hook 顶层调用，副作用放 `useEffect`，纯派生值不额外存 state。
@@ -351,7 +351,7 @@ references/
 - 已有缓存能通过最小验证且满足当前命令需求时直接复用，不重复查找本机路径。
 - Java/Maven 缓存按 `pom.xml`、`.mvn/*`、wrapper、Java/Maven 版本约束、聚合 root 和模块路径记录 JDK、Maven、本地仓库、`selectedCommand` 和验证命令。
 - Python 缓存按 `pyproject.toml`、锁文件、requirements、tox/nox、版本文件和虚拟环境记录解释器、管理器、lockfile、`selectedCommand` 和验证命令。
-- 前端项目缓存按目标 `package.json` 记录 `packageRoot`、`packageManager`、Node 版本约束、lockfile、scripts、最终构建命令和验证命令；`npx` 只作为 command runner 记录，不当作包管理器。
+- 前端项目缓存按目标 `package.json` 记录 `packageRoot`、`packageManager`、Node 版本约束、Node 版本来源、版本管理器、lockfile、scripts、最终构建命令和验证命令；`npx` 只作为 command runner 记录，不当作包管理器。若项目使用 nvm，缓存原始声明和解析版本，执行前重新进入 nvm 上下文，避免不同项目共用错误 Node。
 - 小程序缓存按 `project.config.json`、`pages.json`、`manifest.json`、Taro/uni-app 配置和必要 `package.json` 记录框架、平台、源码目录、输出目录、构建命令和必要的开发者工具验证状态。
 - 缓存缺失、失效或项目配置显式变化时，再查找本机常见候选路径。
 - 找到后必须执行最小验证，例如 `mvn -version` 或带项目 JDK 的 `JAVA_HOME=<jdk> mvn -version`。
