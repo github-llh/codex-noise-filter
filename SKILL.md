@@ -1,10 +1,9 @@
 ---
 name: codex-noise-filter
 description: |
-  专用于编程相关、写代码/读代码/改代码/调试/重构/构建/测试/代码规范治理场景。
-  识别到代码片段、报错日志、堆栈、构建/测试失败、路径、类名、方法名、配置文件、截图里的代码或错误、Java 后端 Controller/Service/DTO/Entity、前端导出类型/API 边界、组件属性类型、ESLint/Prettier/EditorConfig 等前端语法与缩进规范、中文字符乱码/编码/字符集问题、Maven 多模块、事务并发、Python、Vue/React、小程序、文件归属、环境命令、local-environment 缓存、.codex 忽略规则、验证策略、安全边界、注释契约、编码风格智能化、魔法值、常量放置、硬编码、重复逻辑、公共抽象、泛型/any 边界、Plan/Goal、任意第三方 Agent/App/CLI/终端/IDE 扩展、MCP/ACP/hooks/subagent、cc switch/路由转发/模型切换、上下文压缩、减少 token 或调用链确认等编程任务时自动启用。
-  平台名和技术栈名只是高频示例，不是边界；执行时必须从当前宿主、当前工具调用、cwd、文件扩展名、配置文件、命令、日志、diff 和本机环境证据内部追加对应 reference、环境缓存和验证范围。
-  执行时先读索引、收敛上下文、确认触碰范围和调用链，先按跨技术栈公共规则判断，再按当前证据命中的技术栈落地；默认压缩噪音与冗余输出，并内置用户全局 AGENTS 规则，避免切换会话或窗口后规则丢失。
+  编程任务去噪与规则路由：写代码、读代码、改代码、调试、重构、构建、测试、lint、typecheck、代码规范治理时启用。
+  触发信号包括代码片段、diff、报错日志、异常堆栈、构建/测试失败、命令输出、IDE 截图、路径、文件名、类名、方法名、配置文件、项目结构、中文乱码、魔法值、硬编码、重复逻辑、注释契约、any/泛型边界、Plan/Goal、上下文恢复、第三方 Agent/App/CLI/IDE/MCP/ACP/hooks/subagent/CI/chatops/模型路由转发。
+  先读 references/00-index.md，按当前宿主、cwd、文件、配置、命令、日志、diff、工具动作和本机环境证据渐进追加最小 reference、调用链、环境缓存和验证范围；平台名和技术栈名只是提示，不是白名单。
 ---
 
 # codex-noise-filter

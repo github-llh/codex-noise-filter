@@ -1,0 +1,8 @@
+interface:
+  display_name: "codex-noise-filter"
+  short_description: "编程任务去噪、规则路由、调用链确认和最小验证。"
+  brand_color: "#2563EB"
+  default_prompt: "按 codex-noise-filter 的索引读取最小规则集，确认触碰范围、调用链、局部对齐项和验证命令。"
+
+policy:
+  allow_implicit_invocation: true

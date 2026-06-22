@@ -213,6 +213,8 @@ SKILL.md
 CHANGELOG.md
 examples/
 templates/
+agents/
+  openai.yaml
 references/
   00-index.md
   01-global-engineering-rules.md
@@ -234,8 +236,11 @@ references/
 
 `SKILL.md` is intentionally small. It routes the agent to indexed reference files instead of loading every rule at once.
 
+`agents/openai.yaml` defines the Codex App display name, short description, brand color, default surrounding prompt, and implicit-invocation policy. It does not replace the `SKILL.md` `name` / `description`, and it does not hold execution rules; activation scope and routing remain owned by `SKILL.md` and `references/00-index.md`.
+
 ## Efficiency Strategy
 
+- Keep the `SKILL.md` `description` concise and front-load the core trigger terms. Codex may shorten descriptions in the initial skills list because of context-budget limits, so detailed activation matrices belong in the body and references.
 - Keep each reference file topic-focused instead of allowing one file to grow to several hundred lines.
 - `01-global-engineering-rules.md` only contains globally shared rules, including file ownership, commands, validation, security boundaries, hardcoded values, repeated logic, and comment placement.
 - `02-noise-filter-workflow.md` only contains cross-stack execution gates, context budgets, call-chain checks, and touched-scope alignment. Smart read expansion and Git history regression guards live in `13-read-expansion-and-history.md`, while stack-specific differences route to the matching reference files.

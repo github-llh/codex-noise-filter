@@ -214,6 +214,8 @@ SKILL.md
 CHANGELOG.md
 examples/
 templates/
+agents/
+  openai.yaml
 references/
   00-index.md
   01-global-engineering-rules.md
@@ -235,8 +237,11 @@ references/
 
 `SKILL.md` 只保留触发、路由和硬约束；执行细则按索引进入对应文件，减少主文件负担。
 
+`agents/openai.yaml` 明确 Codex App 中的显示名称、短描述、品牌色、默认外围提示词和隐式调用策略。它不替代 `SKILL.md` 的 `name` / `description`，也不承载执行细则；触发范围和规则路由仍以 `SKILL.md` 与 `references/00-index.md` 为准。
+
 ### 效率策略
 
+- `SKILL.md` 的 `description` 必须把核心触发词放在前面，并保持足够短；Codex 初始技能列表可能因上下文预算缩短描述，详细触发矩阵应下沉到正文和 references。
 - 单个 reference 尽量保持入口化和主题化，避免一个文件堆到数百行。
 - `01-global-engineering-rules.md` 只保留全局共用规则，例如文件归属、环境命令、验证策略、安全边界、硬编码、重复逻辑和注释原则。
 - `02-noise-filter-workflow.md` 只保留跨技术栈执行门禁、上下文预算、调用链和局部对齐流程；智能扩窗和 Git 历史防回归下沉到 `13-read-expansion-and-history.md`，技术栈差异通过索引进入对应 reference。
