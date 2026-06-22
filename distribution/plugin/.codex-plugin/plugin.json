@@ -1,0 +1,41 @@
+{
+  "name": "codex-noise-filter",
+  "version": "1.0.1",
+  "description": "Coding-task noise reduction, indexed rules, call-chain checks, and lightweight validation for Codex.",
+  "author": {
+    "name": "github-llh",
+    "url": "https://github.com/github-llh"
+  },
+  "homepage": "https://github.com/github-llh/codex-noise-filter",
+  "repository": "https://github.com/github-llh/codex-noise-filter",
+  "license": "Apache-2.0",
+  "keywords": [
+    "codex",
+    "skill",
+    "coding",
+    "debugging",
+    "rule-routing",
+    "call-chain",
+    "validation"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "codex-noise-filter",
+    "shortDescription": "Coding-task noise reduction and indexed rule routing",
+    "longDescription": "Use codex-noise-filter to route coding tasks through indexed references, confirm touched scope and call chains, align existing code locally, and run the lightest relevant validation.",
+    "developerName": "github-llh",
+    "category": "Developer Tools",
+    "capabilities": [
+      "Interactive",
+      "Write"
+    ],
+    "websiteURL": "https://github.com/github-llh/codex-noise-filter",
+    "brandColor": "#2563EB",
+    "defaultPrompt": [
+      "Use codex-noise-filter for this coding task.",
+      "List the references, touched scope, and validation checks.",
+      "Debug this failure with the indexed workflow."
+    ],
+    "screenshots": []
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "name": "codex-noise-filter-local",
+  "interface": {
+    "displayName": "Codex Noise Filter Local"
+  },
+  "plugins": [
+    {
+      "name": "codex-noise-filter",
+      "source": {
+        "source": "local",
+        "path": "./plugins/codex-noise-filter"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Developer Tools"
+    }
+  ]
+}

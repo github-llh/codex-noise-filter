@@ -5,6 +5,7 @@
 ```text
 <repo>/.agents/skills/codex-noise-filter/
   SKILL.md
+  agents/
   references/
   examples/
   templates/
@@ -37,3 +38,4 @@
 - 环境发现结果写入当前工作区 `.codex/local-environment.<profile>.json`；旧版 `.codex/local-environment.json` 只作为一次性迁移输入，迁移成功后不再 fallback。
 - README、README.en、SKILL.md、references/00-index.md 发生触发或目录变化时保持同步。
 - 示例和模板只表达接入方式，不承载必须执行的规则；硬约束以 `SKILL.md` 和 `references/` 为准。
+- 如果需要通过 Codex 插件分发，先运行仓库根目录的 `scripts/build-plugin-package.sh`，使用生成的 `dist/codex-noise-filter-plugin/` 作为插件根；repo/team marketplace 可参考 `distribution/marketplace.json`，不要把当前 skill 根目录直接当成插件根目录。

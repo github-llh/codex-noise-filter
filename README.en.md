@@ -12,7 +12,7 @@ Reduce context noise · enforce call-chain checks · load rules progressively ·
 ![Routing](https://img.shields.io/badge/Scope-dynamic%20tool%20%2B%20stack%20evidence-7c3aed)
 [![License](https://img.shields.io/badge/License-Apache--2.0-blue)](LICENSE)
 
-[Quick Start](#quick-start) · [Why Use It](#why-use-it) · [Usage](#usage) · [Activation Examples](#activation-examples) · [Capabilities](#capabilities) · [Layout](#layout) · [Community Health](#community-health) · [License](#license) · [简体中文](README.md)
+[Quick Start](#quick-start) · [Why Use It](#why-use-it) · [Usage](#usage) · [Distribution](#distribution) · [Activation Examples](#activation-examples) · [Capabilities](#capabilities) · [Layout](#layout) · [Community Health](#community-health) · [License](#license) · [简体中文](README.md)
 
 </div>
 
@@ -148,6 +148,16 @@ These inputs should enter the indexed workflow without requiring an explicit ski
 - Agent/router forwarding: any third-party invocation, unknown wrapper, future agent, and `Claude Code`, `Gemini CLI`, `Cline`, `Roo Code`, `aider`, `OpenCode`, `Continue`, `Cursor`, `Windsurf`, `Copilot`, `Antigravity`, `Zed`, `ACP`, `MCP`, `hook`, `subagent`, `chatops`, `webhook`, `CI bot`, `cc switch`, `cc-switch`, `ccswitch`, `model router`, `provider switch`, `gateway`, `proxy`, `adapter`.
 - Ambiguous but contextual Chinese prompts: `报错了`, `失败了`, `为什么不行`, `还是这样`, `处理一下`, `看下这个`.
 
+## Distribution
+
+This repository keeps both the skill authoring layout and plugin distribution templates:
+
+- Direct skill use: copy or symlink this repository to `<repo>/.agents/skills/codex-noise-filter/` or `$HOME/.agents/skills/codex-noise-filter/`. This is the smallest local/team setup.
+- Plugin distribution: run `scripts/build-plugin-package.sh` to generate `dist/codex-noise-filter-plugin/`. The output contains `.codex-plugin/plugin.json` and `skills/codex-noise-filter/`, matching the plugin distribution layout.
+- Repo/team marketplace: use `distribution/marketplace.json` as the example. Put the built plugin under `plugins/codex-noise-filter/` relative to the marketplace root and keep `source.path` as `./plugins/codex-noise-filter`.
+
+`distribution/plugin/.codex-plugin/plugin.json` is the plugin manifest template, and `distribution/README.md` explains the difference between the skill layout and plugin layout. This package does not add `assets/` because there are no required icons or screenshots for the skill, and it declares no MCP/app dependencies to avoid unrelated install-time authorization.
+
 ## Activation Examples
 
 You can copy these prompts directly:
@@ -213,8 +223,14 @@ SKILL.md
 CHANGELOG.md
 examples/
 templates/
+scripts/
+  build-plugin-package.sh
 agents/
   openai.yaml
+distribution/
+  README.md
+  marketplace.json
+  plugin/.codex-plugin/plugin.json
 references/
   00-index.md
   01-global-engineering-rules.md

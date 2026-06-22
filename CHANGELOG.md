@@ -4,6 +4,7 @@
 
 ## Unreleased
 
+- 补齐插件分发模板：新增 `scripts/build-plugin-package.sh`、`distribution/plugin/.codex-plugin/plugin.json`、`distribution/marketplace.json` 和分发说明，区分 skill 编写目录与 plugin 分发目录，避免直接把当前 skill 根目录误当插件根。
 - 按 Codex Agent Skills 官方资料和 Runoob 教程查漏补缺：压缩并前置 `SKILL.md` 的核心触发描述，新增 `agents/openai.yaml` 声明 Codex App UI 元数据和隐式调用策略，并同步中英文 README 的目录结构与 description 预算说明。
 - 按官方/第三方资料刷新跨宿主接入矩阵：补充 Roo Code 原生 Agent Skills、Gemini CLI `.gemini/skills`、OpenCode/MiMo Code skills、VS Code/GitHub Copilot Agent Skills、Continue rules/MCP、aider repo map/read-only context 和 Windsurf MCP/Rules 资料；同步 `SKILL.md`、`00`、`02`、`15`、README 与模板的 bootstrap 路径说明，避免把 rules/custom instructions 误判为 skill 已加载。
 - 全文核验 15 个 reference：补齐 Python `StrEnum` 的 3.11+ 边界，去掉环境缓存示例中的个人机器名，并把小程序 npm 包参考链接替换为可自动校验的 npm registry API。

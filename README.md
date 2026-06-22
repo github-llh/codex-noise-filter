@@ -12,7 +12,7 @@
 ![Routing](https://img.shields.io/badge/Scope-dynamic%20tool%20%2B%20stack%20evidence-7c3aed)
 [![License](https://img.shields.io/badge/License-Apache--2.0-blue)](LICENSE)
 
-[快速开始](#快速开始) · [为什么用](#为什么用) · [使用方式](#使用方式) · [触发示例](#触发示例) · [能力概览](#能力概览) · [结构](#结构) · [社区健康](#社区健康) · [协议](#协议) · [English](README.en.md)
+[快速开始](#快速开始) · [为什么用](#为什么用) · [使用方式](#使用方式) · [分发](#分发) · [触发示例](#触发示例) · [能力概览](#能力概览) · [结构](#结构) · [社区健康](#社区健康) · [协议](#协议) · [English](README.en.md)
 
 </div>
 
@@ -148,6 +148,16 @@ JetBrains 项目优先使用 JetBrains MCP / IDE 工具；搜索优先 rg。
 - Agent/路由转发：任意第三方调用、未知 wrapper、未来新增 agent，以及 `Claude Code`、`Gemini CLI`、`Cline`、`Roo Code`、`aider`、`OpenCode`、`Continue`、`Cursor`、`Windsurf`、`Copilot`、`Antigravity`、`Zed`、`ACP`、`MCP`、`hook`、`subagent`、`chatops`、`webhook`、`CI bot`、`cc switch`、`cc-switch`、`ccswitch`、`model router`、`provider switch`、`gateway`、`proxy`、`adapter`。
 - 模糊但有上下文的中文指令：`报错了`、`失败了`、`为什么不行`、`还是这样`、`处理一下`、`看下这个`。
 
+## 分发
+
+本仓库同时保留 skill 编写结构和插件分发模板：
+
+- 直接使用 skill：复制或软链整个仓库到 `<repo>/.agents/skills/codex-noise-filter/` 或 `$HOME/.agents/skills/codex-noise-filter/`。这是最轻量的本地/团队使用方式。
+- 通过 plugin 分发：运行 `scripts/build-plugin-package.sh`，生成 `dist/codex-noise-filter-plugin/`。该目录会包含 `.codex-plugin/plugin.json` 和 `skills/codex-noise-filter/`，符合插件分发时的目录形态。
+- repo/team marketplace：参考 `distribution/marketplace.json`。把构建后的插件放到 marketplace 根目录的 `plugins/codex-noise-filter/`，并保持 `source.path` 为 `./plugins/codex-noise-filter`。
+
+`distribution/plugin/.codex-plugin/plugin.json` 是插件 manifest 模板；`distribution/README.md` 说明了 skill 结构和 plugin 结构的区别。当前没有新增 `assets/`，因为这个 skill 没有必须随包展示的图标或截图；也没有声明 MCP/app 依赖，避免安装后请求无关授权。
+
 ## 触发示例
 
 这些 prompt 可以直接复制使用：
@@ -214,8 +224,14 @@ SKILL.md
 CHANGELOG.md
 examples/
 templates/
+scripts/
+  build-plugin-package.sh
 agents/
   openai.yaml
+distribution/
+  README.md
+  marketplace.json
+  plugin/.codex-plugin/plugin.json
 references/
   00-index.md
   01-global-engineering-rules.md
