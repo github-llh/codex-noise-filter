@@ -296,7 +296,7 @@ references/
 - 更新 profile 环境缓存后自动检查 Git root 的 `.gitignore` 是否覆盖 `/.codex/`；未覆盖时补齐，并用 `git check-ignore -v` 验证。
 - 多模块 Maven 项目默认从聚合 root 节点执行，并使用 `-pl <module> -am`。
 - 文件归属、环境命令、验证策略、安全边界、硬编码、重复逻辑和注释原则跨技术栈保持一致，先按 `01-global-engineering-rules.md` 判断，再按 Java/Python/Vue/React/小程序的具体语法落地。
-- 写代码前必须做编码风格智能化预检：新增或保留的字符串、数字、状态、类型、来源、协议字段、错误码、配置 key、路由/事件/storage key、阈值、时间窗和重复映射，先判断应使用枚举、常量、配置、字典、SDK 常量、生成类型、design tokens 还是局部字面量。
+- 写代码前必须做编码风格智能化预检：新增或保留的字符串、数字、状态、类型、来源、协议字段、错误码、配置 key、路由/事件/storage key、阈值、时间窗和重复映射，先判断应使用枚举、常量、配置、字典、SDK 常量、生成类型、design tokens 还是局部字面量。DTO/VO/OpenAPI 注解或字段注释列出固定取值时，必须先查并复用现有枚举/字典/生成类型，不把示例 code 继续写成裸字符串。
 - Python 项目先确认 `requires-python`、`.python-version`、IDE 解释器、`.venv` 或锁文件，并写入/复用 Python 环境缓存；优先复用 uv、poetry、pipenv、venv、tox、nox 等项目已有工具链，不直接使用全局 pip 乱装依赖。
 - Python 代码遵守项目已有 `pyproject.toml`、Ruff/Black/isort/mypy/pyright/pytest 配置；公共函数、复杂返回值、跨模块 DTO/配置对象补类型标注和必要 docstring。
 - Python 运行优先使用项目命令、`python -m ...`、`uv run ...`、`poetry run ...`；测试优先定向运行 `python -m pytest path::test` 或项目已有 `tox/nox` 命令。
@@ -320,7 +320,7 @@ references/
 - Vue/React 修改优先运行项目已有 `typecheck`、`build`、`lint` 或等价语法/编译命令；不默认用浏览器验证关键页面或点击操作。
 - 前端格式和语法验证不依赖 IDE 飘红/飘黄：进入验证阶段时读取 active cache path 的 `frontendQuality`，核对 ESLint/Prettier/EditorConfig/Biome/Stylelint/TypeScript 配置是否变化，再运行项目已有 lint/format/typecheck/build 脚本；没有脚本时说明缺口，不臆造会全仓改格式的命令。
 - 新建文件前必须确认 module、层级职责、包路径、同类文件位置和依赖方向，尤其注意接口、实现、实体、契约可能分属不同 module。
-- 明确固定集合的状态、类型、来源、动作、阶段、结果等值优先写成业务 Enum，避免魔法字符串和数字散落。
+- 明确固定集合的状态、类型、来源、动作、阶段、结果等值优先写成业务 Enum；公共 API 因兼容仍用 `String` code 时，业务层也要通过枚举 code/lookup、校验器或字典能力连接，避免魔法字符串和数字散落。
 - URL、密钥、开关、阈值、时间窗、线程池、缓存 TTL、外部系统参数等环境或运维可变值优先写入 yml/properties 或配置中心，并通过配置类注入。
 - 简单入参校验优先写在 DTO/Request 的 Bean Validation 注解上，Controller 只触发校验并走统一异常处理。
 - 多状态、多类型、多来源、多外部系统、重复流程、重复组装、重复字段映射或稳定扩展点必须评估业务抽象，优先沉淀到 Service 方法、领域组件、策略、枚举行为、Assembler/Converter、配置属性或项目已有扩展点。

@@ -10,6 +10,7 @@
 
 - 新增 `if/switch` 前先确认分支条件是否来自固定业务状态、类型、来源、平台、动作或结果；是固定集合时优先业务 Enum、枚举行为、策略表或 handler map。
 - 新增字符串/数字常量前先查同包、同模块、contract/api module、配置属性类、SDK 常量和项目统一字典；有现成定义必须复用。
+- 看到 DTO/VO/Request/Response 字段、`@Schema`、`ApiModelProperty`、`allowableValues` 或字段注释列出一组固定 code 时，先按字段语义、code 和 label 查现有业务 Enum、字典、类型处理器或生成类型；找到后必须复用，不把描述里的 code 再复制成字符串常量。
 - 新增 `private static final` 只适合局部技术常量或当前类私有协议值；跨层传递、持久化、序列化、展示或多处判断的值不能藏在 Service 实现类里。
 - 不新建无业务域的 `Constants`、`CommonConstants`、`StatusEnum`；常量类或枚举名必须表达业务归属。
 - 测试中的状态、类型、错误码和 fixture key 若与生产协议相关，也要复用同一枚举/常量或测试 fixture builder。
@@ -29,6 +30,7 @@
 - 枚举名表达业务域，例如 `AuditTaskStatus`、`ReportType`，不要使用泛化的 `StatusEnum`。
 - 枚举项命名稳定清晰，字段至少包含持久化 code 和展示/说明 label 或 desc。
 - 提供按 code 反查的方法，并处理未知值；不要在业务代码里散写 `valueOf` 或手写字符串比较。
+- 如果 API/数据库/外部协议为了兼容仍暴露 `String` code，DTO 字段可以暂时保持兼容类型，但 Service、Assembler/Converter、校验器、测试 mock 和默认值必须通过枚举 `getCode()`、`fromCode`、统一校验或项目已有字典能力连接；不能继续散写同一组 code。
 - 数据库存储、API 入参出参、前端展示必须保持兼容；新增枚举不能随意修改既有 code。
 - 已存在项目统一枚举接口、序列化注解、字典体系或类型处理器时，优先复用。
 - 动态字典、用户可配置项、运行期可扩展值，不强行写死为 Enum。
@@ -42,6 +44,7 @@
 - 外部平台、消息格式、通知渠道、支付方式、登录来源、任务动作、导入导出类型等闭合集合：优先业务 Enum；如果只在前端/接口契约层使用，也要放到对应 contract/api module，而不是散在 Service 实现。
 - JSON 字段名、模板参数 key、header name、query key、map key 等协议字段名：优先复用 SDK/OpenAPI/生成类型；没有时可集中为协议常量或当前类私有常量，不强行枚举。
 - 字段名对应的固定业务取值：例如接收人来源、通知渠道、消息模板类型、平台 code、动作 code，不能因为只有一个当前值就永远保留字符串常量；若调用链显示存在闭合集合或未来扩展点，应补业务 Enum、按 code 反查并保持序列化兼容。
+- DTO/VO/OpenAPI 字段说明中的固定取值属于业务取值候选，不是普通注释文本；如果同模块已有 Enum 或字典定义，优先引用现有定义的 code/label/lookup，并同步检查比较、赋值、mock、校验和转换链路是否仍有裸 code。
 - HTTP header、content type、media type、charset、时间单位、状态码等技术标准值：优先使用 Spring/JDK/第三方 SDK 已有常量；没有可用常量时，集中到协议常量类或私有常量，并保留来源说明。
 - 环境 URL、密钥、开关、阈值、时间窗、外部系统地址、超时、重试、线程池、缓存 TTL：优先配置属性类，不写死在 Service。
 - 单一技术常量且不会跨层传递：可保留 `private static final`，但要命名清晰、靠近使用点并说明来源。

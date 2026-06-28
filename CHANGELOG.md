@@ -4,6 +4,7 @@
 
 ## Unreleased
 
+- 强化固定业务取值的枚举复用链路：DTO/VO/OpenAPI 注解或字段注释列出固定 code 时，先按字段语义、code 和 label 查现有枚举/字典/生成类型；公共契约因兼容仍用 `String` 时，业务层赋值、比较、校验、mock 和转换也必须通过枚举 code/lookup 或统一字典能力连接，不再裸写同一组字符串。
 - 强化 Node/前端环境缓存：新增 nvm/fnm/asdf/corepack 版本管理器证据，按目标 `package.json`、`.nvmrc`、`.node-version`、`.tool-versions`、Volta 和 `engines.node` 选择 Node；存在 nvm 时缓存 `NVM_DIR`、`nvm.sh`、原始声明、解析版本和 nvm 初始化命令，并按不同 package/versionSource 隔离缓存。
 - 补齐插件分发模板：新增 `scripts/build-plugin-package.sh`、`distribution/plugin/.codex-plugin/plugin.json`、`distribution/marketplace.json` 和分发说明，区分 skill 编写目录与 plugin 分发目录，避免直接把当前 skill 根目录误当插件根。
 - 按 Codex Agent Skills 官方资料和 Runoob 教程查漏补缺：压缩并前置 `SKILL.md` 的核心触发描述，新增 `agents/openai.yaml` 声明 Codex App UI 元数据和隐式调用策略，并同步中英文 README 的目录结构与 description 预算说明。
