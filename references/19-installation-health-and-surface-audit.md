@@ -49,6 +49,7 @@
 - `references/00-index.md` 是否包含新增 reference 的路由、关键词和组合。
 - README/README.en 是否同步能力概览和目录结构。
 - templates 是否同步 bootstrap、activation check 和 repo install snippet。
+- 若新增或强化自动触发、范围追加、状态机、防断流规则，是否同步 `20-automatic-guard-loop.md`、`02` 状态机、`05` Capsule、README 和 AGENTS 模板。
 - `agents/openai.yaml` 是否只保留 UI 元数据，不塞执行规则。
 - `scripts/build-plugin-package.sh` 是否仍能定位源文件和必要目录。
 - `distribution/marketplace.json` 是否指向正确构建产物、版本和显示名。
@@ -78,6 +79,7 @@ surfaceAudit:
   canonicalSkill: <path/status>
   index: <path/status>
   references: <新增/删除/变更>
+  guardLoop: <20 路由/模板/README 同步状态>
   templates: <同步状态>
   pluginMetadata: <agents/openai.yaml/distribution/manifest>
   hostSupport: <nativeSkill|manualFileBootstrap|rulesOnly|fallbackOnly>

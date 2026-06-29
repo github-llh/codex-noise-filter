@@ -15,6 +15,11 @@ surfaceAudit:
     changed:
     removed:
     routingUpdated:
+  guardLoop:
+    reference20:
+    indexRouting:
+    templates:
+    readme:
   templates:
     globalAgents:
     repoSnippet:
@@ -53,6 +58,7 @@ surfaceAudit:
 - `SKILL.md` 保持轻量，细节放入 references。
 - 新增 reference 必须在 `references/00-index.md` 有路由、关键词或任务映射。
 - README、README.en、templates 和 CHANGELOG 同步新增能力或目录变化。
+- 自动触发、范围追加、状态机、防断流规则变更时，`references/20-automatic-guard-loop.md`、`00-index.md`、`02`、`05`、README 和 AGENTS 模板必须同步。
 - 构建脚本、manifest、marketplace 不引用不存在的文件。
 - hook、MCP、commands、subagent 只有在当前宿主支持且已注册时才写成运行时能力；否则只写成规则门禁。
 - 保留无关脏改和未跟踪噪声，不把 surface audit 扩大成工作区清理。

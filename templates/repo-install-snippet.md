@@ -22,6 +22,7 @@
 - 确认可扫描目录中只有预期版本的 `codex-noise-filter`，或明确哪个副本是 canonical skill。
 - 确认 `SKILL.md`、`references/00-index.md`、README、templates、`agents/openai.yaml`、`distribution/marketplace.json` 和插件构建脚本之间没有引用漂移。
 - 修改或新增 reference 后，确认 README/README.en、`templates/global-AGENTS.light.md`、`templates/activation-check.prompt.md` 和本片段同步。
+- 如果新增或强化自动触发、范围追加、防断流或状态机规则，确认 `references/20-automatic-guard-loop.md`、`references/00-index.md`、`references/02-noise-filter-workflow.md`、`references/05-delivery-templates.md` 和模板都同步。
 - 如果宿主需要 reload/restart、刷新插件缓存或重新扫描 skills，记录为安装步骤；不要把 rules-only 注入写成 native skill 已加载。
 - 如果接入 hook、commands、MCP/ACP 或 workflow，先确认当前宿主真实支持、已注册、matcher 命中和权限边界；不支持时只保留规则门禁，不承诺自动拦截。
 
@@ -42,6 +43,7 @@
 - skill/plugin/AGENTS/templates/README/manifest/marketplace/rules/commands/hooks 改动或加载故障必须追加 `references/19-installation-health-and-surface-audit.md`，记录 canonical skill、索引、引用链、宿主能力和不支持的 runtime。
 - 如果第三方宿主只读取 AGENTS 而不支持 Codex skills，必须在 AGENTS 中保留 `templates/global-AGENTS.light.md` 的“第三方兜底闭环”矩阵，不能只写“先读取 skill”。
 - 如果 skill 已触发但执行流像被模型、wrapper 或工具结果重置，必须保留 `02#内部触发状态机与防重置自检` 对应的 AGENTS 规则，先重建已读规则、任务胶囊、触碰范围、调用链、局部对齐、环境缓存和验证状态。
+- 如果自动触发、追加规则/边界/范围或工作流连续性不稳定，必须保留 `references/20-automatic-guard-loop.md` 对应规则：每次工具调用、写入、验证、恢复和最终回复前检查 `guardLoop.missingState`，缺项先补齐，不能只交付最后一次工具结果。
 
 团队约定：
 
@@ -49,5 +51,6 @@
 - 环境发现结果写入当前工作区 `.codex/local-environment.<profile>.json`；旧版 `.codex/local-environment.json` 只作为一次性迁移输入，迁移成功后不再 fallback。
 - README、README.en、SKILL.md、references/00-index.md 发生触发或目录变化时保持同步。
 - 新增、删除或重命名 references/templates/scripts/distribution 文件时，必须做 surface audit：检查 README、README.en、`00-index.md`、模板、构建脚本、manifest 和 marketplace 是否仍引用正确。
+- surface audit 要包含 Guard Loop 状态：新增/删除/改名 reference 后，确认 `20` 的路由、README 双语、AGENTS 模板、activation check 和插件构建产物一致。
 - 示例和模板只表达接入方式，不承载必须执行的规则；硬约束以 `SKILL.md` 和 `references/` 为准。
 - 如果需要通过 Codex 插件分发，先运行仓库根目录的 `scripts/build-plugin-package.sh`，使用生成的 `dist/codex-noise-filter-plugin/` 作为插件根；repo/team marketplace 可参考 `distribution/marketplace.json`，不要把当前 skill 根目录直接当成插件根目录。

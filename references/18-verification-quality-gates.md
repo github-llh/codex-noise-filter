@@ -11,6 +11,7 @@
 - 工具输出出现失败、超时、拒绝、上下文不匹配、补丁失败、测试失败、编译失败、网络错误、依赖缺失、环境不一致。
 - 第三方 agent、CI、hook、IDE 或模型只给出“已完成/成功/替换/Build 完成”，但没有本地 diff、命令和验证证据。
 - 任务存在连续性、防复发、旧窗口已经说过、又再犯、`doNotRetry`、Context Capsule 或工作上下文恢复信号。
+- 任务出现自动触发失效、追加规则/边界/范围不智能、工作流断掉、状态机缺项或只剩最后一次工具结果，需要确认 `20` 的 Guard Loop 是否补齐。
 
 ## 最小验证矩阵
 
@@ -38,7 +39,8 @@
 4. `tests`：目标测试、回归测试、最小复现场景。
 5. `security/supply-chain`：命中 `17` 时检查外部内容、凭证、网络、hook/MCP/skill/rules 面。
 6. `diff review`：人工复核 diff，确认没有越界重构、硬编码、重复逻辑、注释契约缺口。
-7. `delivery check`：最终回复包含变更、影响、验证、未覆盖边界和必要后续。
+7. `guard check`：最终回复前确认 `guardLoop.missingState` 为空，或已列出无法补齐原因、blocked 和下一步。
+8. `delivery check`：最终回复包含变更、影响、验证、未覆盖边界和必要后续。
 
 不是每个任务都要执行所有步骤；跳过任何不适用步骤时，要能说明“不适用”或“无法运行”的原因。
 
@@ -63,6 +65,7 @@
 - 是否改变 API、DTO、数据库、权限、路由、配置键、线程/事务/缓存语义。
 - 是否同步 README、索引、模板、manifest、测试或迁移脚本。
 - 是否存在中文乱码、换行风格异常、不可见字符或 trailing whitespace。
+- 命中自动 Guard Loop 时，是否同步记录 appendedReferences、missingState、nextAutoAction 和 blocked，且没有把缺状态任务写成完成。
 
 如果 diff review 发现范围越界，先收缩或说明理由，再继续验证。
 

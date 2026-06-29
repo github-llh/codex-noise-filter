@@ -25,7 +25,7 @@ dist/codex-noise-filter-plugin/
 
 发布或放入 marketplace 时，使用 `dist/codex-noise-filter-plugin/` 作为插件根目录。
 
-新增、删除或重命名 `references/`、`templates/`、`agents/` 或 manifest 相关文件后，先按 `references/19-installation-health-and-surface-audit.md` 检查 README、模板、构建脚本、manifest 和 marketplace 引用，再重新构建插件包。
+新增、删除或重命名 `references/`、`templates/`、`agents/` 或 manifest 相关文件后，先按 `references/19-installation-health-and-surface-audit.md` 检查 README、模板、构建脚本、manifest 和 marketplace 引用；若涉及自动触发、范围追加或防断流，还要确认 `references/20-automatic-guard-loop.md` 已被索引、模板和构建产物覆盖，再重新构建插件包。
 
 ## Repo Marketplace Example
 

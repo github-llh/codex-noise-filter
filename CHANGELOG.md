@@ -4,6 +4,7 @@
 
 ## Unreleased
 
+- 新增 `references/20-automatic-guard-loop.md`，把“自动触发、自动追加规则/边界/范围、防止工作流断掉”收敛为每次工具调用、写入、验证、恢复和最终回复前执行的 Guard Loop；同步 `SKILL.md`、`00`、`02`、`05`、`15`、`16`、`18`、`19`、README、模板和 Codex App 元数据，要求记录 `observed/appendedReferences/missingState/nextAutoAction/blocked`，缺状态先补齐，不能只交付最后一次工具结果。
 - 参考 `affaan-m/ECC` 的 security guide、verification-loop、agent introspection、troubleshooting、commands quick reference 和 working context 思路，新增 `references/17-agentic-security-and-supply-chain.md`、`references/18-verification-quality-gates.md`、`references/19-installation-health-and-surface-audit.md`，并接入 `SKILL.md`、`00`、`01`、`02`、`05`、`15`、`16`、README 和模板；把外部内容/agent 供应链、验证门禁/失败诊断、安装健康/surface audit 纳入同一套防重置状态机，只迁移可验证制度能力，不引入 ECC runtime、hook 自动拦截承诺或外部 CLI 依赖。
 - 新增 `templates/working-context.md` 和 `templates/surface-audit-checklist.md`，分别用于项目级当前事实/约束/队列/执行笔记交接和 skill/plugin/manifest/templates 分发表面审计；模板默认不强制持久化，写入前必须复核当前文件、diff、status、外部内容安全边界和宿主能力。
 - 参考 `affaan-m/ECC` 的 session save/resume、`WORKING-CONTEXT.md`、project-scoped continuous learning、strategic compact 和 agent self-debugging 思路，新增 `references/16-continuity-and-learning.md`；把“之前窗口说过/改过仍再犯”“不要再试同一失败方案”“保存/恢复上下文”等场景收敛为 `currentTruth/decisions/doNotRetry/nextStep` 连续性账本，并接入 `SKILL.md`、`00`、`02`、`05`、README 和 AGENTS 模板。该规则只吸收可执行协议，不引入 ECC 外部 runtime 或 hook 依赖。

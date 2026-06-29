@@ -35,6 +35,7 @@
 | `decisions` | 已定决策、原因、取舍、适用范围、失效条件 | 防止反复争论已确定口径 |
 | `doNotRetry` | 失败方案、精确错误、失败原因、证据命令或文件、何时可重新尝试 | 防止模型换窗口后重复同一失败路径 |
 | `nextStep` | 唯一下一个动作、前置证据、验证方式、回滚点 | 防止恢复后从零开始或跳步 |
+| `guardLoop` | observed、appendedReferences、missingState、nextAutoAction、blocked | 防止恢复后只沿用结论而不补缺失状态 |
 
 最小格式：
 
@@ -44,6 +45,7 @@ currentTruth：...
 decisions：...
 doNotRetry：...
 nextStep：...
+guardLoop：...
 evidence：文件/命令/行号 ...
 ```
 
@@ -105,6 +107,7 @@ Update Rule: 何时更新、谁可更新、哪些内容不能写入
 | 同一失败命令反复出现 | 写入 `doNotRetry`，记录命令、root、环境、错误和不再重复的原因；下一步必须换假设或补证据 |
 | 第三方声称已完成 | 只当线索；必须复核当前文件、diff、命令 root、环境缓存和验证覆盖范围 |
 | 模型/供应商/窗口切换 | 刷新 Capsule，重建状态机字段，确认 `currentTruth/decisions/doNotRetry/nextStep` 后继续 |
+| 自动触发、范围追加或工作流断掉 | 按 `20-automatic-guard-loop.md` 重建 `guardLoop`，先补 `missingState`，再执行 `nextAutoAction` |
 | 需要把经验沉淀为规则 | 先判断是当前项目规则、当前 skill 规则、AGENTS 兜底、环境缓存还是长期 memory；没有明确授权不写长期 memory |
 
 ## 自检与恢复

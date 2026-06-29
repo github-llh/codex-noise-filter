@@ -76,7 +76,7 @@
    - `nativeCommand`：先读取命令/workflow 当前内容；若可读文件，再按 Skill Bootstrap 读取 `SKILL.md` 和 `00-index.md`。
    - `manualFileBootstrap` / `rulesOnly`：按宿主配置目录、AGENTS 目录、项目级 `.agents/skills`、宿主原生目录、用户级 `.agents`、`CODEX_HOME` 和兼容 `.codex` 的顺序查找首个存在的 `SKILL.md`，读取成功后立即停止查找。
    - `fallbackOnly`：不再查找平台清单，直接执行第三方兜底闭环。
-6. **内部状态机**：建立 `activated/loadState/hostCapability/references/dynamicScope/capsule/scope/callChain/localAlignment/environment/securityBoundary/surfaceHealth/qualityGate/validation`，后续工具调用、写入、验证和最终回复前都自检。
+6. **内部状态机**：建立 `activated/loadState/hostCapability/references/dynamicScope/capsule/scope/callChain/localAlignment/environment/securityBoundary/surfaceHealth/qualityGate/validation/guardLoop`，后续工具调用、写入、验证和最终回复前都按 `20-automatic-guard-loop.md` 自检。
 7. **动态追加范围**：根据触碰文件、最近配置、命令、错误、diff、active cache path、本机环境、外部内容、供应链表面和分发状态追加 `01`、`02`、`06`、`14`、`17`、`18`、`19` 和命中的技术栈 reference。
 8. **最小执行与验证**：只做当前触碰范围的最小闭环；第三方“已验证/已修改”必须用当前 root、diff、active cache path、命令和触碰范围复核，并按 `18` 记录验证矩阵。
 
@@ -104,6 +104,7 @@
 - **索引优先**：完整 `SKILL.md` 后只读 `references/00-index.md`，默认追加 1 个主 reference；需要构建/运行时再加 `06` + `14`，需要恢复/交付时再加 `05`。
 - **证据优先于平台名**：不因为平台名出现在清单里就打开平台专属规则；只有载荷证据决定技术栈、工具链和验证范围。
 - **状态缓存写入 Capsule**：同一任务内记录 `hostCapability`、`loadState`、已读 `SKILL.md` 路径、已读 reference 和未读边界；恢复后先复用并用当前文件/diff 校验。
+- **Guard Loop 缓存写入 Capsule**：记录 observed、appendedReferences、missingState、nextAutoAction 和 blocked；第三方宿主无法中间输出时，最迟在最终回复补发。
 - **大输出只摘要**：日志、搜索结果、子代理报告、CI 输出和第三方包装层长叙述只保留命令、关键错误、路径/行号、退出码、结论和下一步。
 - **subagent 用于读多写少**：探索、日志归因、测试输出汇总可交给 subagent；写多、跨文件修改、公共契约和验证结论必须回到主上下文复核。
 - **避免模板复制膨胀**：AGENTS、rules、workflow 和 README 只放 bootstrap 和兜底矩阵；完整细则保留在本 skill 的 references 中。
