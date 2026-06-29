@@ -4,13 +4,15 @@
 
 ## Unreleased
 
+- 参考 `affaan-m/ECC` 的 security guide、verification-loop、agent introspection、troubleshooting、commands quick reference 和 working context 思路，新增 `references/17-agentic-security-and-supply-chain.md`、`references/18-verification-quality-gates.md`、`references/19-installation-health-and-surface-audit.md`，并接入 `SKILL.md`、`00`、`01`、`02`、`05`、`15`、`16`、README 和模板；把外部内容/agent 供应链、验证门禁/失败诊断、安装健康/surface audit 纳入同一套防重置状态机，只迁移可验证制度能力，不引入 ECC runtime、hook 自动拦截承诺或外部 CLI 依赖。
+- 新增 `templates/working-context.md` 和 `templates/surface-audit-checklist.md`，分别用于项目级当前事实/约束/队列/执行笔记交接和 skill/plugin/manifest/templates 分发表面审计；模板默认不强制持久化，写入前必须复核当前文件、diff、status、外部内容安全边界和宿主能力。
 - 参考 `affaan-m/ECC` 的 session save/resume、`WORKING-CONTEXT.md`、project-scoped continuous learning、strategic compact 和 agent self-debugging 思路，新增 `references/16-continuity-and-learning.md`；把“之前窗口说过/改过仍再犯”“不要再试同一失败方案”“保存/恢复上下文”等场景收敛为 `currentTruth/decisions/doNotRetry/nextStep` 连续性账本，并接入 `SKILL.md`、`00`、`02`、`05`、README 和 AGENTS 模板。该规则只吸收可执行协议，不引入 ECC 外部 runtime 或 hook 依赖。
 - 强化固定业务取值的枚举复用链路：DTO/VO/OpenAPI 注解或字段注释列出固定 code 时，先按字段语义、code 和 label 查现有枚举/字典/生成类型；公共契约因兼容仍用 `String` 时，业务层赋值、比较、校验、mock 和转换也必须通过枚举 code/lookup 或统一字典能力连接，不再裸写同一组字符串。
 - 强化 Node/前端环境缓存：新增 nvm/fnm/asdf/corepack 版本管理器证据，按目标 `package.json`、`.nvmrc`、`.node-version`、`.tool-versions`、Volta 和 `engines.node` 选择 Node；存在 nvm 时缓存 `NVM_DIR`、`nvm.sh`、原始声明、解析版本和 nvm 初始化命令，并按不同 package/versionSource 隔离缓存。
 - 补齐插件分发模板：新增 `scripts/build-plugin-package.sh`、`distribution/plugin/.codex-plugin/plugin.json`、`distribution/marketplace.json` 和分发说明，区分 skill 编写目录与 plugin 分发目录，避免直接把当前 skill 根目录误当插件根。
 - 按 Codex Agent Skills 官方资料和 Runoob 教程查漏补缺：压缩并前置 `SKILL.md` 的核心触发描述，新增 `agents/openai.yaml` 声明 Codex App UI 元数据和隐式调用策略，并同步中英文 README 的目录结构与 description 预算说明。
 - 按官方/第三方资料刷新跨宿主接入矩阵：补充 Roo Code 原生 Agent Skills、Gemini CLI `.gemini/skills`、OpenCode/MiMo Code skills、VS Code/GitHub Copilot Agent Skills、Continue rules/MCP、aider repo map/read-only context 和 Windsurf MCP/Rules 资料；同步 `SKILL.md`、`00`、`02`、`15`、README 与模板的 bootstrap 路径说明，避免把 rules/custom instructions 误判为 skill 已加载。
-- 全文核验 15 个 reference：补齐 Python `StrEnum` 的 3.11+ 边界，去掉环境缓存示例中的个人机器名，并把小程序 npm 包参考链接替换为可自动校验的 npm registry API。
+- 全文核验当时已有 reference：补齐 Python `StrEnum` 的 3.11+ 边界，去掉环境缓存示例中的个人机器名，并把小程序 npm 包参考链接替换为可自动校验的 npm registry API。
 - 增加跨宿主 Skill 兼容矩阵：新增 `references/15-host-skill-portability.md`，按 `nativeSkill`、`nativeCommand`、`rulesOnly`、`delegatedTool`、`manualFileBootstrap`、`fallbackOnly` 统一第三方平台执行顺序、触发条件和性能预算，避免继续把平台名写成白名单。
 - 强化 Codex 上下文窗口与自动 compact 处理：结合官方 thread/context window、automatic compaction、subagent 噪音隔离、`PreCompact`/`PostCompact`/`SessionStart compact` 事件和 memory 边界，补充上下文预算、压缩前后恢复协议、Context Capsule 字段和团队接入模板，避免大日志、重复搜索和旧假设污染主上下文。
 - 增加第三方中转动态追加范围：平台名、agent 名、CLI/IDE/MCP/ACP 名称和技术栈名不再作为封闭白名单；从当前宿主、工具动作、cwd/workspace、文件扩展名、配置文件、命令、日志、diff、补丁、active cache path 和本机环境证据动态追加 reference、环境缓存和最小验证范围。
