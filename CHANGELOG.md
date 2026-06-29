@@ -4,6 +4,7 @@
 
 ## Unreleased
 
+- 参考 `affaan-m/ECC` 的 session save/resume、`WORKING-CONTEXT.md`、project-scoped continuous learning、strategic compact 和 agent self-debugging 思路，新增 `references/16-continuity-and-learning.md`；把“之前窗口说过/改过仍再犯”“不要再试同一失败方案”“保存/恢复上下文”等场景收敛为 `currentTruth/decisions/doNotRetry/nextStep` 连续性账本，并接入 `SKILL.md`、`00`、`02`、`05`、README 和 AGENTS 模板。该规则只吸收可执行协议，不引入 ECC 外部 runtime 或 hook 依赖。
 - 强化固定业务取值的枚举复用链路：DTO/VO/OpenAPI 注解或字段注释列出固定 code 时，先按字段语义、code 和 label 查现有枚举/字典/生成类型；公共契约因兼容仍用 `String` 时，业务层赋值、比较、校验、mock 和转换也必须通过枚举 code/lookup 或统一字典能力连接，不再裸写同一组字符串。
 - 强化 Node/前端环境缓存：新增 nvm/fnm/asdf/corepack 版本管理器证据，按目标 `package.json`、`.nvmrc`、`.node-version`、`.tool-versions`、Volta 和 `engines.node` 选择 Node；存在 nvm 时缓存 `NVM_DIR`、`nvm.sh`、原始声明、解析版本和 nvm 初始化命令，并按不同 package/versionSource 隔离缓存。
 - 补齐插件分发模板：新增 `scripts/build-plugin-package.sh`、`distribution/plugin/.codex-plugin/plugin.json`、`distribution/marketplace.json` 和分发说明，区分 skill 编写目录与 plugin 分发目录，避免直接把当前 skill 根目录误当插件根。

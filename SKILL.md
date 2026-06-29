@@ -2,7 +2,7 @@
 name: codex-noise-filter
 description: |
   编程任务去噪与规则路由：写代码、读代码、改代码、调试、重构、构建、测试、lint、typecheck、代码规范治理时启用。
-  触发信号包括代码片段、diff、报错日志、异常堆栈、构建/测试失败、命令输出、IDE 截图、路径、文件名、类名、方法名、配置文件、项目结构、中文乱码、魔法值、硬编码、重复逻辑、注释契约、any/泛型边界、Plan/Goal、上下文恢复、第三方 Agent/App/CLI/IDE/MCP/ACP/hooks/subagent/CI/chatops/模型路由转发。
+  触发信号包括代码片段、diff、报错日志、异常堆栈、构建/测试失败、命令输出、IDE 截图、路径、文件名、类名、方法名、配置文件、项目结构、中文乱码、魔法值、硬编码、重复逻辑、注释契约、any/泛型边界、Plan/Goal、上下文恢复、之前窗口已说过/已改过又再犯、第三方 Agent/App/CLI/IDE/MCP/ACP/hooks/subagent/CI/chatops/模型路由转发。
   先读 references/00-index.md，按当前宿主、cwd、文件、配置、命令、日志、diff、工具动作和本机环境证据渐进追加最小 reference、调用链、环境缓存和验证范围；平台名和技术栈名只是提示，不是白名单。
 ---
 
@@ -22,6 +22,7 @@ description: |
 - 任务经任意第三方调用、coding agent、桌面/网页 App、IDE 插件、终端/TUI/CLI、MCP/ACP、hook、subagent、CI/chatops/webhook、`cc switch`/`cc-switch`/`ccswitch`、model/provider router、gateway/proxy/adapter、自定义 wrapper、未知转发层、未来新增 agent 或模型路由执行；只要原始意图、转发载荷、工具动作、cwd、文件、命令、日志或 diff 涉及代码读取、修改、构建、测试、调试、重构或代码规范治理，就按本 skill 内部自动触发。
 - 当前宿主、工具调用、CLI/App/IDE 插件、MCP/ACP、hook/subagent、CI/chatops 或路由层没有在上条枚举中命名，但转发载荷带有 cwd、workspace、文件扩展名、配置文件、命令、日志、diff、补丁、构建/测试/lint/typecheck/format 输出、编码/乱码信号或工具链动作；必须按未知第三方中转恢复原始任务，并按证据动态追加对应技术栈和验证规则。
 - 当前任务处于上个会话接续、上下文恢复、自动续跑、跨窗口继续、引用上一轮结论、存在 Context Capsule、或 skill/reference 近期在当前工作区发生变更的状态；这类状态必须自动刷新规则，不依赖外部提醒。
+- 当前任务出现“之前窗口”“上次说过”“已经改过”“又犯了”“不要再”“记住”“按之前的”“save/resume/session/working context/continuous learning/instinct/doNotRetry”等连续性或防复发信号；这类状态必须按 `16` 恢复 `currentTruth/decisions/doNotRetry/nextStep`，再用当前文件、diff、status 和最新规则复核。
 - 任务涉及路径、文件名、类名、方法名、错误日志、调用链、构建、测试、前后端代码规范。
 - 任务目标、代码证据或上下文体现写代码风格、智能化抽象、公共接口/方法/类/文件抽离、泛型/any 边界、减少魔法值、抽常量、枚举化、配置化、去掉硬编码或避免重复逻辑。
 - 代码片段、IDE 截图、diff、lint/typecheck 输出、阅读或检索命中的文件中已经出现明显硬编码、重复 if/set、外部协议常量、平台编码、中文字符乱码、字符集不一致、配置写死、分层错位、导出接口/API 边界缺少必要注释、组件/页面属性使用裸 `any`、前端语法/缩进规范未纳入环境缓存、环境缓存仍依赖单一固定文件名或 hostname 唯一性、旧代码继续违背本 skill 规则。
@@ -58,6 +59,7 @@ description: |
 - 读取完整性、智能扩窗和 Git 历史防回归由 `13-read-expansion-and-history.md` 承载；不能用初始读取窗口、局部 diff 或旧记忆替代必要证据。
 - 当前项目范围、`.codex/local-environment.<profile>.json`、旧版 `.codex/local-environment.json` 强制迁移替换、`.codex/` 忽略规则和工具链缓存由 `06-environment-discovery.md` 与 `14-environment-cache-by-stack.md` 承载；进入构建、测试、运行、lint、typecheck、代码生成等工具链节点前必须自动处理项目根缓存。
 - 当前会话、归档会话、长期 memory、Context Capsule、模型/窗口/模式/插件/技能切换和网络错误后的恢复策略由 `05-delivery-templates.md` 承载；恢复时必须按当前文件证据和最新 skill 规则重新校准，不能让旧记忆冲掉硬约束。
+- 连续性、防复发、Save/Resume 等价协议、项目级记忆隔离、`doNotRetry` 和“已说过/已改过仍再犯”的恢复矩阵由 `16-continuity-and-learning.md` 承载；不能只说“记住了”而不把当前事实、决策、失败路径和下一步写入 Capsule 或被明确授权的持久位置。
 - 上下文窗口压力、自动 compact、手动 compact、`PreCompact`、`PostCompact`、`SessionStart compact`、模型切换和窗口切换都属于恢复事件；压缩前刷新 Capsule，压缩后先重建当前文件/diff/status/规则状态，再继续读取、写入或验证。
 - Java、Python、Vue/React、小程序、并发/异步/批量等落地细节只在命中代码证据、调用链、项目配置、命令节点或风险信号时按 `07`、`08`、`09`、`10`、`11`、`12` 追加读取，避免外层膨胀。
 - 对 JetBrains 项目，优先使用 JetBrains MCP / IDE 工具读取、定位、修改和诊断；只有明确不可用、超时或错误时才使用 Shell。
@@ -72,9 +74,10 @@ description: |
 4. 写代码前做编码风格智能化预检：字面量分类、常量/枚举/配置归属、重复逻辑抽象点、中文字符/字符集风险和可保留局部字面量边界。
 5. 按 `13` 对目标修改单元执行读取完整性检查；局部窗口不足时先智能扩读，再做规则判断。
 6. 按 `13` 对高回归风险或历史语义不清的触碰点执行 git 历史对比，确认旧逻辑意图和最近变更原因。
-7. 调用链阅读中发现相关文件强规则违背时，先判断低风险闭环，成立就写入任务胶囊同步处理。
-8. 修改前再次引用任务编号确认目标。
-9. 只做最小闭环改动，并对本次触碰的已有代码做局部规则对齐。
-10. 执行最轻量验证；凡进入工具链节点，必须先按 `06` 解析 active cache path，并自动处理 profile 环境缓存命名、旧版缓存强制迁移替换、`.codex/` 忽略规则、当前技术栈缓存和可能导致中文乱码的编码/locale 配置。
-11. 最终回复前执行内部触发状态机自检：确认任务胶囊、调用链、局部对齐、抽象抽离、环境缓存、验证和未完成边界均已处理或说明。
-12. 用中文说明变更内容、影响范围和验证结果。
+7. 命中连续性或防复发信号时，按 `16` 恢复 `currentTruth/decisions/doNotRetry/nextStep`，确认哪些旧结论仍有效，哪些被当前事实覆盖。
+8. 调用链阅读中发现相关文件强规则违背时，先判断低风险闭环，成立就写入任务胶囊同步处理。
+9. 修改前再次引用任务编号确认目标。
+10. 只做最小闭环改动，并对本次触碰的已有代码做局部规则对齐。
+11. 执行最轻量验证；凡进入工具链节点，必须先按 `06` 解析 active cache path，并自动处理 profile 环境缓存命名、旧版缓存强制迁移替换、`.codex/` 忽略规则、当前技术栈缓存和可能导致中文乱码的编码/locale 配置。
+12. 最终回复前执行内部触发状态机自检：确认任务胶囊、连续性账本、调用链、局部对齐、抽象抽离、环境缓存、验证和未完成边界均已处理或说明。
+13. 用中文说明变更内容、影响范围和验证结果。

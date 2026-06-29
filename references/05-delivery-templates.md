@@ -36,6 +36,7 @@
 读取预算：最多 ... 个文件，每个默认 ... 行窗口。
 工具状态：已读 ... 个文件；已执行 ... 次工具调用；下一次工具 ...；失败/中断后从 ... 恢复。
 窗口/压缩状态：剩余上下文/压缩风险 ...；compact 触发 manual/auto/unknown；PreCompact/PostCompact/SessionStart compact 状态 ...
+连续性账本：currentTruth ...；decisions ...；doNotRetry ...；nextStep ...
 噪音治理：已摘要/丢弃的大日志、搜索结果、旧假设和无关 stdout ...
 ```
 
@@ -74,6 +75,7 @@ Context Capsule
 读取/历史：完整语义单元 ...；未读边界 ...；git 历史结论 ...
 失败/策略：失败类型 ...；已写入/未写入 ...；切换策略 ...
 窗口/压缩：剩余空间/风险 ...；manual/auto compact ...；恢复事件 ...
+连续性：currentTruth ...；decisions ...；doNotRetry ...；nextStep ...
 噪音治理：已摘要 ...；已丢弃 ...；仍需保留原文 ...
 验证：已跑 ...；未跑原因 ...；仍需验证 ...
 证据：文件路径:行号 - 事实；命令 - 结论
@@ -157,7 +159,8 @@ Context Capsule
 - 长任务阶段固定按“定位 -> 读取 -> 确认调用链 -> 修改 -> 验证”推进；每个阶段完成后输出或刷新中间 Capsule，阶段进行中但可能中断时也输出当前断点。
 - 任意第三方调用、第三方 IDE 集成、MCP/ACP、agent wrapper、终端/CLI、hook、subagent、CI/chatops、`cc switch`、路由转发、未知 wrapper 或模型路由任务中，读取 3 个文件或执行 2 次工具调用后必须输出初始 Capsule，不等待上下文接近阈值。
 - 任意第三方调用或模型路由场景必须按 `02#第三方全流程执行矩阵` 串联入口恢复、胶囊/快照、读取、调用链、局部对齐、抽象抽离、编码乱码、环境缓存、验证、恢复与交付；不能只执行搜索、写入或验证其中一个节点。
-- 一旦本轮已经按编程任务触发 skill，后续每次工具调用、写入、验证和最终回复前都必须按 `02#内部触发状态机与防重置自检` 检查 `activated/references/capsule/scope/callChain/localAlignment/environment/validation` 状态；缺项时 fail-closed，先补齐或说明无法补齐原因。
+- 一旦本轮已经按编程任务触发 skill，后续每次工具调用、写入、验证和最终回复前都必须按 `02#内部触发状态机与防重置自检` 检查 `activated/references/capsule/continuity/scope/callChain/localAlignment/environment/validation` 状态；缺项时 fail-closed，先补齐或说明无法补齐原因。
+- 命中“之前窗口”“上次说过”“已改过”“又犯了”“不要再”“save/resume/session/working context/continuous learning”等信号时，必须追加 `16-continuity-and-learning.md`，并在 Capsule 中维护 `currentTruth/decisions/doNotRetry/nextStep`，不能只依赖模型记忆。
 - 初始 Capsule 输出后，每累计新增读取超过 5 个文件，必须输出或刷新中间 Capsule，记录新增文件、已确认事实、未闭环项和下一步断点。
 - 执行预计耗时超过 30s、输出量大、网络不稳定或可能改变文件的工具调用前必须输出 Capsule 快照，包括 MCP/IDE `findUsages`、`searchFiles`、`executeCommand`、Shell 命令、构建、测试、lint、typecheck、format、codegen、全局搜索、批量读取、批量文件操作、git 历史查询、浏览器/模拟器/外部服务验证和任意第三方调用/agent/wrapper 子任务。
 - 每次修改写入前必须先输出可恢复的中间 Capsule，写明目标文件、锚点、预期写入、回滚点和失败后如何判断已写入/未写入；写入后、验证前后、失败后、策略切换后、新指令插入后，都要确认 Capsule 是否仍覆盖最新任务清单、触碰范围、调用链、强规则同步项、失败状态、验证状态和回滚点。
@@ -181,6 +184,7 @@ Context Capsule
 
 - 原始目标、当前阶段、任务清单状态和用户最新约束。
 - 允许改动和禁止改动，尤其是 API、DTO、数据库、权限、路由、配置键、外部协议和业务语义边界。
+- 连续性账本：当前事实、已定决策、失败勿重试路径、唯一下一步，以及每项证据来源。
 - 已读 reference、触碰范围、直接调用链、影响面、未闭环缺口和回滚点。
 - 强规则同步项、低风险本轮处理项、高风险不处理边界。
 - 编码风格预检结论：新增/保留字面量分类、常量/枚举/配置/字典归属、重复逻辑抽象边界。

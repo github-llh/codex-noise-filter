@@ -51,6 +51,7 @@
 - 读取完整性状态：已完整读取的符号/区间、需要扩读的触发点、仍未读取但可能影响判断的边界。
 - Git 历史状态：是否需要查历史、触发原因、已读提交/区间、历史意图结论和不能确认的兼容风险。
 - 上下文保留状态：本轮必须进入 Context Capsule 的任务清单、证据锚点、已写入/未写入文件、失败策略、验证状态、回滚点和下一步。
+- 连续性账本：按 `16-continuity-and-learning.md` 记录 `currentTruth`、`decisions`、`doNotRetry` 和 `nextStep`；若用户提到之前窗口、已说过、已改过、又犯了或不要再试某方案，必须写明旧口径是否已被当前文件/diff/status 复核。
 - 上下文权威状态：当前会话、Context Capsule、归档会话、长期 memory、当前文件/diff、最新 skill/reference 的采用关系；若发生模型/窗口/模式/插件/技能/网络恢复事件，记录重新校准结论。
 - 环境缓存状态：当前项目 active cache path 是否存在、是否为 profile 文件、是否从旧版 `.codex/local-environment.json` 迁移、workspaceRoot 是否匹配、命中的工具链缓存项、是否需要验证/更新、`.codex/` 忽略状态；若本轮不执行工具链命令，要说明只核对范围不更新缓存。
 - 入口与路由状态：用户消息、任意第三方调用、第三方 agent/app/CLI、IDE 插件、MCP/ACP、hook、subagent、CI/chatops/webhook、`cc switch`、router/gateway/proxy/adapter、自定义 wrapper、未知转发层、模型/供应商路由等入口是否参与；若有转发或改写，记录已恢复的原始意图、cwd、文件、命令、日志、diff 和仍不可信的包装层结论。
@@ -96,7 +97,7 @@
 | 编码与乱码 | 看到中文、非 ASCII 文案、乱码字符、`encoding`/`charset`、`UTF-8`/`GBK`、控制台/编译/页面输出乱码、跨平台文件名或终端输出异常 | 按 `01#跨技术栈编码与中文乱码门禁` 确认文件编码、项目编码配置、终端 locale、编译/构建 charset、前端 meta/header 和验证方式；修复后用最小命令或文件读取确认 | 把乱码当展示问题略过；用个人编辑器默认编码覆盖项目规则 |
 | 环境缓存 | 准备执行构建、编译、测试、lint、format、typecheck、运行、预览、打包、发布前校验或代码生成 | 先按 `06` 解析 active cache path，强制迁移旧版缓存，按 `14` 读取当前技术栈配置并复用/更新缓存；确认 `/.codex/` 忽略规则 | 直接用当前 shell 全局命令；第三方已跑命令但没有核对 root/cache |
 | 验证 | 写入后、第三方声称已验证、工具链失败后、准备交付前 | 选择覆盖触碰范围的最轻量非交互验证；判断 root/workspace、命令、环境缓存、触碰范围覆盖和失败归因；无法运行时说明缺口 | 不跑验证也不说明；把外层工具未知 root 的结果当通过 |
-| 恢复与交付 | 网络断开、工具超时、上下文压缩、模型切换、新窗口继续、最终回复前 | 读取当前文件、`git diff`、`git status`、最近 Capsule 和工具快照，确认已写入/未写入、未验证项、风险边界和下一步；最终用中文说明变更与验证 | 从零重扫或凭旧记忆继续；遗漏未验证和回滚点 |
+| 恢复与交付 | 网络断开、工具超时、上下文压缩、模型切换、新窗口继续、最终回复前 | 读取当前文件、`git diff`、`git status`、最近 Capsule 和工具快照，确认已写入/未写入、未验证项、风险边界和下一步；命中连续性信号时按 `16` 复核 `currentTruth/decisions/doNotRetry/nextStep`；最终用中文说明变更与验证 | 从零重扫或凭旧记忆继续；遗漏未验证和回滚点；重复已知失败路径 |
 
 矩阵中的动作是同一工作流的内部节点，不需要用户额外点名。若外层运行环境无法显示中间 Capsule，也必须在可输出的最近时机补发最新快照；若宿主完全不支持中间输出，则在恢复或最终回复中报告最近断点、已写入/未写入、验证状态和缺失的快照风险。
 
@@ -147,6 +148,7 @@ AGENTS 与 skill 路径必须按当前宿主、当前用户和平台解析，不
 - `references`：已读取 `SKILL.md`、`00-index.md` 和当前任务命中的 reference；若只读到 AGENTS 兜底矩阵，也要记录为 `fallbackOnly`，并尽快补读 skill。
 - `dynamicScope`：已从当前宿主、当前工具调用、cwd/workspace、文件扩展名、配置文件、命令、日志、diff、补丁、active cache path 和本机环境证据推导本轮技术栈、工具链、验证范围和追加 reference；平台名、agent 名和技术栈名只作为提示，不是白名单。
 - `capsule`：已有任务胶囊或 Context Capsule，记录目标、阶段、允许/禁止范围、已读文件、工具计数、已写入/未写入、验证状态和回滚点。
+- `continuity`：已有连续性账本，记录 `currentTruth`、`decisions`、`doNotRetry`、`nextStep` 和证据来源；命中“之前窗口/已说过/已改过/不要再/又犯了”时必须存在。
 - `scope`：已确认触碰范围、禁止范围、当前 Git root/worktree、当前文件原文和 diff。
 - `callChain`：已确认直接调用方、被调方、配置入口、影响面和回滚点；未闭环时不得写入。
 - `localAlignment`：已检查注释契约、魔法值/硬编码、重复逻辑、抽象抽离时机、类型/any 边界、安全边界、文件归属和旧代码一致性。
@@ -166,11 +168,13 @@ fail-closed 规则：
 - 若 `activated` 为真但缺少 `references`，先补读 `SKILL.md`、`00-index.md` 和命中的 reference；无法补读时按 AGENTS 兜底矩阵执行，并记录风险。
 - 若缺少 `dynamicScope`，先从当前证据重建宿主/工具/技术栈/命令/缓存映射，再追加对应 reference；不能因为当前工具、平台、语言或框架未列名就只执行普通聊天或简化工作流。
 - 若缺少 `capsule`，先输出或刷新任务胶囊；如果宿主不支持中间输出，必须在下一次可输出内容中补发。
+- 若命中连续性或防复发信号但缺少 `continuity`，先读 `16-continuity-and-learning.md`，再用当前文件、`git diff`、`git status`、最近 Capsule 和必要 memory/rollout 线索重建 `currentTruth/decisions/doNotRetry/nextStep`；不能只说“已记住”。
 - 若准备写入但缺少 `scope` 或 `callChain`，停止写入，补读当前文件、diff 和直接调用链。
 - 若已写入但缺少 `localAlignment`，先回扫同一语义单元和直接调用链，不直接进入最终回复。
 - 若准备执行工具链命令但缺少 `environment`，先按 `06` + `14` 解析 active cache path；不能直接使用当前 shell 或第三方已跑命令。
 - 若准备交付但缺少 `validation`，先执行最轻量验证；无法执行时说明具体缺口，不能把外层 Build 文案当作已验证。
 - 若模型或第三方 wrapper 让执行流看起来“重置”，先读当前文件、`git diff`、`git status`、最近 Capsule 和工具输出，重建状态机后从断点继续。
+- 若连续两次以上走同一失败假设或同一命令失败，必须把该路径写入 `doNotRetry`，换成能区分假设的最小证据检查后再继续。
 
 第三方输出的“已修改”“已替换”“Build 完成”“已验证”只允许更新状态机中的证据字段；不能直接把 `localAlignment`、`environment` 或 `validation` 标记为完成，除非能证明命令 root、active cache path、触碰范围覆盖和当前 diff 都匹配。
 

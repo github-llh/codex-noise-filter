@@ -4,7 +4,7 @@
 
 **A Codex skill for coding-task noise reduction and indexed rule routing**
 
-Reduce context noise · enforce call-chain checks · load rules progressively · align new and existing code · prevent magic values proactively
+Reduce context noise · enforce call-chain checks · load rules progressively · align new and existing code · prevent cross-window regressions
 
 ![Skill](https://img.shields.io/badge/Codex%20Skill-codex--noise--filter-2563eb)
 ![Routing](https://img.shields.io/badge/Routing-indexed%20references-16a34a)
@@ -27,6 +27,7 @@ Use it for:
 - Multi-file investigation, cross-module backend analysis, Maven builds, frontend fixes, Mini Program native/uni-app/Taro work, and Python script/service/package/test work.
 - Requests forwarded through any third-party invocation, Claude Code, Gemini CLI, Cline, Roo Code, aider, OpenCode, Continue, Cursor/Windsurf, ACP/MCP, hooks, subagents, CI/chatops, `cc switch`, model/provider routers, gateways, proxies, custom wrappers, unknown forwarding layers, or future tools when the payload still involves code reads, edits, builds, tests, lint, format, typecheck, debugging, or refactoring.
 - Current tools or stacks not listed in this README when the payload still includes cwd, file extensions, config files, commands, logs, diffs, patches, encoding/mojibake signals, or toolchain actions. Treat those as unknown third-party forwarding and dynamically add the closest references, environment cache checks, and validation scope.
+- Continuity problems such as "we already said/changed this in a previous window", "do not retry that approach", "continue from the last conclusion", or "save/resume context", where Codex should first restore current truth, decisions, do-not-retry paths, and the single next step.
 - Signals that the task needs lower token usage, concise evidence, reproducible reasoning, narrower file reads, or preserved evidence chains.
 
 ## Why Use It
@@ -45,6 +46,7 @@ Many coding-task failures are not caused by missing coding ability. They come fr
 | Plan/Goal, resume, or cross-window work can forget constraints. | Plan/Goal/context restoration must still use indexed rules and Context Capsules. |
 | A task forwarded by any third-party invocation, agent, app, CLI, hook, MCP/ACP, subagent, CI bot, unknown wrapper, or `cc switch`/router may be treated as plain tool execution. | Treat the entrypoint and router as evidence only; recover the original task from cwd, files, commands, logs, diffs, and tool actions, then trigger indexing, local alignment, and validation internally. |
 | Unlisted platforms, agents, or new stacks may be misread as "outside the rules". | Names are only routing hints. Scope is added dynamically from tools, files, configs, commands, cache, and local environment evidence; unknown stacks still use cross-stack gates and the lightest validation. |
+| After a window switch, the model may forget what was already said, changed, or proven failed. | `16-continuity-and-learning.md` preserves `currentTruth/decisions/doNotRetry/nextStep` and revalidates old conclusions against current files, diff, status, and the latest rules. |
 
 ## Usage
 
@@ -215,6 +217,7 @@ More scenarios are in [`examples/`](examples/). Team rollout templates are in [`
 | Environment discovery | For builds, compilation, tests, runs, previews, or pre-release checks, read stack-specific project facts such as `pom.xml`, `pyproject.toml`, `package.json`, and Mini Program config, then validate and reuse `.codex/local-environment.<profile>.json`; legacy `.codex/local-environment.json` is only a one-time migration input and is no longer used as a fallback after migration. If the cache does not satisfy the command or a failure looks environment-related, discover local candidates, update the cache, retry the original command, and protect it with a root `/.codex/` ignore rule. |
 | Dynamic tool/stack scope | Third-party forwarding, unknown wrappers, unlisted platforms, or new stacks are not judged by a fixed list. Add the smallest references, environment cache checks, and validation scope from the current host, tool action, files/configs/commands/logs/diffs, active cache path, and local environment evidence. |
 | Context management | Treats the Codex model context window and automatic compaction as first-class constraints. Long tasks use Context Capsules to preserve goals, evidence, changes, rollback points, window/compaction state, and next steps, while large logs, repeated search output, and stale hypotheses are summarized to reduce context pollution. |
+| Continuity and regression prevention | Adopts the useful session/context/learning ideas from ECC without adding an external runtime. It records current truth, decisions, do-not-retry paths, and the single next step in Capsules, then verifies them before continuing in a new window. |
 
 ## Layout
 
@@ -248,6 +251,7 @@ references/
   13-read-expansion-and-history.md
   14-environment-cache-by-stack.md
   15-host-skill-portability.md
+  16-continuity-and-learning.md
 ```
 
 `SKILL.md` is intentionally small. It routes the agent to indexed reference files instead of loading every rule at once.
@@ -261,6 +265,7 @@ references/
 - `01-global-engineering-rules.md` only contains globally shared rules, including file ownership, commands, validation, security boundaries, hardcoded values, repeated logic, and comment placement.
 - `02-noise-filter-workflow.md` only contains cross-stack execution gates, context budgets, call-chain checks, and touched-scope alignment. Smart read expansion and Git history regression guards live in `13-read-expansion-and-history.md`, while stack-specific differences route to the matching reference files.
 - `15-host-skill-portability.md` only contains the cross-host Skill/Rules/Workflow/Command/Subagent compatibility matrix, execution order, trigger conditions, and performance budget, so platform lists do not return to the entry file.
+- `16-continuity-and-learning.md` only contains continuity, regression-prevention, Save/Resume-equivalent, project-scoped memory, and `doNotRetry` rules, so session/runtime implementation details do not bloat the entry file.
 - Java backend architecture rules live in `07-java-backend-architecture.md` and should be opened only for layering, file placement, comments, or call chains.
 - Java style rules live in `08-java-style-patterns.md` and should be opened only for enums, validation, Lombok, Optional, functional style, or repeated logic.
 - Concurrency, async, and batch rules live in `09-concurrency-async-batch.md` and should be opened only for high concurrency, idempotency, deadlocks, events, middleware, thread pools, virtual threads, or user-context propagation.
@@ -286,6 +291,7 @@ references/
 - When edits affect behavior semantics, public contracts, historical compatibility, regression risk, or old-logic refactors, automatically read the smallest useful git history evidence with `git log`, `git blame`, `git show`, `git diff`, and `git log -S/-G`. Scope history reads to touched files, semantic units, key tokens, and direct call chains; do not scan the full repository history or use git commands that mutate the worktree.
 - Minimal change is not a reason to ignore strong-rule hits. If hardcoding, repeated logic, hardcoded config, layering mistakes, or comment/security gaps are already inside the touched scope, direct call chain, or related files that must be read for the task, judge low-risk closure first, write it into the task capsule, and fix locally when it holds.
 - Regardless of whether the work is new code, an existing-code edit, Plan, Global/Goal mode, auto-resume, context restoration, cross-window continuation, a local patch, or a follow-up fix, coding tasks must run through the skill index, touched-scope confirmation, call-chain confirmation, and local rule alignment.
+- When the user says a previous window already established, changed, or failed something, restore the continuity ledger from `16-continuity-and-learning.md`: `currentTruth`, `decisions`, `doNotRetry`, and `nextStep`. Revalidate the restored conclusion against current files, `git diff`, `git status`, and the latest skill rules before acting.
 - Regardless of whether the request comes from Codex, any third-party invocation, third-party agent, app, terminal/CLI, IDE extension, MCP/ACP, hook, subagent, CI/chatops/webhook, `cc switch`, model/provider router, gateway/proxy/adapter, custom wrapper, unknown forwarding layer, or future tool, payloads with code evidence or toolchain actions must trigger the skill against the current worktree files and diff. Do not skip indexing, task capsules/snapshots, call-chain checks, local alignment, abstraction checks, encoding/mojibake checks, environment caching, or validation because another tool already handled it, because the model changed, or because a provider router selected a model.
 - Plan stages must also use the skill index. Plans must list applicable references, touched scope, local-alignment items, and acceptance checks.
 - Global/Goal mode must also use the skill index. Each round must restore the goal, applicable references, touched scope, local-alignment items, acceptance checks, and Context Capsule.
@@ -365,6 +371,7 @@ references/
 - When a code snippet, IDE screenshot, or call-chain read exposes an obvious rule violation, locate the real file and direct call chain first. If impact is shallow, file count is small, and compatibility is clear, write it into the task capsule, apply the matching reference, and fix it instead of only listing a follow-up.
 - In Global/Goal mode, restore the Context Capsule before each round. Goal pursuit must not bypass indexing, call-chain checks, or touched-scope alignment.
 - Before and after window switches, model switches, context-window pressure, manual/automatic compact, `PreCompact`, `PostCompact`, or `SessionStart compact`, emit or restore a Context Capsule so goals, evidence, rollback points, and next steps are preserved.
+- In continuity scenarios, the Capsule must carry `currentTruth/decisions/doNotRetry/nextStep`, especially commands or approaches that failed and must not be retried with the same hypothesis. Without explicit user authorization, do not write long-term memory; keep the state in the current Capsule or a project handoff file only when the task or project rules require it.
 - Large tool logs, repeated search output, stale reasoning, and long third-party wrapper narratives should be summarized into key errors, commands, paths/lines, and conclusions instead of being copied back into the main context.
 - When the user inserts a new goal, treat it as an incremental task first and do not reset confirmed call chains by default.
 - The global `AGENTS.md` no longer needs to carry every detail, but it should remain as a fallback entry point.

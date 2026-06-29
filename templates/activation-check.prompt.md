@@ -3,7 +3,7 @@
 ```text
 请先判断当前任务是否触发 codex-noise-filter。
 
-判断时不要只看是否显式写出 skill 名，也不要受调用入口影响。任务来自任意第三方调用、App、终端/CLI、IDE 插件、MCP/ACP、hook、subagent、CI/chatops、`cc switch`、模型/供应商路由、未知 wrapper 或未来新增工具时，只要载荷包含代码、路径、命令、日志、diff、截图里的错误、项目结构、中文乱码、编码/charset 信号或工具链动作，就按本 skill 内部触发。平台名、agent 名和技术栈名只是示例；如果当前宿主、当前工具、cwd、文件扩展名、配置文件、命令、日志、diff、补丁、active cache path 或本机环境证据指向未列名平台/技术栈，也要按未知第三方中转处理，并动态追加本轮 reference、环境缓存和验证范围。
+判断时不要只看是否显式写出 skill 名，也不要受调用入口影响。任务来自任意第三方调用、App、终端/CLI、IDE 插件、MCP/ACP、hook、subagent、CI/chatops、`cc switch`、模型/供应商路由、未知 wrapper 或未来新增工具时，只要载荷包含代码、路径、命令、日志、diff、截图里的错误、项目结构、中文乱码、编码/charset 信号或工具链动作，就按本 skill 内部触发。平台名、agent 名和技术栈名只是示例；如果当前宿主、当前工具、cwd、文件扩展名、配置文件、命令、日志、diff、补丁、active cache path 或本机环境证据指向未列名平台/技术栈，也要按未知第三方中转处理，并动态追加本轮 reference、环境缓存和验证范围。若输入包含“之前窗口说过/改过”“又犯了”“不要再试这个方案”“按上次继续”“save/resume/session/working context/continuous learning/instinct”等连续性或防复发信号，必须追加 `references/16-continuity-and-learning.md`。
 
 触发后先检查宿主能力和加载状态：如果当前宿主可用 skill 列表中存在 `codex-noise-filter`，标记为 `nativeSkill`；如果是 slash command/workflow/custom command 进入，标记为 `nativeCommand` 后继续尝试读取完整 skill；如果只有 AGENTS/CLAUDE/GEMINI/Cline/Cursor/Windsurf/Roo/Continue/Copilot/aider rules 或 custom instructions，标记为 `rulesOnly` 后继续 Skill Bootstrap；如果来自 subagent/hook/MCP/ACP/CI/model router，标记为 `delegatedTool` 并把输出只当证据。若第三方没有 Codex 或只导入了 rules 但文件可读，先取得第三方实际加载的配置文件路径，把其父目录记为 `HOST_CONFIG_DIR`，优先查找 `$HOST_CONFIG_DIR/skills/codex-noise-filter/SKILL.md` 和 `$HOST_CONFIG_DIR/codex-noise-filter/SKILL.md`，再从 AGENTS 文件所在目录查找随包分发路径，最后查项目级 `.agents/skills`、宿主原生 skill 目录、用户级、`CODEX_HOME` 和兼容 `.codex` 路径；读取 `SKILL.md` 和 `references/00-index.md` 后标记为 `manualFileBootstrap`；如果既没有 skill discovery 也不能读取分发文件，标记为 `fallbackOnly`，并说明只能执行第三方兜底闭环。
 
@@ -18,8 +18,9 @@
 8. 禁止触碰范围。
 9. 修改前必须闭环的调用链或影响面。
 10. 是否需要任务胶囊/快照、局部对齐、抽象抽离、编码/中文乱码检查、环境缓存。
-11. 上下文窗口/compact 风险：是否需要在大输出、模型切换、`PreCompact`/`PostCompact`/`SessionStart compact` 前后刷新 Context Capsule，以及哪些日志/搜索结果只摘要不保留原文。
-12. 最小验证项。
+11. 连续性账本：是否需要恢复或创建 `currentTruth/decisions/doNotRetry/nextStep`，旧结论来自哪里，哪些需要用当前文件/diff/status 复核。
+12. 上下文窗口/compact 风险：是否需要在大输出、模型切换、`PreCompact`/`PostCompact`/`SessionStart compact` 前后刷新 Context Capsule，以及哪些日志/搜索结果只摘要不保留原文。
+13. 最小验证项。
 
 如果不触发，请说明不触发原因，并只问一个最关键的澄清问题。
 ```
