@@ -64,7 +64,7 @@
 2. 从当前证据识别实际工具链：命令名、脚本名、文件扩展名、最近配置文件、lockfile、错误类型、IDE 配置和 active cache path。产品名或 agent 名只作为线索，不参与工具链优先级。
 3. 只读取命中的技术栈配置：Java/Maven、Node/前端、小程序、Python 或其他最贴近的项目配置。未命中某技术栈时，不为补齐缓存去扫描、验证或写入该技术栈字段。
 4. 若未知技术栈没有专属 reference，仍使用本文件的 active cache path、`.codex/` 忽略规则、locale/encoding 证据和 `01` 的跨技术栈验证策略；命令选择来自项目脚本、README、CI 或第三方载荷，不能凭个人习惯臆造。
-5. 第三方已经执行过命令时，只有能证明 root/workspace、命令、工具版本、active cache path、触碰范围覆盖和当前 diff 匹配，才可作为验证证据；否则补做最轻量非交互验证或说明无法验证。
+5. 第三方已经执行过命令时，只有能证明 root/workspace、命令、工具版本、active cache path、原始问题、触碰范围覆盖和当前 diff 匹配，才可作为验证证据；否则补做最小充分非交互验证或说明无法验证。
 
 写入缓存时必须记录当前证据来源：
 
@@ -77,7 +77,7 @@
 
 - 不能把当前 shell 可用的 `mvn/node/python` 当作项目工具链事实。
 - 不能把某个第三方 agent 的默认工作目录当作项目根。
-- 不能把未列名工具或未列名技术栈视为“不需要缓存/验证”；至少要完成项目根、命令来源、active cache path 和最轻量验证边界。
+- 不能把未列名工具或未列名技术栈视为“不需要缓存/验证”；至少要完成项目根、命令来源、active cache path 和最小充分验证边界。
 - 不能为了第三方兼容写入个人绝对路径、token、密钥、上传凭证或供应商特有的不可迁移路径。
 
 ## 跨系统缓存文件命名
@@ -134,7 +134,7 @@
    - 不为了处理乱码直接全局改 shell 配置、IDE 全局编码或系统 locale；只能记录当前项目命令需要的环境变量、项目配置和验证命令。
 5. 缓存不存在：
    - 创建 `<project-root>/.codex/` 目录。
-   - 按当前命令命中的技术栈读取项目配置，再按 `14-environment-cache-by-stack.md` 查找本机候选、执行最小验证。
+   - 按当前命令命中的技术栈读取项目配置，再按 `14-environment-cache-by-stack.md` 查找本机候选、执行工具可用性验证。
    - 验证通过后创建 active cache path，只写当前命令需要且已验证的字段，不为补齐 schema 写空值或猜测值。
 6. 执行命令：使用缓存路径或新验证路径执行原目标命令；不要回退到未验证全局命令。
 7. 命令失败：
@@ -189,7 +189,7 @@
    - `/usr/local/bin/pnpm`
    - `/Applications/wechatwebdevtools.app/Contents/MacOS/cli`
    - `/Applications/微信开发者工具.app/Contents/MacOS/cli`
-5. 找到候选后执行最小验证。
+5. 找到候选后执行工具可用性验证。
 6. 验证通过后写入 active cache path，下次优先复用。
 
 ## 自动环境缓存维护
@@ -222,7 +222,7 @@
 4. 查找本机候选：
    - 只在缓存或项目配置无法提供可用路径时执行。
    - 只查当前任务需要的候选路径，不全盘扫描。
-5. 执行最小验证：
+5. 执行工具可用性验证：
    - Maven/JDK、Node、Python、小程序开发者工具按 [公共验证矩阵](#公共验证矩阵) 验证。
    - Maven 后端若项目声明 Java 8，但默认 `mvn -version` 使用更高 JDK，应优先尝试带 `JAVA_HOME=<project-jdk>` 的验证命令，并把项目目标 Java 版本和验证 JDK 分开记录。
    - 命中编码/乱码风险时，同时记录本次命令使用的 locale、source encoding、前端规范文件、Python 文件 IO 编码或小程序/页面 charset 依据；只记录可验证证据，不写未验证猜测。
@@ -270,7 +270,7 @@
 
 只验证当前任务实际需要的工具；不要为了补全缓存而安装、扫描或验证无关技术栈。
 
-| 场景 | 最小验证 | 记录要点 | 差异规则 |
+| 场景 | 工具可用性验证 | 记录要点 | 差异规则 |
 | --- | --- | --- | --- |
 | Maven/JDK | `<mavenExecutable> -version`，必要时验证 `JAVA_HOME` 和 `java -version` | `mavenRoot`、`modulePath`、`maven.executable`、`maven.localRepository`、`java.home/version/versionRequirement`、来源 | 先按 `14` 的 Maven/Java 环境缓存匹配，再按 `03` 执行构建 |
 | Node/前端 | `node --version`，项目实际包管理器 `--version`，必要时验证 `corepack --version` | `node.executable`、`node.version`、`packageManager.name/executable/version`、`packageJson`、`packageRoot`、lockfile、scripts、selectedCommand、`frontendQuality` 规范文件集合、来源 | 先按 `14` 的 Node/前端环境缓存匹配，再按 `11` 执行构建、lint、format 或 typecheck |

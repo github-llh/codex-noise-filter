@@ -6,6 +6,7 @@
 Current Truth
 - Goal:
 - Verified facts:
+- Root cause:
 - Touched scope:
 - Unverified boundaries:
 
@@ -24,10 +25,12 @@ Active Queues
 
 Interfaces
 - Entry files:
+- Trigger/data source:
 - Commands:
 - Configs:
 - Distribution surfaces:
 - Call-chain anchors:
+- Validation coverage:
 
 Latest Execution Notes
 - What worked:

@@ -76,7 +76,7 @@
    - `nativeCommand`：先读取命令/workflow 当前内容；若可读文件，再按 Skill Bootstrap 读取 `SKILL.md` 和 `00-index.md`。
    - `manualFileBootstrap` / `rulesOnly`：按宿主配置目录、AGENTS 目录、项目级 `.agents/skills`、宿主原生目录、用户级 `.agents`、`CODEX_HOME` 和兼容 `.codex` 的顺序查找首个存在的 `SKILL.md`，读取成功后立即停止查找。
    - `fallbackOnly`：不再查找平台清单，直接执行第三方兜底闭环。
-6. **内部状态机**：建立 `activated/loadState/hostCapability/references/dynamicScope/capsule/scope/callChain/localAlignment/environment/securityBoundary/surfaceHealth/qualityGate/validation/guardLoop`，后续工具调用、写入、验证和最终回复前都按 `20-automatic-guard-loop.md` 自检。
+6. **内部状态机**：建立 `activated/loadState/hostCapability/references/dynamicScope/capsule/scope/rootCause/callChain/localAlignment/environment/securityBoundary/surfaceHealth/qualityGate/validation/guardLoop`，后续工具调用、写入、验证和最终回复前都按 `20-automatic-guard-loop.md` 自检。
 7. **动态追加范围**：根据触碰文件、最近配置、命令、错误、diff、active cache path、本机环境、外部内容、供应链表面和分发状态追加 `01`、`02`、`06`、`14`、`17`、`18`、`19` 和命中的技术栈 reference。
 8. **最小执行与验证**：只做当前触碰范围的最小闭环；第三方“已验证/已修改”必须用当前 root、diff、active cache path、命令和触碰范围复核，并按 `18` 记录验证矩阵。
 
@@ -95,9 +95,9 @@
 
 不触发：纯生活对话、无代码上下文的一般知识问答、无法从当前仓库/转发载荷/历史任务恢复编程目标的空泛指令。
 
-## 性能强化
+## 读取效率强化
 
-性能优化不能降低触发准确度；只能减少无关读取和无效输出。
+读取效率优化不能降低触发准确度、根因追踪深度、调用链闭环或验证覆盖；只能减少无关读取和无效输出。
 
 - **先读能力描述，不读全量文件**：优先使用宿主的 skill 列表、tool description、command/workflow 元数据、rules 面板或配置路径；只有命中本 skill 后才读完整 `SKILL.md`。
 - **路径探测有上限**：手动 bootstrap 只检查当前宿主配置目录、AGENTS 目录、当前工作区、用户级兼容目录和 `CODEX_HOME`。命中首个有效 `SKILL.md` 后停止；除非宿主官方支持递归 discovery，不手写全盘递归扫描。

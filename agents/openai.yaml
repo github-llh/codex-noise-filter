@@ -1,8 +1,8 @@
 interface:
   display_name: "codex-noise-filter"
-  short_description: "编程任务去噪、规则路由、自动 Guard Loop、调用链和验证闭环。"
+  short_description: "编程任务去噪、规则路由、自动 Guard Loop、根因调用链和验证闭环。"
   brand_color: "#2563EB"
-  default_prompt: "按 codex-noise-filter 的索引读取最小规则集，运行自动 Guard Loop，确认触碰范围、调用链、局部对齐项、安全/分发边界和验证命令。"
+  default_prompt: "按 codex-noise-filter 的索引读取必要规则集，运行自动 Guard Loop，确认触碰范围、根因、调用链、局部对齐项、安全/分发边界和最小充分验证命令。"
 
 policy:
   allow_implicit_invocation: true
