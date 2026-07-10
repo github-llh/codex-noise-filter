@@ -2,42 +2,47 @@
 set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-OUT_DIR="${1:-"$ROOT_DIR/dist/codex-noise-filter-plugin"}"
+OUT_ROOT="${1:-"$ROOT_DIR/dist/marketplace"}"
 
-case "$OUT_DIR" in
+case "$OUT_ROOT" in
   /*) ;;
-  *) OUT_DIR="$(pwd)/$OUT_DIR" ;;
+  *) OUT_ROOT="$(pwd)/$OUT_ROOT" ;;
 esac
 
-if [ "$OUT_DIR" = "$ROOT_DIR" ] || [ "$OUT_DIR" = "/" ]; then
-  echo "Refusing to write plugin package into an unsafe output directory: $OUT_DIR" >&2
+if [ "$OUT_ROOT" = "/" ] || [ "$OUT_ROOT" = "$ROOT_DIR" ]; then
+  echo "Refusing unsafe output root: $OUT_ROOT" >&2
   exit 2
 fi
 
-SKILL_DIR="$OUT_DIR/skills/codex-noise-filter"
+case "$OUT_ROOT/" in
+  "$ROOT_DIR/dist/"*) ;;
+  "$ROOT_DIR/"*)
+    echo "Refusing to write build output into source directories: $OUT_ROOT" >&2
+    exit 2
+    ;;
+esac
 
-rm -rf "$OUT_DIR/.codex-plugin" "$SKILL_DIR"
-mkdir -p "$SKILL_DIR" "$OUT_DIR/.codex-plugin"
+PLUGIN_DIR="$OUT_ROOT/plugins/codex-noise-filter"
+STAGE_DIR="$(mktemp -d "${TMPDIR:-/tmp}/codex-noise-filter-plugin.XXXXXX")"
+trap 'rm -rf "$STAGE_DIR"' EXIT
 
-cp "$ROOT_DIR/distribution/plugin/.codex-plugin/plugin.json" "$OUT_DIR/.codex-plugin/plugin.json"
+python3 "$ROOT_DIR/scripts/validate-project.py"
 
-for path in \
-  SKILL.md \
-  README.md \
-  README.en.md \
-  CHANGELOG.md \
-  LICENSE \
-  CODE_OF_CONDUCT.md \
-  CONTRIBUTING.md \
-  SECURITY.md \
-  agents \
-  examples \
-  references \
-  templates
-do
-  cp -R "$ROOT_DIR/$path" "$SKILL_DIR/"
-done
+mkdir -p "$STAGE_DIR/.codex-plugin" "$STAGE_DIR/skills/codex-noise-filter"
+cp "$ROOT_DIR/distribution/plugin/.codex-plugin/plugin.json" "$STAGE_DIR/.codex-plugin/plugin.json"
+cp "$ROOT_DIR/LICENSE" "$STAGE_DIR/LICENSE"
+cp "$ROOT_DIR/SKILL.md" "$STAGE_DIR/skills/codex-noise-filter/SKILL.md"
+cp -R "$ROOT_DIR/agents" "$STAGE_DIR/skills/codex-noise-filter/agents"
+cp -R "$ROOT_DIR/references" "$STAGE_DIR/skills/codex-noise-filter/references"
 
-find "$OUT_DIR" -name ".DS_Store" -delete
+find "$STAGE_DIR" -name '.DS_Store' -delete
+python3 "$ROOT_DIR/scripts/validate-project.py" --plugin "$STAGE_DIR"
 
-echo "Plugin package written to: $OUT_DIR"
+mkdir -p "$OUT_ROOT/plugins"
+rm -rf "$PLUGIN_DIR"
+mv "$STAGE_DIR" "$PLUGIN_DIR"
+trap - EXIT
+cp "$ROOT_DIR/distribution/marketplace.json" "$OUT_ROOT/marketplace.json"
+python3 "$ROOT_DIR/scripts/validate-project.py" --marketplace-root "$OUT_ROOT"
+
+echo "Marketplace package written to: $OUT_ROOT"

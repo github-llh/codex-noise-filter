@@ -1,30 +1,20 @@
 # 小程序场景
 
-## 触发 Prompt
+## Prompt
 
 ```text
-$codex-noise-filter 检查这个小程序页面，先识别原生/uni-app/Taro，再确认分包、依赖边界和模拟器验证方式。
+$codex-noise-filter 解决 uni-app 在 HBuilderX 中的启动失败，先判断宿主插件链还是业务源码问题。
 ```
 
-## 应读取
+## 路由
 
-- `SKILL.md`
-- `references/00-index.md`
-- `references/02-noise-filter-workflow.md`
-- `references/12-miniprogram-development.md`
-- uni-app/Taro 命中 Vue/React 语法时追加 `references/11-frontend-vue-react.md`
-- 通用布局状态命中时追加 `references/04-frontend-rules.md`
-- 环境或开发者工具路径未知时追加 `references/06-environment-discovery.md` 和 `references/14-environment-cache-by-stack.md`
+- `references/02-execution-workflow.md`
+- `references/03-environment-and-validation.md`
+- `references/08-miniprogram.md`
+- 涉及 Vue/React 语法时追加 `references/07-frontend.md`
 
-## 期望行为
+## 期望
 
-- 先识别原生微信小程序、uni-app、Taro 或其他跨平台框架。
-- 按框架选择对应语法：原生走 `Page`、`Component`、`wxml`、`wxss`、`setData`；uni-app/Taro 复用 Vue/React 规则。
-- 主包接近限制、首屏变慢、重功能局部使用或业务域天然独立时评估分包。
-- 运行优先使用官方开发者工具模拟器或项目已有 CLI/CI，并说明是否需要真机验证。
-
-## 禁止行为
-
-- 不把 `dist/` 或 `unpackage/dist/` 当长期源码维护。
-- 不凭旧经验写死平台包体积限制。
-- 不忽略 appid、上传凭证、白名单、登录、支付、订阅消息等平台边界。
+- 确认 HBuilderX/CLI、插件、环境变量和生成链入口。
+- 不修改 `unpackage/dist` 等产物来掩盖宿主故障。
+- 无法运行宿主时明确静态验证与人工验证边界。

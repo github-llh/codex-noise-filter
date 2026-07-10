@@ -1,44 +1,48 @@
 # Distribution
 
-本目录保存分发相关模板，不是运行时 skill 入口。
+`distribution/` 保存 plugin manifest 与 marketplace 源模板，不是运行时 skill 入口。
 
-## Skill vs Plugin
+## 构建
 
-- `SKILL.md`、`references/`、`agents/openai.yaml` 是 skill 编写结构，适合仓库级或用户级直接安装。
-- `.codex-plugin/plugin.json`、`skills/<name>/` 和 `marketplace.json` 是 plugin 分发结构，适合让 Codex App/CLI 通过插件目录安装。
-
-## Build a Local Plugin Package
-
-从仓库根目录运行：
+从仓库根运行：
 
 ```bash
 scripts/build-plugin-package.sh
 ```
 
-默认输出到：
+默认生成：
 
 ```text
-dist/codex-noise-filter-plugin/
-  .codex-plugin/plugin.json
-  skills/codex-noise-filter/
+dist/marketplace/
+  marketplace.json
+  plugins/codex-noise-filter/
+    .codex-plugin/plugin.json
+    LICENSE
+    skills/codex-noise-filter/
+      SKILL.md
+      agents/openai.yaml
+      references/
 ```
 
-发布或放入 marketplace 时，使用 `dist/codex-noise-filter-plugin/` 作为插件根目录。
+这个输出目录本身就是 local marketplace root，`marketplace.json` 的 `source.path` 与插件位置一致。
 
-新增、删除或重命名 `references/`、`templates/`、`agents/` 或 manifest 相关文件后，先按 `references/19-installation-health-and-surface-audit.md` 检查 README、模板、构建脚本、manifest 和 marketplace 引用；若涉及自动触发、范围追加或防断流，还要确认 `references/20-automatic-guard-loop.md` 已被索引、模板和构建产物覆盖，再重新构建插件包。
+## 源与产物
 
-## Repo Marketplace Example
+- 根目录 `SKILL.md`、`agents/`、`references/` 是 canonical skill source。
+- `distribution/plugin/.codex-plugin/plugin.json` 是 canonical plugin manifest source。
+- `distribution/marketplace.json` 是 canonical marketplace source。
+- `dist/` 是可重建产物，不直接编辑、不提交。
 
-`distribution/marketplace.json` 是 repo/team marketplace 示例。若使用它，把构建后的插件放到 marketplace 根目录的：
+仓库 README、CHANGELOG、examples、templates 和维护脚本不会复制进运行时 skill，避免增加安装包上下文和重复事实。
 
-```text
-plugins/codex-noise-filter/
+## 验证
+
+构建脚本会在复制前验证源码、复制后验证临时产物，并在写入 marketplace 后再次验证完整根目录。也可以独立运行：
+
+```bash
+python3 scripts/validate-project.py
+python3 scripts/validate-project.py --plugin dist/marketplace/plugins/codex-noise-filter
+python3 scripts/validate-project.py --marketplace-root dist/marketplace
 ```
 
-然后让 marketplace 条目中的 `source.path` 保持：
-
-```text
-./plugins/codex-noise-filter
-```
-
-个人本机安装仍可直接使用 `$HOME/.agents/skills/codex-noise-filter/`，不强制走插件分发。
+本 plugin 不声明 hooks、MCP server 或 app；若未来增加，必须先有真实文件、权限说明和运行验证，再更新 manifest。

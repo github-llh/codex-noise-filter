@@ -1,29 +1,20 @@
 # Vue / React 场景
 
-## 触发 Prompt
+## Prompt
 
 ```text
-$codex-noise-filter 处理这个 Vue/React 组件问题，先确认框架版本、组件归属、状态契约和验证命令。
+$codex-noise-filter 修复这个页面筛选不生效的问题，核对参数传递链并运行 typecheck/build。
 ```
 
-## 应读取
+## 路由
 
-- `SKILL.md`
-- `references/00-index.md`
-- `references/02-noise-filter-workflow.md`
-- `references/11-frontend-vue-react.md`
-- 涉及通用布局、表单、状态契约时追加 `references/04-frontend-rules.md`
-- 环境路径未知时追加 `references/06-environment-discovery.md` 和 `references/14-environment-cache-by-stack.md`
+- `references/01-engineering-baseline.md`
+- `references/02-execution-workflow.md`
+- `references/03-environment-and-validation.md`
+- `references/07-frontend.md`
 
-## 期望行为
+## 期望
 
-- 先识别 Vue 2、Vue 3、React、Vite、包管理器和现有组件体系。
-- 新建组件前确认归属、复用价值、公开契约、测试或示例入口。
-- 使用组件时优先复用项目已有组件，保持 props、slots、children、emits/API 边界稳定。
-- 注释放在 props/emits/slots、组件类型、Hook 或复杂契约附近。
-
-## 禁止行为
-
-- 不混用 npm/yarn/pnpm/bun。
-- 不用硬编码掩盖后端契约问题。
-- 不在未确认 Vue 版本时套用 Vue 3 语法到 Vue 2 项目，或反过来。
+- 从控件状态追到请求参数、API client 和后端契约，不把 UI 存在当功能已接通。
+- 保持 props/API 类型和现有组件库模式。
+- 使用项目包管理器运行最小 typecheck/lint/build，不做无关视觉重构。
