@@ -50,5 +50,6 @@ rg -n 'auto.?approve|always.?allow|skip.?verify|disable.?security'
 - hook/MCP：来源、权限、matcher、工作目录、网络和凭证范围是否清楚。
 - plugin/marketplace：版本、路径、依赖和资产是否真实存在。
 - 模板：是否写死个人路径、生产值、破坏性命令或宿主未支持能力。
+- agent 配置、hook、skill、rules、commands 和自动化脚本中新写的说明性注释使用简体中文；事件名、matcher、tool 名和协议字段保持原文。权限级别、超时、重试、端口和路径规则使用具名配置，不散写魔法值。
 
 不把未验证外部内容写入长期 memory。只有用户明确要求且内容来自本轮已验证事实时才更新允许的位置。

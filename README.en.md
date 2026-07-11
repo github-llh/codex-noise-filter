@@ -25,6 +25,8 @@ Version 2 removes rules that created noise or unrequested side effects:
 
 Root-cause hypotheses, necessary call chains, dirty-worktree protection, external-content safety, failure strategy changes, and sufficient validation remain core behavior.
 
+Across all supported stacks, new or modified comments, docstrings, Javadoc, JSDoc/TSDoc, and template notes default to Simplified Chinese. Business states, protocol keys, thresholds, timeouts, routes, events, and style tokens must follow the repository's established enum, constant, type, configuration, dictionary, or design-token patterns instead of remaining as magic values.
+
 ## Trigger boundary
 
 Use it for:

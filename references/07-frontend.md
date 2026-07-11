@@ -24,8 +24,11 @@
 
 - 业务状态使用联合类型、`as const` 对象、枚举或后端生成类型；展示文案与业务 code 分离。
 - URL、token、超时和环境开关使用项目配置；不要把示例地址或截图值复制为真实配置。
+- route name、event name、storage key、请求 header、轮询间隔、分页大小、z-index 层级和断点值按项目模式集中到类型化常量、配置或 design token；颜色、间距、字号和圆角优先复用现有 token，不在组件内重复裸值。
 - 动态 HTML、URL、文件上传下载和外部消息需校验；避免 `v-html`、`dangerouslySetInnerHTML` 等未净化输入。
 - 样式复用 design tokens，避免无依据的全局覆盖和高特异性补丁。
+
+新增或修改的组件说明、JSDoc/TSDoc、props/emits/slots/children 契约、hook/composable 副作用说明以及 template/JSX/style 注释使用简体中文；组件名、属性名、API 字段和第三方术语保持原文。注释只保留业务原因、可访问性、兼容和非显然状态边界。
 
 ## 验证
 

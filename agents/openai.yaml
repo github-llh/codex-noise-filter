@@ -2,7 +2,7 @@ interface:
   display_name: "codex-noise-filter"
   short_description: "以证据收敛编程任务，保护范围并完成真实验证。"
   brand_color: "#2563EB"
-  default_prompt: "使用 codex-noise-filter 判断任务模式，收敛证据与触碰范围，并完成与风险匹配的验证。"
+  default_prompt: "使用 codex-noise-filter 判断任务模式，收敛证据与触碰范围，统一中文注释并避免魔法值，最后完成与风险匹配的验证。"
 
 policy:
   allow_implicit_invocation: true

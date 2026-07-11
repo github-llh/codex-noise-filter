@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Validate the source skill and an optional built plugin using stdlib only."""
+"""仅使用标准库验证源码 skill，以及可选的 plugin 构建产物。"""
 
 from __future__ import annotations
 
@@ -16,6 +16,52 @@ HEX_COLOR_RE = re.compile(r"^#[0-9A-Fa-f]{6}$")
 LINK_RE = re.compile(r"\[[^\]]+\]\(([^)]+)\)")
 DIRECTIONAL = re.compile("[\u202a-\u202e\u2066-\u2069]")
 
+MIN_DESCRIPTION_LENGTH = 40
+MAX_DESCRIPTION_LENGTH = 600
+MAX_REFERENCE_LINES = 100
+MAX_DEFAULT_PROMPTS = 3
+MAX_DEFAULT_PROMPT_LENGTH = 128
+EXPECTED_MARKETPLACE_PLUGIN_COUNT = 1
+SUCCESS_EXIT_CODE = 0
+FAILURE_EXIT_CODE = 1
+
+FRONTMATTER_OPENING = "---\n"
+FRONTMATTER_CLOSING = "\n---\n"
+RELATIVE_PATH_PREFIX = "./"
+HTTPS_PREFIX = "https://"
+
+SKILL_FRONTMATTER_FIELDS = {"name", "description"}
+PLUGIN_ALLOWED_FIELDS = {
+    "id",
+    "name",
+    "version",
+    "description",
+    "skills",
+    "apps",
+    "mcpServers",
+    "interface",
+    "author",
+    "homepage",
+    "repository",
+    "license",
+    "keywords",
+}
+PLUGIN_REQUIRED_FIELDS = {"name", "version", "description", "author", "skills", "interface"}
+PLUGIN_RUNTIME_FIELDS = {"hooks", "mcpServers", "apps"}
+PLUGIN_INTERFACE_REQUIRED_FIELDS = {
+    "displayName",
+    "shortDescription",
+    "longDescription",
+    "developerName",
+    "category",
+    "capabilities",
+    "defaultPrompt",
+}
+MARKETPLACE_INSTALLATION_POLICIES = {"NOT_AVAILABLE", "AVAILABLE", "INSTALLED_BY_DEFAULT"}
+MARKETPLACE_AUTHENTICATION_POLICIES = {"ON_INSTALL", "ON_USE"}
+PLUGIN_ALLOWED_TOP_LEVEL_FILES = {".codex-plugin", "skills", "LICENSE"}
+LOCAL_SOURCE_TYPE = "local"
+
 
 class ValidationError(Exception):
     pass
@@ -23,23 +69,27 @@ class ValidationError(Exception):
 
 def read_frontmatter(skill_path: Path) -> tuple[str, str]:
     text = skill_path.read_text(encoding="utf-8")
-    if not text.startswith("---\n") or "\n---\n" not in text[4:]:
-        raise ValidationError(f"{skill_path}: invalid YAML frontmatter delimiters")
-    raw = text.split("\n---\n", 1)[0][4:]
+    frontmatter_body = text[len(FRONTMATTER_OPENING):]
+    if not text.startswith(FRONTMATTER_OPENING) or FRONTMATTER_CLOSING not in frontmatter_body:
+        raise ValidationError(f"{skill_path}: YAML frontmatter 分隔符无效")
+    raw, _, _ = frontmatter_body.partition(FRONTMATTER_CLOSING)
     fields: dict[str, str] = {}
     for line in raw.splitlines():
         if not line.strip():
             continue
         if ":" not in line:
-            raise ValidationError(f"{skill_path}: unsupported multiline frontmatter")
-        key, value = line.split(":", 1)
+            raise ValidationError(f"{skill_path}: 不支持多行 frontmatter 字段")
+        key, _, value = line.partition(":")
         fields[key.strip()] = value.strip().strip('"')
-    if set(fields) != {"name", "description"}:
-        raise ValidationError(f"{skill_path}: frontmatter must contain only name and description")
+    if set(fields) != SKILL_FRONTMATTER_FIELDS:
+        raise ValidationError(f"{skill_path}: frontmatter 只能包含 name 和 description")
     if not NAME_RE.fullmatch(fields["name"]):
-        raise ValidationError(f"{skill_path}: invalid skill name")
-    if not (40 <= len(fields["description"]) <= 600):
-        raise ValidationError(f"{skill_path}: description length must be 40..600 characters")
+        raise ValidationError(f"{skill_path}: skill 名称无效")
+    if not MIN_DESCRIPTION_LENGTH <= len(fields["description"]) <= MAX_DESCRIPTION_LENGTH:
+        raise ValidationError(
+            f"{skill_path}: description 长度必须在 "
+            f"{MIN_DESCRIPTION_LENGTH} 到 {MAX_DESCRIPTION_LENGTH} 个字符之间"
+        )
     return fields["name"], fields["description"]
 
 
@@ -48,22 +98,22 @@ def validate_markdown_tree(skill_root: Path) -> None:
     for path in markdown:
         text = path.read_text(encoding="utf-8")
         if DIRECTIONAL.search(text):
-            raise ValidationError(f"{path}: contains directional control characters")
+            raise ValidationError(f"{path}: 包含方向控制字符")
         for target in LINK_RE.findall(text):
-            target = target.split("#", 1)[0]
+            target, _, _ = target.partition("#")
             if not target or re.match(r"^[a-z]+://", target):
                 continue
             resolved = (path.parent / target).resolve()
             if not resolved.exists():
-                raise ValidationError(f"{path}: broken local link {target}")
+                raise ValidationError(f"{path}: 本地链接失效 {target}")
 
     skill_text = (skill_root / "SKILL.md").read_text(encoding="utf-8")
     for reference in sorted((skill_root / "references").glob("*.md")):
         relative = reference.relative_to(skill_root).as_posix()
         if relative not in skill_text:
-            raise ValidationError(f"SKILL.md does not link directly to {relative}")
-        if len(reference.read_text(encoding="utf-8").splitlines()) > 100:
-            raise ValidationError(f"{reference}: keep references under 100 lines or add a split")
+            raise ValidationError(f"SKILL.md 未直接链接 {relative}")
+        if len(reference.read_text(encoding="utf-8").splitlines()) > MAX_REFERENCE_LINES:
+            raise ValidationError(f"{reference}: reference 应控制在 {MAX_REFERENCE_LINES} 行内或继续拆分")
 
 
 def validate_repo_markdown(root: Path) -> None:
@@ -72,19 +122,19 @@ def validate_repo_markdown(root: Path) -> None:
             continue
         text = path.read_text(encoding="utf-8")
         if DIRECTIONAL.search(text):
-            raise ValidationError(f"{path}: contains directional control characters")
+            raise ValidationError(f"{path}: 包含方向控制字符")
         for target in LINK_RE.findall(text):
-            target = target.split("#", 1)[0]
+            target, _, _ = target.partition("#")
             if not target or re.match(r"^[a-z]+://", target):
                 continue
             if not (path.parent / target).resolve().exists():
-                raise ValidationError(f"{path}: broken local link {target}")
+                raise ValidationError(f"{path}: 本地链接失效 {target}")
 
 
 def validate_source(root: Path) -> None:
     name, _ = read_frontmatter(root / "SKILL.md")
     if name != root.name:
-        raise ValidationError(f"skill name {name!r} must match folder {root.name!r}")
+        raise ValidationError(f"skill 名称 {name!r} 必须与目录名 {root.name!r} 一致")
     validate_markdown_tree(root)
     validate_repo_markdown(root)
 
@@ -97,78 +147,76 @@ def validate_source(root: Path) -> None:
     )
     for field in required_ui:
         if field not in ui_text:
-            raise ValidationError(f"agents/openai.yaml: missing or stale {field}")
+            raise ValidationError(f"agents/openai.yaml: 字段缺失或已过期 {field}")
 
     manifest = json.loads((root / "distribution/plugin/.codex-plugin/plugin.json").read_text())
     marketplace = json.loads((root / "distribution/marketplace.json").read_text())
     validate_manifest(manifest, root / "distribution/plugin/.codex-plugin/plugin.json")
     if manifest["name"] != name:
-        raise ValidationError("plugin name must match skill name")
+        raise ValidationError("plugin 名称必须与 skill 名称一致")
     validate_marketplace(marketplace, manifest["name"])
 
 
 def validate_manifest(manifest: dict, path: Path) -> None:
-    allowed = {
-        "id", "name", "version", "description", "skills", "apps", "mcpServers",
-        "interface", "author", "homepage", "repository", "license", "keywords",
-    }
-    unknown = set(manifest) - allowed
+    unknown = set(manifest) - PLUGIN_ALLOWED_FIELDS
     if unknown:
-        raise ValidationError(f"{path}: unsupported fields {sorted(unknown)}")
-    required = {"name", "version", "description", "author", "skills", "interface"}
-    missing = required - manifest.keys()
+        raise ValidationError(f"{path}: 包含不支持的字段 {sorted(unknown)}")
+    missing = PLUGIN_REQUIRED_FIELDS - manifest.keys()
     if missing:
-        raise ValidationError(f"{path}: missing fields {sorted(missing)}")
+        raise ValidationError(f"{path}: 缺少字段 {sorted(missing)}")
     if not NAME_RE.fullmatch(manifest["name"]):
-        raise ValidationError(f"{path}: invalid plugin name")
+        raise ValidationError(f"{path}: plugin 名称无效")
     if not SEMVER_RE.fullmatch(manifest["version"]):
-        raise ValidationError(f"{path}: invalid semantic version")
-    if not manifest["skills"].startswith("./"):
-        raise ValidationError(f"{path}: skills path must start with ./")
-    if "hooks" in manifest or "mcpServers" in manifest or "apps" in manifest:
-        raise ValidationError(f"{path}: undeclared runtime surface present")
+        raise ValidationError(f"{path}: 语义化版本无效")
+    if not manifest["skills"].startswith(RELATIVE_PATH_PREFIX):
+        raise ValidationError(f"{path}: skills 路径必须以 {RELATIVE_PATH_PREFIX} 开头")
+    if PLUGIN_RUNTIME_FIELDS.intersection(manifest):
+        raise ValidationError(f"{path}: 存在未声明的运行时表面")
     author = manifest["author"]
     if not isinstance(author, dict) or not author.get("name"):
-        raise ValidationError(f"{path}: author.name is required")
-    if author.get("url") and not author["url"].startswith("https://"):
-        raise ValidationError(f"{path}: author.url must use https")
+        raise ValidationError(f"{path}: 必须提供 author.name")
+    if author.get("url") and not author["url"].startswith(HTTPS_PREFIX):
+        raise ValidationError(f"{path}: author.url 必须使用 https")
 
     interface = manifest["interface"]
-    required_interface = {
-        "displayName", "shortDescription", "longDescription", "developerName",
-        "category", "capabilities", "defaultPrompt",
-    }
-    missing_interface = required_interface - interface.keys()
+    missing_interface = PLUGIN_INTERFACE_REQUIRED_FIELDS - interface.keys()
     if missing_interface:
-        raise ValidationError(f"{path}: missing interface fields {sorted(missing_interface)}")
+        raise ValidationError(f"{path}: 缺少 interface 字段 {sorted(missing_interface)}")
     if not isinstance(interface["capabilities"], list) or not all(
         isinstance(value, str) and value.strip() for value in interface["capabilities"]
     ):
-        raise ValidationError(f"{path}: capabilities must be non-empty strings")
-    if interface.get("websiteURL") and not interface["websiteURL"].startswith("https://"):
-        raise ValidationError(f"{path}: websiteURL must use https")
+        raise ValidationError(f"{path}: capabilities 必须是非空字符串数组")
+    if interface.get("websiteURL") and not interface["websiteURL"].startswith(HTTPS_PREFIX):
+        raise ValidationError(f"{path}: websiteURL 必须使用 https")
     if interface.get("brandColor") and not HEX_COLOR_RE.fullmatch(interface["brandColor"]):
-        raise ValidationError(f"{path}: brandColor must use #RRGGBB")
+        raise ValidationError(f"{path}: brandColor 必须使用 #RRGGBB 格式")
     prompts = interface.get("defaultPrompt", [])
-    if len(prompts) > 3 or any(len(prompt) > 128 for prompt in prompts):
-        raise ValidationError(f"{path}: defaultPrompt exceeds UI limits")
+    if len(prompts) > MAX_DEFAULT_PROMPTS or any(
+        len(prompt) > MAX_DEFAULT_PROMPT_LENGTH for prompt in prompts
+    ):
+        raise ValidationError(
+            f"{path}: defaultPrompt 超出 UI 限制，最多 {MAX_DEFAULT_PROMPTS} 条，"
+            f"每条最多 {MAX_DEFAULT_PROMPT_LENGTH} 个字符"
+        )
 
 
 def validate_marketplace(marketplace: dict, plugin_name: str) -> None:
     entries = [item for item in marketplace.get("plugins", []) if item.get("name") == plugin_name]
-    if len(entries) != 1:
-        raise ValidationError("marketplace must contain exactly one matching plugin")
-    entry = entries[0]
+    if len(entries) != EXPECTED_MARKETPLACE_PLUGIN_COUNT:
+        raise ValidationError("marketplace 必须且只能包含一个同名 plugin")
+    (entry,) = entries
     path = entry.get("source", {}).get("path", "")
-    if not path.startswith("./") or ".." in Path(path).parts:
-        raise ValidationError("marketplace source.path must be a contained ./ relative path")
+    if not path.startswith(RELATIVE_PATH_PREFIX) or ".." in Path(path).parts:
+        raise ValidationError(
+            f"marketplace source.path 必须是以 {RELATIVE_PATH_PREFIX} 开头且不越界的相对路径"
+        )
     policy = entry.get("policy", {})
     if not {"installation", "authentication"} <= policy.keys() or "category" not in entry:
-        raise ValidationError("marketplace entry is missing policy/category")
-    if policy["installation"] not in {"NOT_AVAILABLE", "AVAILABLE", "INSTALLED_BY_DEFAULT"}:
-        raise ValidationError("marketplace installation policy is invalid")
-    if policy["authentication"] not in {"ON_INSTALL", "ON_USE"}:
-        raise ValidationError("marketplace authentication policy is invalid")
+        raise ValidationError("marketplace 条目缺少 policy 或 category")
+    if policy["installation"] not in MARKETPLACE_INSTALLATION_POLICIES:
+        raise ValidationError("marketplace installation 策略无效")
+    if policy["authentication"] not in MARKETPLACE_AUTHENTICATION_POLICIES:
+        raise ValidationError("marketplace authentication 策略无效")
 
 
 def validate_plugin(plugin_root: Path) -> None:
@@ -178,25 +226,24 @@ def validate_plugin(plugin_root: Path) -> None:
     skill_root = plugin_root / "skills" / manifest["name"]
     read_frontmatter(skill_root / "SKILL.md")
     validate_markdown_tree(skill_root)
-    allowed = {".codex-plugin", "skills", "LICENSE"}
-    extras = {path.name for path in plugin_root.iterdir()} - allowed
+    extras = {path.name for path in plugin_root.iterdir()} - PLUGIN_ALLOWED_TOP_LEVEL_FILES
     if extras:
-        raise ValidationError(f"plugin contains unexpected top-level files: {sorted(extras)}")
+        raise ValidationError(f"plugin 包含预期外的顶层文件: {sorted(extras)}")
 
 
 def validate_marketplace_root(root: Path) -> None:
     marketplace = json.loads((root / "marketplace.json").read_text())
     entries = marketplace.get("plugins", [])
     if not entries:
-        raise ValidationError(f"{root}: marketplace contains no plugins")
+        raise ValidationError(f"{root}: marketplace 中没有 plugin")
     for entry in entries:
         source = entry.get("source", {})
-        if source.get("source") != "local":
+        if source.get("source") != LOCAL_SOURCE_TYPE:
             continue
         raw_path = source.get("path", "")
         plugin_root = (root / raw_path).resolve()
         if not plugin_root.is_relative_to(root.resolve()):
-            raise ValidationError(f"{root}: marketplace path escapes root")
+            raise ValidationError(f"{root}: marketplace 路径越出根目录")
         validate_plugin(plugin_root)
 
 
@@ -213,10 +260,10 @@ def main() -> int:
         if args.marketplace_root:
             validate_marketplace_root(args.marketplace_root.resolve())
     except (OSError, json.JSONDecodeError, ValidationError) as exc:
-        print(f"ERROR: {exc}", file=sys.stderr)
-        return 1
-    print("validation passed")
-    return 0
+        print(f"错误: {exc}", file=sys.stderr)
+        return FAILURE_EXIT_CODE
+    print("验证通过")
+    return SUCCESS_EXIT_CODE
 
 
 if __name__ == "__main__":

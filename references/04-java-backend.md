@@ -18,8 +18,11 @@
 
 - 有限业务状态优先复用领域枚举，并保持数据库/API code 兼容。公共字段暂时为 `String` 时，业务赋值和校验仍应通过枚举 code/lookup 集中处理。
 - URL、密钥、超时、重试、阈值、线程池和开关使用类型化配置；默认值必须有业务依据并可验证。
+- HTTP method/status、MediaType、header、字符集和时间格式优先使用框架或标准库常量；缓存 key、消息 topic、任务名和外部协议字段集中到有业务归属的契约常量，避免 `CommonConstants` 式垃圾桶。
 - 重复 DTO/Entity/VO 映射优先项目已有 MapStruct、converter 或 assembler；避免反射型万能拷贝掩盖字段差异。
 - Lombok 按项目风格使用；实体和继承模型谨慎生成 `equals/hashCode/toString`，敏感字段不得意外输出。
+
+新增或修改的 Javadoc、字段注释、事务边界说明和 SQL/Mapper 注释使用简体中文；类名、方法名、注解、异常和外部协议值保持原文。注释只说明业务含义、单位、兼容原因、权限和副作用，不逐行复述实现。
 
 ## 事务与副作用
 
