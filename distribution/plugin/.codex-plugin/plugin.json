@@ -1,7 +1,7 @@
 {
   "name": "codex-noise-filter",
-  "version": "2.0.0",
-  "description": "Evidence-driven coding workflow with scoped investigation, safe edits, and proportionate validation.",
+  "version": "3.0.0",
+  "description": "Evidence-driven coding workflow with automatic continuity recovery, scoped investigation, safe edits, and proportionate validation.",
   "author": {
     "name": "github-llh",
     "url": "https://github.com/github-llh"
@@ -20,12 +20,13 @@
   "interface": {
     "displayName": "codex-noise-filter",
     "shortDescription": "Evidence-driven coding workflow and validation",
-    "longDescription": "Keep coding tasks scoped and evidence-driven: identify intent, trace the necessary cause and call chain, preserve dirty worktrees, make authorized edits, and run proportionate validation.",
+    "longDescription": "Keep coding tasks scoped and evidence-driven, then automatically reconcile goals and on-disk state after compaction, session resume, model changes, or network failures.",
     "developerName": "github-llh",
     "category": "Developer Tools",
     "capabilities": [
       "Interactive",
-      "Write"
+      "Write",
+      "Hooks"
     ],
     "websiteURL": "https://github.com/github-llh/codex-noise-filter",
     "brandColor": "#2563EB",

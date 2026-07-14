@@ -4,26 +4,26 @@
 
 **An evidence-driven coding workflow skill for Codex**
 
-Read less noise · Preserve dirty worktrees · Trace proportionately · Verify for real
+Read less noise · Preserve dirty worktrees · Recover continuity automatically · Verify for real
 
 [简体中文](README.md) · [Changelog](CHANGELOG.md) · [Distribution](distribution/README.md)
 
 </div>
 
-## Version 2 scope
+## Version 3 scope
 
-`codex-noise-filter` supports explanation, diagnosis, review, and implementation in real repositories. It identifies the authorized task mode, narrows evidence from code, diffs, paths, configuration, logs, and failing commands, then closes the task with validation proportional to the touched scope.
+`codex-noise-filter` supports explanation, diagnosis, review, and implementation in real repositories. It identifies the authorized task mode, narrows evidence from code, diffs, paths, configuration, logs, and failing commands, then closes the task with validation proportional to the touched scope. Version 3 adds plugin-bundled continuity hooks that automatically request goal and on-disk-state reconciliation after compaction, session resume or reconnection, model changes, and network or transport failures.
 
-Version 2 removes rules that created noise or unrequested side effects:
+Version 3 preserves the noise and side-effect boundaries established in version 2:
 
 - No Guard Loop before every tool call.
 - No checkpoint after a fixed number of files or tools.
 - No mandatory `.codex/local-environment*.json` writes before validation.
 - No automatic cleanup of unrelated code smells discovered during reading.
-- No guessed third-party host paths or claims about unregistered hooks.
+- No guessed third-party host paths; automatic behavior is claimed only for packaged, validated, host-enabled hooks.
 - Call-chain depth is risk-based: simple failures stop at the complete semantic unit; high-risk changes expand to system boundaries.
 
-Root-cause hypotheses, necessary call chains, dirty-worktree protection, external-content safety, failure strategy changes, and sufficient validation remain core behavior.
+Root-cause hypotheses, necessary call chains, dirty-worktree protection, external-content safety, failure strategy changes, and sufficient validation remain core behavior. Continuity state is limited to the plugin-owned `PLUGIN_DATA` directory and never copies prompts, transcripts, raw tool output, logs, credentials, customer data, or workspace paths.
 
 Across all supported stacks, new or modified comments, docstrings, Javadoc, JSDoc/TSDoc, and template notes default to Simplified Chinese. Business states, protocol keys, thresholds, timeouts, routes, events, and style tokens must follow the repository's established enum, constant, type, configuration, dictionary, or design-token patterns instead of remaining as magic values.
 
@@ -35,6 +35,7 @@ Use it for:
 - Diffs, paths, stack traces, build/test/lint/typecheck/CI output.
 - Java/Maven, Python, Vue/React/TypeScript, mini programs, uni-app, and Taro.
 - Skill, plugin, AGENTS, hook, MCP, manifest, marketplace, and agentic supply-chain audits.
+- Task recovery after context compaction, session resume or reconnection, model switches, working-directory changes, and network or transport failures.
 
 Do not use it for standalone general knowledge, generic advice without repository context, translation, or ordinary prose editing.
 
@@ -46,7 +47,8 @@ Do not use it for standalone general knowledge, generic advice without repositor
 4. Start from the symptom or desired behavior, read the complete semantic unit, and expand the call chain only as risk requires.
 5. Change only the authorized scope and direct dependencies required by the goal.
 6. Run the smallest sufficient mix of static checks, target build/tests, and diff review.
-7. Deliver the result, material changes, validation, and remaining gaps.
+7. After a continuity event, automatically rebuild the single next step from current instructions, worktree evidence, persisted files, and active tools.
+8. Deliver the result, material changes, validation, and remaining gaps.
 
 ## Install
 
@@ -69,6 +71,8 @@ $codex-noise-filter diagnose and fix this build failure, preserve existing dirty
 
 Implicit invocation depends on the `SKILL.md` description. Restart Codex and inspect duplicate copies if an update is not visible.
 
+A direct Skill install provides instruction-level recovery only. Use the Plugin package below for automatic lifecycle triggers. Under Codex's official security model, non-managed command hooks require a one-time trust review when first enabled or changed. After that review, supported continuity events need no user reminder. If hooks are disabled, managed-only policy skips plugin hooks, or the current surface lacks an event, the workflow falls back to instruction-level recovery.
+
 ## Distribution
 
 Build a ready-to-use local marketplace root:
@@ -84,16 +88,20 @@ dist/marketplace/
   marketplace.json
   plugins/codex-noise-filter/
     .codex-plugin/plugin.json
+    hooks/
+      hooks.json
+      continuity_guard.py
     LICENSE
     skills/codex-noise-filter/
 ```
 
-The runtime skill contains only `SKILL.md`, `agents/`, and `references/`. Repository documentation, examples, templates, and changelog files are excluded from the packaged skill.
+The runtime Plugin also includes the continuity hooks. Its Skill payload contains only `SKILL.md`, `agents/`, and `references/`. Repository documentation, examples, templates, tests, and changelog files are excluded from the runtime package.
 
 ## Validation
 
 ```bash
 python3 scripts/validate-project.py
+python3 scripts/test-continuity-guard.py
 bash -n scripts/build-plugin-package.sh
 scripts/build-plugin-package.sh
 python3 scripts/validate-project.py --plugin dist/marketplace/plugins/codex-noise-filter
@@ -101,7 +109,7 @@ python3 scripts/validate-project.py --marketplace-root dist/marketplace
 git diff --check
 ```
 
-The validator uses only the Python standard library and checks frontmatter, naming, description size, direct reference links, local Markdown links, directional control characters, SemVer, manifest shape, and marketplace paths.
+The validator and hook tests use only the Python standard library and check frontmatter, naming, description size, direct reference links, local Markdown links, directional control characters, SemVer, manifest shape, hook events/paths/timeouts, and marketplace paths.
 
 ## Official sources
 

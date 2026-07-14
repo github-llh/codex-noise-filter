@@ -23,6 +23,9 @@ Skill 的运行时入口是 `SKILL.md`，可选目录为 `references/`、`script
 ```text
 plugin-root/
   .codex-plugin/plugin.json
+  hooks/
+    hooks.json
+    continuity_guard.py
   skills/codex-noise-filter/
     SKILL.md
     agents/openai.yaml
@@ -30,7 +33,7 @@ plugin-root/
 ```
 
 - manifest 的 `name` 使用稳定 kebab-case，`version` 使用严格 SemVer，`skills` 使用以 `./` 开头的相对路径。
-- 不声明不存在的 app、MCP、hook 或 assets。只有真实文件存在并通过验证时才加入 manifest。
+- 不声明不存在的 app、MCP、hook 或 assets。只有真实文件存在、权限边界清楚并通过验证时才加入 manifest。
 - marketplace 的 `source.path` 相对 marketplace root、以 `./` 开头且不越界；每项包含 installation、authentication 和 category。
 - 构建产物必须可重建，不作为源规则编辑入口。
 
@@ -38,12 +41,13 @@ plugin-root/
 
 Skill 指令只能指导 agent，不能证明 hook 会运行。需要生命周期强制时：
 
-1. 使用 Codex 当前支持的 hook 事件和配置位置。
-2. 审查非托管命令 hook 的来源与权限。
-3. 验证 matcher、事件、退出行为和多 hook 并发语义。
-4. 在没有实际注册和运行证据时，不写“自动阻止”或“每次必执行”。
+1. 使用 Codex 当前支持的 `PreCompact`、`PostCompact`、`SessionStart`、`UserPromptSubmit` 和 `PostToolUse` 事件。
+2. Plugin Hook 通过 `$PLUGIN_ROOT` 定位只读脚本，通过 `$PLUGIN_DATA` 保存最小私有状态；不写项目目录、全局配置或长期 memory。
+3. 审查 matcher、退出行为、超时、多 hook 并发语义、敏感信息边界和故障降级。
+4. 非托管 Hook 首次启用或内容变化后必须由宿主完成信任审查；被禁用或跳过时退回 Skill 指令级流程。
+5. 没有实际注册和运行证据时，不写“自动阻止”或“所有表面必执行”。
 
-本项目 v2 不内置 hook、MCP 或 app，避免安装时获得无关权限。
+本项目 v3 只内置连续性 Hook，不声明 MCP 或 app，也不扩大文件、网络或外部系统权限。
 
 ## 发布检查
 

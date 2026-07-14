@@ -17,6 +17,9 @@ dist/marketplace/
   marketplace.json
   plugins/codex-noise-filter/
     .codex-plugin/plugin.json
+    hooks/
+      hooks.json
+      continuity_guard.py
     LICENSE
     skills/codex-noise-filter/
       SKILL.md
@@ -30,10 +33,11 @@ dist/marketplace/
 
 - 根目录 `SKILL.md`、`agents/`、`references/` 是 canonical skill source。
 - `distribution/plugin/.codex-plugin/plugin.json` 是 canonical plugin manifest source。
+- `distribution/plugin/hooks/` 是 canonical plugin continuity Hook source。
 - `distribution/marketplace.json` 是 canonical marketplace source。
 - `dist/` 是可重建产物，不直接编辑、不提交。
 
-仓库 README、CHANGELOG、examples、templates 和维护脚本不会复制进运行时 skill，避免增加安装包上下文和重复事实。
+仓库 README、CHANGELOG、examples、templates、测试和维护脚本不会复制进运行时包，避免增加安装包上下文和重复事实。
 
 ## 验证
 
@@ -41,8 +45,9 @@ dist/marketplace/
 
 ```bash
 python3 scripts/validate-project.py
+python3 scripts/test-continuity-guard.py
 python3 scripts/validate-project.py --plugin dist/marketplace/plugins/codex-noise-filter
 python3 scripts/validate-project.py --marketplace-root dist/marketplace
 ```
 
-本 plugin 不声明 hooks、MCP server 或 app；若未来增加，必须先有真实文件、权限说明和运行验证，再更新 manifest。
+本 Plugin 只声明连续性 Hook，不声明 MCP server 或 app。Hook 仅写插件专属 `PLUGIN_DATA`，不写项目目录、全局配置或长期 memory；非托管命令 Hook 仍遵守 Codex 首次信任审查。

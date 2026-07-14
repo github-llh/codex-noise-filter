@@ -32,12 +32,15 @@ python3 "$ROOT_DIR/scripts/validate-project.py"
 
 mkdir -p "$STAGE_DIR/.codex-plugin" "$STAGE_DIR/skills/$PLUGIN_NAME"
 cp "$ROOT_DIR/distribution/plugin/.codex-plugin/plugin.json" "$STAGE_DIR/.codex-plugin/plugin.json"
+cp -R "$ROOT_DIR/distribution/plugin/hooks" "$STAGE_DIR/hooks"
 cp "$ROOT_DIR/LICENSE" "$STAGE_DIR/LICENSE"
 cp "$ROOT_DIR/SKILL.md" "$STAGE_DIR/skills/$PLUGIN_NAME/SKILL.md"
 cp -R "$ROOT_DIR/agents" "$STAGE_DIR/skills/$PLUGIN_NAME/agents"
 cp -R "$ROOT_DIR/references" "$STAGE_DIR/skills/$PLUGIN_NAME/references"
 
 find "$STAGE_DIR" -name '.DS_Store' -delete
+find "$STAGE_DIR" -type d -name '__pycache__' -prune -exec rm -rf {} +
+find "$STAGE_DIR" -type f \( -name '*.pyc' -o -name '*.pyo' \) -delete
 python3 "$ROOT_DIR/scripts/validate-project.py" --plugin "$STAGE_DIR"
 
 mkdir -p "$OUT_ROOT/plugins"

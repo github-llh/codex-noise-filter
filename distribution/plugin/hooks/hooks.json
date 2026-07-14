@@ -1,0 +1,71 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "resume|compact",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"$PLUGIN_ROOT/hooks/continuity_guard.py\"",
+            "commandWindows": "py -3 \"%PLUGIN_ROOT%\\hooks\\continuity_guard.py\"",
+            "timeout": 5,
+            "statusMessage": "恢复连续性上下文"
+          }
+        ]
+      }
+    ],
+    "PreCompact": [
+      {
+        "matcher": "manual|auto",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"$PLUGIN_ROOT/hooks/continuity_guard.py\"",
+            "commandWindows": "py -3 \"%PLUGIN_ROOT%\\hooks\\continuity_guard.py\"",
+            "timeout": 5,
+            "statusMessage": "标记压缩前连续性状态"
+          }
+        ]
+      }
+    ],
+    "PostCompact": [
+      {
+        "matcher": "manual|auto",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"$PLUGIN_ROOT/hooks/continuity_guard.py\"",
+            "commandWindows": "py -3 \"%PLUGIN_ROOT%\\hooks\\continuity_guard.py\"",
+            "timeout": 5,
+            "statusMessage": "标记压缩后恢复状态"
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"$PLUGIN_ROOT/hooks/continuity_guard.py\"",
+            "commandWindows": "py -3 \"%PLUGIN_ROOT%\\hooks\\continuity_guard.py\"",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Bash|mcp__.*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"$PLUGIN_ROOT/hooks/continuity_guard.py\"",
+            "commandWindows": "py -3 \"%PLUGIN_ROOT%\\hooks\\continuity_guard.py\"",
+            "timeout": 5
+          }
+        ]
+      }
+    ]
+  }
+}

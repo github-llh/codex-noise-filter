@@ -46,8 +46,15 @@ PLUGIN_ALLOWED_FIELDS = {
     "license",
     "keywords",
 }
-PLUGIN_REQUIRED_FIELDS = {"name", "version", "description", "author", "skills", "interface"}
-PLUGIN_RUNTIME_FIELDS = {"hooks", "mcpServers", "apps"}
+PLUGIN_REQUIRED_FIELDS = {
+    "name",
+    "version",
+    "description",
+    "author",
+    "skills",
+    "interface",
+}
+PLUGIN_FORBIDDEN_RUNTIME_FIELDS = {"mcpServers", "apps"}
 PLUGIN_INTERFACE_REQUIRED_FIELDS = {
     "displayName",
     "shortDescription",
@@ -59,8 +66,32 @@ PLUGIN_INTERFACE_REQUIRED_FIELDS = {
 }
 MARKETPLACE_INSTALLATION_POLICIES = {"NOT_AVAILABLE", "AVAILABLE", "INSTALLED_BY_DEFAULT"}
 MARKETPLACE_AUTHENTICATION_POLICIES = {"ON_INSTALL", "ON_USE"}
-PLUGIN_ALLOWED_TOP_LEVEL_FILES = {".codex-plugin", "skills", "LICENSE"}
+PLUGIN_ALLOWED_TOP_LEVEL_FILES = {".codex-plugin", "skills", "hooks", "LICENSE"}
+PLUGIN_FORBIDDEN_PATH_NAMES = {".DS_Store", "__pycache__"}
+PLUGIN_FORBIDDEN_FILE_SUFFIXES = {".pyc", ".pyo"}
 LOCAL_SOURCE_TYPE = "local"
+
+HOOK_CONFIG_TOP_LEVEL_FIELD = "hooks"
+HOOK_CONFIG_RELATIVE_PATH = "hooks/hooks.json"
+HOOK_SCRIPT_RELATIVE_PATH = "hooks/continuity_guard.py"
+HOOK_COMMAND_MARKER = "$PLUGIN_ROOT/hooks/continuity_guard.py"
+HOOK_WINDOWS_COMMAND_MARKER = "%PLUGIN_ROOT%\\hooks\\continuity_guard.py"
+HOOK_REQUIRED_EVENTS = {
+    "SessionStart",
+    "PreCompact",
+    "PostCompact",
+    "UserPromptSubmit",
+    "PostToolUse",
+}
+HOOK_ALLOWED_EVENTS = HOOK_REQUIRED_EVENTS
+HOOK_REQUIRED_MATCHERS = {
+    "SessionStart": "resume|compact",
+    "PreCompact": "manual|auto",
+    "PostCompact": "manual|auto",
+    "PostToolUse": "Bash|mcp__.*",
+}
+MIN_HOOK_TIMEOUT_SECONDS = 1
+MAX_HOOK_TIMEOUT_SECONDS = 30
 
 
 class ValidationError(Exception):
@@ -170,8 +201,9 @@ def validate_manifest(manifest: dict, path: Path) -> None:
         raise ValidationError(f"{path}: 语义化版本无效")
     if not manifest["skills"].startswith(RELATIVE_PATH_PREFIX):
         raise ValidationError(f"{path}: skills 路径必须以 {RELATIVE_PATH_PREFIX} 开头")
-    if PLUGIN_RUNTIME_FIELDS.intersection(manifest):
+    if PLUGIN_FORBIDDEN_RUNTIME_FIELDS.intersection(manifest):
         raise ValidationError(f"{path}: 存在未声明的运行时表面")
+    validate_hooks(path.parent.parent)
     author = manifest["author"]
     if not isinstance(author, dict) or not author.get("name"):
         raise ValidationError(f"{path}: 必须提供 author.name")
@@ -198,6 +230,66 @@ def validate_manifest(manifest: dict, path: Path) -> None:
             f"{path}: defaultPrompt 超出 UI 限制，最多 {MAX_DEFAULT_PROMPTS} 条，"
             f"每条最多 {MAX_DEFAULT_PROMPT_LENGTH} 个字符"
         )
+
+
+def validate_hooks(plugin_root: Path) -> None:
+    hook_path = plugin_root / HOOK_CONFIG_RELATIVE_PATH
+    if not hook_path.is_file():
+        raise ValidationError(f"plugin 默认 Hook 文件不存在: {HOOK_CONFIG_RELATIVE_PATH}")
+    hook_script = plugin_root / HOOK_SCRIPT_RELATIVE_PATH
+    if not hook_script.is_file():
+        raise ValidationError(f"plugin Hook 脚本不存在: {HOOK_SCRIPT_RELATIVE_PATH}")
+
+    hook_config = json.loads(hook_path.read_text(encoding="utf-8"))
+    if set(hook_config) != {HOOK_CONFIG_TOP_LEVEL_FIELD}:
+        raise ValidationError(f"{hook_path}: 顶层只能包含 hooks")
+    events = hook_config[HOOK_CONFIG_TOP_LEVEL_FIELD]
+    if not isinstance(events, dict):
+        raise ValidationError(f"{hook_path}: hooks 必须是对象")
+    missing_events = HOOK_REQUIRED_EVENTS - events.keys()
+    unknown_events = events.keys() - HOOK_ALLOWED_EVENTS
+    if missing_events or unknown_events:
+        raise ValidationError(
+            f"{hook_path}: Hook 事件不完整，缺少 {sorted(missing_events)}，"
+            f"未知 {sorted(unknown_events)}"
+        )
+
+    for event_name, matcher_groups in events.items():
+        if not isinstance(matcher_groups, list) or not matcher_groups:
+            raise ValidationError(f"{hook_path}: {event_name} 必须包含 matcher group")
+        for matcher_group in matcher_groups:
+            expected_matcher = HOOK_REQUIRED_MATCHERS.get(event_name)
+            actual_matcher = matcher_group.get("matcher") if isinstance(matcher_group, dict) else None
+            if expected_matcher is None and actual_matcher is not None:
+                raise ValidationError(f"{hook_path}: {event_name} 不应声明 matcher")
+            if expected_matcher is not None and actual_matcher != expected_matcher:
+                raise ValidationError(
+                    f"{hook_path}: {event_name} matcher 必须是 {expected_matcher}"
+                )
+            handlers = matcher_group.get("hooks") if isinstance(matcher_group, dict) else None
+            if not isinstance(handlers, list) or not handlers:
+                raise ValidationError(f"{hook_path}: {event_name} 必须包含 command Hook")
+            for handler in handlers:
+                if not isinstance(handler, dict) or handler.get("type") != "command":
+                    raise ValidationError(f"{hook_path}: {event_name} 只允许 command Hook")
+                command = handler.get("command")
+                windows_command = handler.get("commandWindows")
+                if not isinstance(command, str) or HOOK_COMMAND_MARKER not in command:
+                    raise ValidationError(f"{hook_path}: {event_name} 必须通过 PLUGIN_ROOT 定位脚本")
+                if (
+                    not isinstance(windows_command, str)
+                    or HOOK_WINDOWS_COMMAND_MARKER not in windows_command
+                ):
+                    raise ValidationError(f"{hook_path}: {event_name} 缺少 Windows 插件脚本路径")
+                timeout = handler.get("timeout")
+                if (
+                    not isinstance(timeout, int)
+                    or not MIN_HOOK_TIMEOUT_SECONDS <= timeout <= MAX_HOOK_TIMEOUT_SECONDS
+                ):
+                    raise ValidationError(
+                        f"{hook_path}: {event_name} timeout 必须在 "
+                        f"{MIN_HOOK_TIMEOUT_SECONDS} 到 {MAX_HOOK_TIMEOUT_SECONDS} 秒之间"
+                    )
 
 
 def validate_marketplace(marketplace: dict, plugin_name: str) -> None:
@@ -229,6 +321,11 @@ def validate_plugin(plugin_root: Path) -> None:
     extras = {path.name for path in plugin_root.iterdir()} - PLUGIN_ALLOWED_TOP_LEVEL_FILES
     if extras:
         raise ValidationError(f"plugin 包含预期外的顶层文件: {sorted(extras)}")
+    for path in plugin_root.rglob("*"):
+        if PLUGIN_FORBIDDEN_PATH_NAMES.intersection(path.parts):
+            raise ValidationError(f"plugin 包含缓存或系统文件: {path.relative_to(plugin_root)}")
+        if path.is_file() and path.suffix in PLUGIN_FORBIDDEN_FILE_SUFFIXES:
+            raise ValidationError(f"plugin 包含 Python 字节码: {path.relative_to(plugin_root)}")
 
 
 def validate_marketplace_root(root: Path) -> None:

@@ -10,7 +10,9 @@ plugin:
   manifest: <path>
   version: <semver>
   skillsPath: <relative path>
-  undeclaredRuntime: <hooks/MCP/apps/assets>
+  hooksPath: <relative path/none>
+  hookTrust: <trusted/pending/disabled/managed-only>
+  undeclaredRuntime: <MCP/apps/assets>
 
 marketplace:
   root: <path>
