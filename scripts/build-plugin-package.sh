@@ -3,6 +3,7 @@ set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 PLUGIN_NAME="codex-noise-filter"
+MARKETPLACE_MANIFEST_RELATIVE_PATH=".agents/plugins/marketplace.json"
 UNSAFE_OUTPUT_EXIT_CODE=2
 OUT_ROOT="${1:-"$ROOT_DIR/dist/marketplace"}"
 
@@ -25,6 +26,7 @@ case "$OUT_ROOT/" in
 esac
 
 PLUGIN_DIR="$OUT_ROOT/plugins/$PLUGIN_NAME"
+MARKETPLACE_MANIFEST_PATH="$OUT_ROOT/$MARKETPLACE_MANIFEST_RELATIVE_PATH"
 STAGE_DIR="$(mktemp -d "${TMPDIR:-/tmp}/${PLUGIN_NAME}-plugin.XXXXXX")"
 trap 'rm -rf "$STAGE_DIR"' EXIT
 
@@ -43,11 +45,12 @@ find "$STAGE_DIR" -type d -name '__pycache__' -prune -exec rm -rf {} +
 find "$STAGE_DIR" -type f \( -name '*.pyc' -o -name '*.pyo' \) -delete
 python3 "$ROOT_DIR/scripts/validate-project.py" --plugin "$STAGE_DIR"
 
-mkdir -p "$OUT_ROOT/plugins"
+mkdir -p "$OUT_ROOT/plugins" "$(dirname "$MARKETPLACE_MANIFEST_PATH")"
 rm -rf "$PLUGIN_DIR"
 mv "$STAGE_DIR" "$PLUGIN_DIR"
 trap - EXIT
-cp "$ROOT_DIR/distribution/marketplace.json" "$OUT_ROOT/marketplace.json"
+rm -f "$OUT_ROOT/marketplace.json"
+cp "$ROOT_DIR/distribution/marketplace.json" "$MARKETPLACE_MANIFEST_PATH"
 python3 "$ROOT_DIR/scripts/validate-project.py" --marketplace-root "$OUT_ROOT"
 
 echo "Marketplace 构建产物已写入: $OUT_ROOT"

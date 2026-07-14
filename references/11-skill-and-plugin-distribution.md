@@ -32,7 +32,7 @@ plugin-root/
     references/
 ```
 
-- manifest 的 `name` 使用稳定 kebab-case，`version` 使用严格 SemVer，`skills` 使用以 `./` 开头的相对路径。
+- manifest 的 `name` 使用稳定 kebab-case，`version` 使用严格 SemVer，`skills` 与 `hooks` 使用以 `./` 开头的相对路径。
 - 不声明不存在的 app、MCP、hook 或 assets。只有真实文件存在、权限边界清楚并通过验证时才加入 manifest。
 - marketplace 的 `source.path` 相对 marketplace root、以 `./` 开头且不越界；每项包含 installation、authentication 和 category。
 - 构建产物必须可重建，不作为源规则编辑入口。

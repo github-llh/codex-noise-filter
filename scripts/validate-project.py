@@ -45,6 +45,7 @@ PLUGIN_ALLOWED_FIELDS = {
     "repository",
     "license",
     "keywords",
+    "hooks",
 }
 PLUGIN_REQUIRED_FIELDS = {
     "name",
@@ -52,6 +53,7 @@ PLUGIN_REQUIRED_FIELDS = {
     "description",
     "author",
     "skills",
+    "hooks",
     "interface",
 }
 PLUGIN_FORBIDDEN_RUNTIME_FIELDS = {"mcpServers", "apps"}
@@ -70,9 +72,12 @@ PLUGIN_ALLOWED_TOP_LEVEL_FILES = {".codex-plugin", "skills", "hooks", "LICENSE"}
 PLUGIN_FORBIDDEN_PATH_NAMES = {".DS_Store", "__pycache__"}
 PLUGIN_FORBIDDEN_FILE_SUFFIXES = {".pyc", ".pyo"}
 LOCAL_SOURCE_TYPE = "local"
+MARKETPLACE_MANIFEST_RELATIVE_PATH = Path(".agents/plugins/marketplace.json")
+UNSUPPORTED_ROOT_MARKETPLACE_FILENAME = "marketplace.json"
 
 HOOK_CONFIG_TOP_LEVEL_FIELD = "hooks"
 HOOK_CONFIG_RELATIVE_PATH = "hooks/hooks.json"
+HOOK_MANIFEST_PATH = f"{RELATIVE_PATH_PREFIX}{HOOK_CONFIG_RELATIVE_PATH}"
 HOOK_SCRIPT_RELATIVE_PATH = "hooks/continuity_guard.py"
 HOOK_COMMAND_MARKER = "$PLUGIN_ROOT/hooks/continuity_guard.py"
 HOOK_WINDOWS_COMMAND_MARKER = "%PLUGIN_ROOT%\\hooks\\continuity_guard.py"
@@ -201,6 +206,8 @@ def validate_manifest(manifest: dict, path: Path) -> None:
         raise ValidationError(f"{path}: 语义化版本无效")
     if not manifest["skills"].startswith(RELATIVE_PATH_PREFIX):
         raise ValidationError(f"{path}: skills 路径必须以 {RELATIVE_PATH_PREFIX} 开头")
+    if manifest["hooks"] != HOOK_MANIFEST_PATH:
+        raise ValidationError(f"{path}: hooks 路径必须是 {HOOK_MANIFEST_PATH}")
     if PLUGIN_FORBIDDEN_RUNTIME_FIELDS.intersection(manifest):
         raise ValidationError(f"{path}: 存在未声明的运行时表面")
     validate_hooks(path.parent.parent)
@@ -329,7 +336,14 @@ def validate_plugin(plugin_root: Path) -> None:
 
 
 def validate_marketplace_root(root: Path) -> None:
-    marketplace = json.loads((root / "marketplace.json").read_text())
+    manifest_path = root / MARKETPLACE_MANIFEST_RELATIVE_PATH
+    unsupported_manifest_path = root / UNSUPPORTED_ROOT_MARKETPLACE_FILENAME
+    if unsupported_manifest_path.exists():
+        raise ValidationError(
+            f"{root}: marketplace manifest 不应位于根目录，请使用 "
+            f"{MARKETPLACE_MANIFEST_RELATIVE_PATH}"
+        )
+    marketplace = json.loads(manifest_path.read_text())
     entries = marketplace.get("plugins", [])
     if not entries:
         raise ValidationError(f"{root}: marketplace 中没有 plugin")

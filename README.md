@@ -104,7 +104,7 @@ scripts/build-plugin-package.sh
 
 ```text
 dist/marketplace/
-  marketplace.json
+  .agents/plugins/marketplace.json
   plugins/codex-noise-filter/
     .codex-plugin/plugin.json
     hooks/
@@ -113,6 +113,16 @@ dist/marketplace/
     LICENSE
     skills/codex-noise-filter/
 ```
+
+在仓库根目录安装并确认发现结果：
+
+```bash
+codex plugin marketplace add ./dist/marketplace
+codex plugin add codex-noise-filter@codex-noise-filter-local
+codex plugin list
+```
+
+随后新建 Codex 任务并运行 `/hooks`，确认 Plugin Hook 已列出并完成首次信任审查。仅安装同名 Skill 不会注册 Plugin Hook。
 
 运行时 Plugin 额外包含连续性 Hook；其中 Skill 包只包含 `SKILL.md`、`agents/` 和 `references/`。README、CHANGELOG、examples、templates、测试和仓库维护文件不会进入运行时包。
 

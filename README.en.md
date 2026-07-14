@@ -85,7 +85,7 @@ Output:
 
 ```text
 dist/marketplace/
-  marketplace.json
+  .agents/plugins/marketplace.json
   plugins/codex-noise-filter/
     .codex-plugin/plugin.json
     hooks/
@@ -94,6 +94,16 @@ dist/marketplace/
     LICENSE
     skills/codex-noise-filter/
 ```
+
+Install from the repository root and confirm discovery:
+
+```bash
+codex plugin marketplace add ./dist/marketplace
+codex plugin add codex-noise-filter@codex-noise-filter-local
+codex plugin list
+```
+
+Then start a new Codex task and run `/hooks` to confirm the Plugin hooks are listed and complete the initial trust review. Installing only the same-named Skill does not register Plugin hooks.
 
 The runtime Plugin also includes the continuity hooks. Its Skill payload contains only `SKILL.md`, `agents/`, and `references/`. Repository documentation, examples, templates, tests, and changelog files are excluded from the runtime package.
 

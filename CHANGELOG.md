@@ -11,7 +11,8 @@
 
 ### 分发与验证
 
-- Plugin 版本升级到 `3.0.0`，通过插件根目录默认 `hooks/hooks.json` 发现机制加载，构建产物包含 Hook 配置与标准库脚本。
+- Plugin 版本升级到 `3.0.0`，由 manifest 显式声明 `hooks/hooks.json`，构建产物包含 Hook 配置与标准库脚本。
+- Marketplace manifest 按 Codex 官方目录约定生成到 `.agents/plugins/marketplace.json`，修复 `marketplace root does not contain a supported manifest`。
 - 验证器新增 Hook 事件、相对路径、`PLUGIN_ROOT`、Windows 命令和超时边界校验。
 - 新增标准库回归测试，覆盖自动压缩恢复、会话恢复、模型切换、网络失败和成功日志防误触发。
 - 保留 Codex 对非托管命令 Hook 的首次信任要求；Hook 被禁用、managed-only 策略跳过或宿主不支持时退回 Skill 指令级恢复。

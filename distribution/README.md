@@ -14,7 +14,7 @@ scripts/build-plugin-package.sh
 
 ```text
 dist/marketplace/
-  marketplace.json
+  .agents/plugins/marketplace.json
   plugins/codex-noise-filter/
     .codex-plugin/plugin.json
     hooks/
@@ -27,14 +27,24 @@ dist/marketplace/
       references/
 ```
 
-这个输出目录本身就是 local marketplace root，`marketplace.json` 的 `source.path` 与插件位置一致。
+这个输出目录本身就是 local marketplace root。Codex 从 `.agents/plugins/marketplace.json` 发现 marketplace manifest；其中的 `source.path` 仍相对于 marketplace root 解析，并与 `plugins/codex-noise-filter/` 一致。
+
+安装并检查本机发现结果：
+
+```bash
+codex plugin marketplace add ./dist/marketplace
+codex plugin add codex-noise-filter@codex-noise-filter-local
+codex plugin list
+```
+
+新建 Codex 任务后使用 `/hooks` 查看并信任首次加载的非托管 Hook。只复制 Skill 源码不会注册 Plugin Hook。
 
 ## 源与产物
 
 - 根目录 `SKILL.md`、`agents/`、`references/` 是 canonical skill source。
 - `distribution/plugin/.codex-plugin/plugin.json` 是 canonical plugin manifest source。
 - `distribution/plugin/hooks/` 是 canonical plugin continuity Hook source。
-- `distribution/marketplace.json` 是 canonical marketplace source。
+- `distribution/marketplace.json` 是 canonical marketplace source，构建时复制到 `.agents/plugins/marketplace.json`。
 - `dist/` 是可重建产物，不直接编辑、不提交。
 
 仓库 README、CHANGELOG、examples、templates、测试和维护脚本不会复制进运行时包，避免增加安装包上下文和重复事实。
