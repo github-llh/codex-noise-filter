@@ -23,7 +23,7 @@
             "command": "python3 \"$PLUGIN_ROOT/hooks/continuity_guard.py\"",
             "commandWindows": "py -3 \"%PLUGIN_ROOT%\\hooks\\continuity_guard.py\"",
             "timeout": 5,
-            "statusMessage": "标记压缩前连续性状态"
+            "statusMessage": "标记压缩连续性恢复"
           }
         ]
       }

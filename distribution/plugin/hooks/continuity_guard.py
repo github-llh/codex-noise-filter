@@ -8,14 +8,19 @@ import json
 import os
 import re
 import sys
+from itertools import islice
 from pathlib import Path
 from typing import Any
 
 
-STATE_SCHEMA_VERSION = 1
+STATE_SCHEMA_VERSION = 2
+LEGACY_STATE_SCHEMA_VERSION = 1
 MAX_PENDING_REASONS = 8
 MAX_RESPONSE_SCAN_CHARS = 32_768
+MAX_RESPONSE_SCAN_DEPTH = 16
+MAX_RESPONSE_SCAN_ITEMS = 1_024
 MAX_STATE_FILES = 64
+MAX_COUNTER_VALUE = 2_147_483_647
 SUCCESS_EXIT_CODE = 0
 
 PLUGIN_DATA_ENV = "PLUGIN_DATA"
@@ -28,6 +33,15 @@ EVENT_PRE_COMPACT = "PreCompact"
 EVENT_POST_COMPACT = "PostCompact"
 EVENT_USER_PROMPT_SUBMIT = "UserPromptSubmit"
 EVENT_POST_TOOL_USE = "PostToolUse"
+SUPPORTED_EVENTS = (
+    EVENT_SESSION_START,
+    EVENT_PRE_COMPACT,
+    EVENT_POST_COMPACT,
+    EVENT_USER_PROMPT_SUBMIT,
+    EVENT_POST_TOOL_USE,
+)
+
+CONTEXT_KIND_RECOVERY = "recovery"
 
 SOURCE_RESUME = "resume"
 SOURCE_COMPACT = "compact"
@@ -70,12 +84,22 @@ REASON_LABELS = {
     REASON_WORKSPACE_CHANGED: "当前工作目录已变化",
     REASON_NETWORK_FAILURE: "工具出现网络或传输失败",
 }
+KNOWN_REASONS = frozenset(REASON_LABELS)
+
+CONTINUITY_LEDGER_ITEMS = (
+    "最新用户目标、验收条件与不可违反的高优先级约束",
+    "已确认事实、根因假设、关键决策及其证据来源",
+    "已修改文件、真实落盘状态和仍在运行的工具",
+    "已运行验证、结果、未覆盖边界和外部操作的幂等性状态",
+    "明确禁止重试的路径（doNotRetry）与唯一下一步",
+)
 
 RECOVERY_STEPS = (
-    "先重读最新用户目标和高优先级指令，不要求用户重复已提供的信息。",
-    "再核对当前 git status、git diff、目标文件落盘状态和仍在运行的工具；外部写操作还要检查幂等性证据。",
-    "在内部重建目标、已确认事实、已改文件、验证状态、doNotRetry 和唯一下一步；缺失事实必须重新验证，不得猜测。",
+    "重读最新用户目标、验收条件和高优先级指令，不要求用户重复已提供的信息。",
+    "核对 git status、git diff、目标文件落盘状态、仍在运行的工具，以及外部写操作的幂等性证据。",
+    "重建目标、约束、已确认事实、关键决策、已改文件、验证状态、doNotRetry 和唯一下一步。",
     "若旧摘要、旧模型结论或工具回执与当前证据冲突，以当前工作区和最新指令为准。",
+    "从唯一下一步继续，不重复已经有成功回执或可能产生副作用的操作。",
 )
 
 
@@ -117,24 +141,75 @@ def empty_state() -> dict[str, Any]:
         "model": "",
         "cwd_fingerprint": "",
         "last_event": "",
+        "event_counts": {},
+        "context_injection_count": 0,
+        "last_context_event": "",
+        "last_context_kind": "",
+        "last_context_reasons": [],
         "pending_reasons": [],
     }
 
 
+def normalize_reasons(value: Any) -> list[str]:
+    """只保留守卫已知原因，防止私有状态被篡改后注入任意上下文。"""
+
+    if not isinstance(value, list):
+        return []
+    reasons: list[str] = []
+    for reason in value:
+        if isinstance(reason, str) and reason in KNOWN_REASONS and reason not in reasons:
+            reasons.append(reason)
+    return reasons[-MAX_PENDING_REASONS:]
+
+
+def normalize_counter(value: Any) -> int:
+    """把持久化计数限制在稳定的非负整数范围。"""
+
+    if not isinstance(value, int) or isinstance(value, bool) or value < 0:
+        return 0
+    return min(value, MAX_COUNTER_VALUE)
+
+
 def load_state(path: Path | None) -> dict[str, Any]:
-    """读取状态；损坏或旧版本状态按空状态处理。"""
+    """读取并迁移状态；损坏或未知版本状态按空状态处理。"""
 
     if path is None or not path.exists():
         return empty_state()
     try:
-        state = json.loads(path.read_text(encoding="utf-8"))
+        stored_state = json.loads(path.read_text(encoding="utf-8"))
     except (OSError, json.JSONDecodeError):
         return empty_state()
-    if not isinstance(state, dict) or state.get("schema_version") != STATE_SCHEMA_VERSION:
+    if not isinstance(stored_state, dict) or stored_state.get("schema_version") not in (
+        LEGACY_STATE_SCHEMA_VERSION,
+        STATE_SCHEMA_VERSION,
+    ):
         return empty_state()
-    pending_reasons = state.get("pending_reasons")
-    if not isinstance(pending_reasons, list):
-        state["pending_reasons"] = []
+
+    state = empty_state()
+    for field in ("model", "cwd_fingerprint", "last_event"):
+        value = stored_state.get(field)
+        if isinstance(value, str):
+            state[field] = value
+    state["pending_reasons"] = normalize_reasons(stored_state.get("pending_reasons"))
+
+    if stored_state.get("schema_version") == STATE_SCHEMA_VERSION:
+        stored_event_counts = stored_state.get("event_counts")
+        if isinstance(stored_event_counts, dict):
+            state["event_counts"] = {
+                event_name: normalize_counter(stored_event_counts.get(event_name))
+                for event_name in SUPPORTED_EVENTS
+                if normalize_counter(stored_event_counts.get(event_name))
+            }
+        state["context_injection_count"] = normalize_counter(
+            stored_state.get("context_injection_count")
+        )
+        for field in ("last_context_event", "last_context_kind"):
+            value = stored_state.get(field)
+            if isinstance(value, str):
+                state[field] = value
+        state["last_context_reasons"] = normalize_reasons(
+            stored_state.get("last_context_reasons")
+        )
     return state
 
 
@@ -178,31 +253,76 @@ def save_state(path: Path | None, state: dict[str, Any]) -> None:
 def add_reason(state: dict[str, Any], reason: str) -> None:
     """以稳定顺序追加去重后的待恢复原因。"""
 
-    pending_reasons = [
-        value for value in state.get("pending_reasons", []) if isinstance(value, str)
-    ]
+    if reason not in KNOWN_REASONS:
+        return
+    pending_reasons = normalize_reasons(state.get("pending_reasons"))
     if reason not in pending_reasons:
         pending_reasons.append(reason)
     state["pending_reasons"] = pending_reasons[-MAX_PENDING_REASONS:]
 
 
+def remove_reason(state: dict[str, Any], reason: str) -> None:
+    """移除已经被更精确状态替代的待恢复原因。"""
+
+    state["pending_reasons"] = [
+        value for value in normalize_reasons(state.get("pending_reasons")) if value != reason
+    ]
+
+
+def consume_reasons(state: dict[str, Any]) -> list[str]:
+    """按稳定顺序消费待恢复原因，保证一次变化只注入一次。"""
+
+    reasons = normalize_reasons(state.get("pending_reasons"))
+    state["pending_reasons"] = []
+    return reasons
+
+
+def record_event(state: dict[str, Any], event_name: str) -> None:
+    """记录有界事件计数，提供不包含用户内容的执行证据。"""
+
+    if event_name not in SUPPORTED_EVENTS:
+        return
+    event_counts = state.get("event_counts")
+    if not isinstance(event_counts, dict):
+        event_counts = {}
+    event_counts[event_name] = min(
+        normalize_counter(event_counts.get(event_name)) + 1,
+        MAX_COUNTER_VALUE,
+    )
+    state["event_counts"] = event_counts
+
+
 def serialize_response(response: Any) -> str:
-    """仅在内存中截取工具响应文本，用于识别传输错误。"""
+    """流式截取有限工具响应文本，用于识别传输错误。"""
 
     try:
-        text = json.dumps(response, ensure_ascii=False, default=str)
+        encoder = json.JSONEncoder(ensure_ascii=False, default=str)
+        chunks: list[str] = []
+        remaining_chars = MAX_RESPONSE_SCAN_CHARS
+        for chunk in encoder.iterencode(response):
+            if remaining_chars <= 0:
+                break
+            fragment = chunk[:remaining_chars]
+            chunks.append(fragment)
+            remaining_chars -= len(fragment)
+        return "".join(chunks)
     except (TypeError, ValueError):
-        text = str(response)
-    return text[:MAX_RESPONSE_SCAN_CHARS]
+        return str(response)[:MAX_RESPONSE_SCAN_CHARS]
 
 
-def response_has_failure_signal(value: Any) -> bool:
+def response_has_failure_signal(value: Any, depth: int = 0) -> bool:
     """递归识别常见失败字段，避免只因日志提到网络错误就误触发。"""
 
+    if depth >= MAX_RESPONSE_SCAN_DEPTH:
+        return False
     if isinstance(value, dict):
         for field in EXIT_CODE_FIELDS:
             exit_code = value.get(field)
-            if isinstance(exit_code, int) and exit_code != SUCCESS_EXIT_CODE:
+            if (
+                isinstance(exit_code, int)
+                and not isinstance(exit_code, bool)
+                and exit_code != SUCCESS_EXIT_CODE
+            ):
                 return True
         for field in FAILURE_BOOLEAN_FIELDS:
             if value.get(field) is True:
@@ -214,9 +334,15 @@ def response_has_failure_signal(value: Any) -> bool:
             status = value.get(field)
             if isinstance(status, str) and status.lower() in FAILURE_STATUSES:
                 return True
-        return any(response_has_failure_signal(child) for child in value.values())
+        return any(
+            response_has_failure_signal(child, depth + 1)
+            for child in islice(value.values(), MAX_RESPONSE_SCAN_ITEMS)
+        )
     if isinstance(value, list):
-        return any(response_has_failure_signal(child) for child in value)
+        return any(
+            response_has_failure_signal(child, depth + 1)
+            for child in islice(value, MAX_RESPONSE_SCAN_ITEMS)
+        )
     return False
 
 
@@ -232,14 +358,33 @@ def is_network_failure(response: Any) -> bool:
 def recovery_context(reasons: list[str]) -> str:
     """构造供模型执行的连续性复核要求。"""
 
-    labels = [REASON_LABELS.get(reason, reason) for reason in reasons]
+    labels = [REASON_LABELS[reason] for reason in normalize_reasons(reasons)]
     reason_text = "、".join(labels) if labels else "连续性状态发生变化"
     steps = "\n".join(f"{index}. {step}" for index, step in enumerate(RECOVERY_STEPS, 1))
-    return f"连续性守卫已自动触发，原因：{reason_text}。继续任务前执行以下复核：\n{steps}"
+    ledger = "\n".join(f"- {item}" for item in CONTINUITY_LEDGER_ITEMS)
+    return (
+        f"连续性守卫已自动触发，原因：{reason_text}。"
+        f"为避免过期上下文覆盖当前事实，继续任务前执行以下复核：\n{steps}\n"
+        f"复核后的连续性账本至少覆盖：\n{ledger}"
+    )
 
 
-def context_output(event_name: str, context: str) -> dict[str, Any]:
-    """按官方 Hook 协议返回模型可见的额外开发者上下文。"""
+def context_output(
+    state: dict[str, Any],
+    event_name: str,
+    context: str,
+    context_kind: str,
+    reasons: list[str],
+) -> dict[str, Any]:
+    """返回额外开发者上下文，并记录不包含用户内容的注入证据。"""
+
+    state["context_injection_count"] = min(
+        normalize_counter(state.get("context_injection_count")) + 1,
+        MAX_COUNTER_VALUE,
+    )
+    state["last_context_event"] = event_name
+    state["last_context_kind"] = context_kind
+    state["last_context_reasons"] = normalize_reasons(reasons)
 
     return {
         "hookSpecificOutput": {
@@ -255,6 +400,7 @@ def handle_event(payload: dict[str, Any]) -> dict[str, Any] | None:
     event_name = str(payload.get("hook_event_name", ""))
     state_path = get_state_path(payload)
     state = load_state(state_path)
+    record_event(state, event_name)
     previous_model = state.get("model")
     previous_cwd_fingerprint = state.get("cwd_fingerprint")
     current_model = payload.get("model") if isinstance(payload.get("model"), str) else ""
@@ -274,28 +420,47 @@ def handle_event(payload: dict[str, Any]) -> dict[str, Any] | None:
     if event_name == EVENT_PRE_COMPACT:
         add_reason(state, REASON_COMPACTION_PENDING)
     elif event_name == EVENT_POST_COMPACT:
+        remove_reason(state, REASON_COMPACTION_PENDING)
         add_reason(state, REASON_COMPACTION_COMPLETED)
     elif event_name == EVENT_SESSION_START:
         source = payload.get("source")
         if source == SOURCE_RESUME:
             add_reason(state, REASON_SESSION_RESUMED)
         elif source == SOURCE_COMPACT:
+            remove_reason(state, REASON_COMPACTION_PENDING)
             add_reason(state, REASON_COMPACTION_COMPLETED)
-        pending_reasons = list(state.get("pending_reasons", []))
+        pending_reasons = consume_reasons(state)
         if pending_reasons:
-            output = context_output(event_name, recovery_context(pending_reasons))
-            state["pending_reasons"] = []
+            output = context_output(
+                state,
+                event_name,
+                recovery_context(pending_reasons),
+                CONTEXT_KIND_RECOVERY,
+                pending_reasons,
+            )
     elif event_name == EVENT_USER_PROMPT_SUBMIT:
-        pending_reasons = list(state.get("pending_reasons", []))
+        pending_reasons = consume_reasons(state)
         if pending_reasons:
-            output = context_output(event_name, recovery_context(pending_reasons))
-            state["pending_reasons"] = []
+            output = context_output(
+                state,
+                event_name,
+                recovery_context(pending_reasons),
+                CONTEXT_KIND_RECOVERY,
+                pending_reasons,
+            )
     elif event_name == EVENT_POST_TOOL_USE and is_network_failure(payload.get("tool_response")):
-        add_reason(state, REASON_NETWORK_FAILURE)
-        output = context_output(event_name, recovery_context([REASON_NETWORK_FAILURE]))
+        output = context_output(
+            state,
+            event_name,
+            recovery_context([REASON_NETWORK_FAILURE]),
+            CONTEXT_KIND_RECOVERY,
+            [REASON_NETWORK_FAILURE],
+        )
 
-    state["model"] = current_model
-    state["cwd_fingerprint"] = current_cwd_fingerprint
+    if current_model:
+        state["model"] = current_model
+    if current_cwd_fingerprint:
+        state["cwd_fingerprint"] = current_cwd_fingerprint
     state["last_event"] = event_name
     save_state(state_path, state)
     return output

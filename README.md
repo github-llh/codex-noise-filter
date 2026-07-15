@@ -12,7 +12,7 @@
 
 ## v3 定位
 
-`codex-noise-filter` 用于真实代码库里的解释、诊断、审查和实施任务。它先判断用户授权的任务模式，再从代码、diff、路径、配置、日志和失败命令中收敛证据，最后用与触碰范围匹配的验证闭环。v3 新增 Plugin 内置连续性 Hook，在上下文压缩、会话恢复/重新连接、模型变化和网络/传输失败后自动要求复核目标与落盘状态。
+`codex-noise-filter` 用于真实代码库里的解释、诊断、审查和实施任务。它先判断用户授权的任务模式，再从代码、diff、路径、配置、日志和失败命令中收敛证据，最后用与触碰范围匹配的验证闭环。v3 新增 Plugin 内置连续性 Hook，在上下文压缩、会话恢复/重新连接、模型变化和网络/传输失败后自动要求复核目标与落盘状态；v3.1 进一步在压缩前可靠标记待恢复状态、压缩后注入结构化连续性账本，并增加不含用户内容的事件与上下文注入计数。
 
 v3 保留 v2 已清理的噪音与副作用边界：
 
@@ -23,7 +23,7 @@ v3 保留 v2 已清理的噪音与副作用边界：
 - 不猜测第三方宿主目录；自动能力只建立在已打包、已验证且被宿主启用的 Hook 上。
 - 调用链改为按风险追踪：简单错误停在完整语义单元，高风险变更才扩展到系统边界。
 
-仍然保留根因假设、必要调用链、Git 脏改保护、外部内容安全、失败换路和最小充分验证。连续性状态只写插件专属 `PLUGIN_DATA`，不复制 prompt、transcript、工具原始输出、日志、凭证、客户数据或工作区路径。
+仍然保留根因假设、必要调用链、Git 脏改保护、外部内容安全、失败换路和最小充分验证。连续性状态只写插件专属 `PLUGIN_DATA`，仅包含不可逆指纹、模型、已知原因和有界事件/注入计数，不复制 prompt、transcript、工具原始输出、日志、凭证、客户数据或工作区路径。
 
 所有技术栈统一要求：新增或修改的注释、docstring、Javadoc、JSDoc/TSDoc 和模板说明默认使用简体中文；状态、类型、协议 key、阈值、超时、路由、事件、样式 token 等魔法值按项目既有方式收敛到枚举、常量、类型、配置、字典或 design token。
 
@@ -124,6 +124,16 @@ codex plugin list
 
 随后新建 Codex 任务并运行 `/hooks`，确认 Plugin Hook 已列出并完成首次信任审查。仅安装同名 Skill 不会注册 Plugin Hook。
 
+查看最近一次 Hook 执行和上下文注入证据：
+
+```bash
+STATE_DIR="$HOME/.codex/plugins/data/codex-noise-filter-codex-noise-filter-local/continuity"
+LATEST_STATE="$(ls -t "$STATE_DIR"/*.json | head -n 1)"
+python3 -m json.tool "$LATEST_STATE"
+```
+
+重点检查 `event_counts`、`context_injection_count`、`last_context_event`、`last_context_kind` 和 `last_context_reasons`。普通成功事件可以静默执行；发生压缩、恢复、模型/目录变化或网络失败时才注入上下文。
+
 运行时 Plugin 额外包含连续性 Hook；其中 Skill 包只包含 `SKILL.md`、`agents/` 和 `references/`。README、CHANGELOG、examples、templates、测试和仓库维护文件不会进入运行时包。
 
 ## 验证
@@ -146,6 +156,12 @@ git diff --check
 - [Build plugins](https://developers.openai.com/codex/plugins/build)：`.codex-plugin/plugin.json`、`skills/`、SemVer 和 marketplace。
 - [AGENTS.md](https://developers.openai.com/codex/agent-configuration/agents-md)：项目指令链、优先级和大小边界。
 - [Hooks](https://developers.openai.com/codex/hooks)：生命周期事件、配置位置和运行时限制。
+
+## 其他一手参考
+
+- [Claude Code Hooks](https://code.claude.com/docs/en/hooks)：恢复时刷新易过期上下文和控制 `additionalContext`。
+- [GitHub Copilot Hooks](https://docs.github.com/en/copilot/concepts/agents/hooks)：事件审计、超时和跨平台 Hook 配置。
+- [OpenCode Plugins](https://opencode.ai/docs/plugins/)：压缩前保留任务状态、关键决策、活动文件、阻塞与下一步。
 
 ## 协议
 

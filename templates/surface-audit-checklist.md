@@ -12,6 +12,9 @@ plugin:
   skillsPath: <relative path>
   hooksPath: <relative path/none>
   hookTrust: <trusted/pending/disabled/managed-only>
+  hookEvents: <event/count>
+  contextInjection: <count/last event/last kind/last reasons>
+  statePrivacy: <fingerprints and metadata only/violation>
   undeclaredRuntime: <MCP/apps/assets>
 
 marketplace:

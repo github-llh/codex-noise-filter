@@ -39,6 +39,8 @@ codex plugin list
 
 新建 Codex 任务后使用 `/hooks` 查看并信任首次加载的非托管 Hook。只复制 Skill 源码不会注册 Plugin Hook。
 
+Hook 状态位于插件专属 `PLUGIN_DATA/continuity/`；v3.1 状态包含有界 `event_counts`、`context_injection_count` 和最近一次上下文注入事件/类型/原因，便于证明执行而不保存 prompt、transcript、原始工具输出或工作区路径。
+
 ## 源与产物
 
 - 根目录 `SKILL.md`、`agents/`、`references/` 是 canonical skill source。

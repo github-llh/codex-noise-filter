@@ -12,7 +12,7 @@ Read less noise · Preserve dirty worktrees · Recover continuity automatically 
 
 ## Version 3 scope
 
-`codex-noise-filter` supports explanation, diagnosis, review, and implementation in real repositories. It identifies the authorized task mode, narrows evidence from code, diffs, paths, configuration, logs, and failing commands, then closes the task with validation proportional to the touched scope. Version 3 adds plugin-bundled continuity hooks that automatically request goal and on-disk-state reconciliation after compaction, session resume or reconnection, model changes, and network or transport failures.
+`codex-noise-filter` supports explanation, diagnosis, review, and implementation in real repositories. It identifies the authorized task mode, narrows evidence from code, diffs, paths, configuration, logs, and failing commands, then closes the task with validation proportional to the touched scope. Version 3 adds plugin-bundled continuity hooks that automatically request goal and on-disk-state reconciliation after compaction, session resume or reconnection, model changes, and network or transport failures. Version 3.1 reliably marks pending recovery before compaction, injects a structured continuity ledger after compaction, and records bounded event/context-injection counters without user content.
 
 Version 3 preserves the noise and side-effect boundaries established in version 2:
 
@@ -23,7 +23,7 @@ Version 3 preserves the noise and side-effect boundaries established in version 
 - No guessed third-party host paths; automatic behavior is claimed only for packaged, validated, host-enabled hooks.
 - Call-chain depth is risk-based: simple failures stop at the complete semantic unit; high-risk changes expand to system boundaries.
 
-Root-cause hypotheses, necessary call chains, dirty-worktree protection, external-content safety, failure strategy changes, and sufficient validation remain core behavior. Continuity state is limited to the plugin-owned `PLUGIN_DATA` directory and never copies prompts, transcripts, raw tool output, logs, credentials, customer data, or workspace paths.
+Root-cause hypotheses, necessary call chains, dirty-worktree protection, external-content safety, failure strategy changes, and sufficient validation remain core behavior. Continuity state is limited to the plugin-owned `PLUGIN_DATA` directory and contains only irreversible fingerprints, model metadata, known reasons, and bounded event/injection counters. It never copies prompts, transcripts, raw tool output, logs, credentials, customer data, or workspace paths.
 
 Across all supported stacks, new or modified comments, docstrings, Javadoc, JSDoc/TSDoc, and template notes default to Simplified Chinese. Business states, protocol keys, thresholds, timeouts, routes, events, and style tokens must follow the repository's established enum, constant, type, configuration, dictionary, or design-token patterns instead of remaining as magic values.
 
@@ -105,6 +105,16 @@ codex plugin list
 
 Then start a new Codex task and run `/hooks` to confirm the Plugin hooks are listed and complete the initial trust review. Installing only the same-named Skill does not register Plugin hooks.
 
+Inspect the latest execution and context-injection evidence:
+
+```bash
+STATE_DIR="$HOME/.codex/plugins/data/codex-noise-filter-codex-noise-filter-local/continuity"
+LATEST_STATE="$(ls -t "$STATE_DIR"/*.json | head -n 1)"
+python3 -m json.tool "$LATEST_STATE"
+```
+
+Inspect `event_counts`, `context_injection_count`, `last_context_event`, `last_context_kind`, and `last_context_reasons`. Successful routine events may stay silent; context is injected only for compaction, resume, model/workspace changes, or network failures.
+
 The runtime Plugin also includes the continuity hooks. Its Skill payload contains only `SKILL.md`, `agents/`, and `references/`. Repository documentation, examples, templates, tests, and changelog files are excluded from the runtime package.
 
 ## Validation
@@ -127,6 +137,12 @@ The validator and hook tests use only the Python standard library and check fron
 - [Build plugins](https://developers.openai.com/codex/plugins/build)
 - [AGENTS.md](https://developers.openai.com/codex/agent-configuration/agents-md)
 - [Hooks](https://developers.openai.com/codex/hooks)
+
+## Additional primary references
+
+- [Claude Code Hooks](https://code.claude.com/docs/en/hooks)
+- [GitHub Copilot Hooks](https://docs.github.com/en/copilot/concepts/agents/hooks)
+- [OpenCode Plugins](https://opencode.ai/docs/plugins/)
 
 ## License
 

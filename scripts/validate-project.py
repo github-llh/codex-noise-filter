@@ -95,8 +95,16 @@ HOOK_REQUIRED_MATCHERS = {
     "PostCompact": "manual|auto",
     "PostToolUse": "Bash|mcp__.*",
 }
+HOOK_REQUIRED_SCRIPT_MARKERS = {
+    "STATE_SCHEMA_VERSION = 2",
+    "CONTINUITY_LEDGER_ITEMS",
+    "normalize_reasons",
+    "consume_reasons",
+    '"event_counts"',
+    '"context_injection_count"',
+}
 MIN_HOOK_TIMEOUT_SECONDS = 1
-MAX_HOOK_TIMEOUT_SECONDS = 30
+MAX_HOOK_TIMEOUT_SECONDS = 5
 
 
 class ValidationError(Exception):
@@ -246,6 +254,14 @@ def validate_hooks(plugin_root: Path) -> None:
     hook_script = plugin_root / HOOK_SCRIPT_RELATIVE_PATH
     if not hook_script.is_file():
         raise ValidationError(f"plugin Hook 脚本不存在: {HOOK_SCRIPT_RELATIVE_PATH}")
+    hook_script_text = hook_script.read_text(encoding="utf-8")
+    missing_script_markers = {
+        marker for marker in HOOK_REQUIRED_SCRIPT_MARKERS if marker not in hook_script_text
+    }
+    if missing_script_markers:
+        raise ValidationError(
+            f"{hook_script}: 缺少连续性保护实现 {sorted(missing_script_markers)}"
+        )
 
     hook_config = json.loads(hook_path.read_text(encoding="utf-8"))
     if set(hook_config) != {HOOK_CONFIG_TOP_LEVEL_FIELD}:
