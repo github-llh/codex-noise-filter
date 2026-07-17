@@ -1,7 +1,7 @@
 {
   "name": "codex-noise-filter",
-  "version": "3.1.0",
-  "description": "Evidence-driven coding workflow with automatic continuity recovery, scoped investigation, safe edits, and proportionate validation.",
+  "version": "3.2.0",
+  "description": "Evidence-driven coding workflow with bounded delegation, automatic continuity recovery, scoped investigation, safe edits, and proportionate validation.",
   "author": {
     "name": "github-llh",
     "url": "https://github.com/github-llh"
@@ -20,8 +20,8 @@
   "hooks": "./hooks/hooks.json",
   "interface": {
     "displayName": "codex-noise-filter",
-    "shortDescription": "Evidence-driven coding workflow and validation",
-    "longDescription": "Keep coding tasks scoped and evidence-driven, then automatically reconcile goals and on-disk state after compaction, session resume, model changes, or network failures.",
+    "shortDescription": "Evidence-driven coding, bounded delegation, and validation",
+    "longDescription": "Keep coding tasks scoped and evidence-driven, delegate only bounded independent work when the benefit exceeds coordination and token costs, then reconcile goals and on-disk state after continuity events.",
     "developerName": "github-llh",
     "category": "Developer Tools",
     "capabilities": [
@@ -32,7 +32,7 @@
     "websiteURL": "https://github.com/github-llh/codex-noise-filter",
     "brandColor": "#2563EB",
     "defaultPrompt": [
-      "Use codex-noise-filter to scope and verify this coding task.",
+      "Use codex-noise-filter to scope, assess bounded delegation, and verify this coding task.",
       "Diagnose this failure without changing files yet.",
       "Review this diff and report only actionable findings."
     ]

@@ -24,6 +24,14 @@ MAX_DEFAULT_PROMPT_LENGTH = 128
 EXPECTED_MARKETPLACE_PLUGIN_COUNT = 1
 SUCCESS_EXIT_CODE = 0
 FAILURE_EXIT_CODE = 1
+DELEGATION_REFERENCE_RELATIVE_PATH = Path("references/12-research-and-delegation.md")
+DELEGATION_REQUIRED_MARKERS = {
+    "不得为了占满并发槽启动 agent",
+    "主智能体唯一拥有拆分、派发、追问、停止、综合和最终验收权",
+    "委派严格单层",
+    "一个通道同一时刻只能有一个所有者",
+    "每个子智能体最多做一次有新信息目标的补充追问",
+}
 
 FRONTMATTER_OPENING = "---\n"
 FRONTMATTER_CLOSING = "\n---\n"
@@ -181,6 +189,17 @@ def validate_source(root: Path) -> None:
         raise ValidationError(f"skill 名称 {name!r} 必须与目录名 {root.name!r} 一致")
     validate_markdown_tree(root)
     validate_repo_markdown(root)
+
+    delegation_reference = root / DELEGATION_REFERENCE_RELATIVE_PATH
+    delegation_text = delegation_reference.read_text(encoding="utf-8")
+    missing_delegation_markers = {
+        marker for marker in DELEGATION_REQUIRED_MARKERS if marker not in delegation_text
+    }
+    if missing_delegation_markers:
+        raise ValidationError(
+            f"{delegation_reference}: 缺少受控委派与防循环边界 "
+            f"{sorted(missing_delegation_markers)}"
+        )
 
     ui_text = (root / "agents/openai.yaml").read_text(encoding="utf-8")
     required_ui = (

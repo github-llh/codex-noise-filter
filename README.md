@@ -4,7 +4,7 @@
 
 **证据驱动的 Codex 编程工作流 skill**
 
-少读无关内容 · 保护脏工作区 · 自动恢复连续性 · 真实验证
+少读无关内容 · 受控最小委派 · 自动恢复连续性 · 真实验证
 
 [English](README.en.md) · [更新记录](CHANGELOG.md) · [分发说明](distribution/README.md)
 
@@ -12,7 +12,9 @@
 
 ## v3 定位
 
-`codex-noise-filter` 用于真实代码库里的解释、诊断、审查和实施任务。它先判断用户授权的任务模式，再从代码、diff、路径、配置、日志和失败命令中收敛证据，最后用与触碰范围匹配的验证闭环。v3 新增 Plugin 内置连续性 Hook，在上下文压缩、会话恢复/重新连接、模型变化和网络/传输失败后自动要求复核目标与落盘状态；v3.1 进一步在压缩前可靠标记待恢复状态、压缩后注入结构化连续性账本，并增加不含用户内容的事件与上下文注入计数。
+`codex-noise-filter` 用于真实代码库里的解释、诊断、审查和实施任务。它先判断用户授权的任务模式，再从代码、diff、路径、配置、日志和失败命令中收敛证据，最后用与触碰范围匹配的验证闭环。v3 新增 Plugin 内置连续性 Hook，在上下文压缩、会话恢复/重新连接、模型变化和网络/传输失败后自动要求复核目标与落盘状态；v3.1 补强压缩账本和无用户内容的审计计数；v3.2 增加按独立性、上下文、写冲突和总成本判断的单层受控委派。
+
+子智能体默认不启动。只有独立通道的并行或上下文隔离收益高于启动、交接、复核和额外 token 成本时才使用最少数量；主智能体保持唯一调度权，子智能体不再派生，也不与主智能体重复搜索或抢写同一范围。
 
 v3 保留 v2 已清理的噪音与副作用边界：
 
@@ -44,11 +46,12 @@ v3 保留 v2 已清理的噪音与副作用边界：
 1. 读取 `SKILL.md` 和 `references/00-index.md`。
 2. 判定回答、诊断、审查或实施模式。
 3. 检查 Git root、目标模块、分支和脏工作区。
-4. 从原始症状或目标行为定位完整语义单元，按风险补必要调用链。
-5. 只修改授权范围和目标所需直接依赖。
-6. 运行静态检查、目标构建/测试和 diff review 中的最小充分组合。
-7. 连续性事件触发后自动从最新指令、工作区、落盘文件和工具状态重建唯一下一步。
-8. 用中文交付结果、关键变更、验证与未覆盖边界。
+4. 仅在任务边界或结构变化时评估一次工作量；不满足收益门槛就保持单智能体。
+5. 从原始症状或目标行为定位完整语义单元，按风险补必要调用链。
+6. 只修改授权范围和目标所需直接依赖。
+7. 运行静态检查、目标构建/测试和 diff review 中的最小充分组合。
+8. 连续性事件触发后自动从最新指令、工作区、落盘文件和工具状态重建唯一下一步。
+9. 用中文交付结果、关键变更、验证与未覆盖边界。
 
 ## 安装
 
@@ -89,6 +92,7 @@ $codex-noise-filter 找到这个构建失败的根因并修复，保护现有脏
 | `09-agentic-security.md` | 外部内容与可执行供应链安全 |
 | `10-continuity.md` | 压缩、中断、模型变化与网络失败后的自动连续性保护 |
 | `11-skill-and-plugin-distribution.md` | Codex skill/plugin 分发 |
+| `12-research-and-delegation.md` | 外部资料调研、工作量判断与单层子智能体委派 |
 
 所有 reference 都由 `SKILL.md` 直接链接，并控制在 100 行以内，避免深层引用和默认上下文膨胀。
 
@@ -156,12 +160,15 @@ git diff --check
 - [Build plugins](https://developers.openai.com/codex/plugins/build)：`.codex-plugin/plugin.json`、`skills/`、SemVer 和 marketplace。
 - [AGENTS.md](https://developers.openai.com/codex/agent-configuration/agents-md)：项目指令链、优先级和大小边界。
 - [Hooks](https://developers.openai.com/codex/hooks)：生命周期事件、配置位置和运行时限制。
+- [Subagents](https://learn.chatgpt.com/docs/agent-configuration/subagents.md)：独立通道、token 成本、写冲突和单层嵌套边界。
 
 ## 其他一手参考
 
 - [Claude Code Hooks](https://code.claude.com/docs/en/hooks)：恢复时刷新易过期上下文和控制 `additionalContext`。
 - [GitHub Copilot Hooks](https://docs.github.com/en/copilot/concepts/agents/hooks)：事件审计、超时和跨平台 Hook 配置。
 - [OpenCode Plugins](https://opencode.ai/docs/plugins/)：压缩前保留任务状态、关键决策、活动文件、阻塞与下一步。
+- [Anthropic multi-agent research system](https://www.anthropic.com/engineering/multi-agent-research-system)：主从编排的收益、协调复杂度和 token 成本。
+- [Anthropic Building Effective Agents](https://www.anthropic.com/engineering/building-effective-agents)：先用简单方案，只在独立拆分有明确收益时并行。
 
 ## 协议
 

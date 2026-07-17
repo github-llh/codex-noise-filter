@@ -4,7 +4,7 @@
 
 **An evidence-driven coding workflow skill for Codex**
 
-Read less noise · Preserve dirty worktrees · Recover continuity automatically · Verify for real
+Read less noise · Delegate minimally · Recover continuity automatically · Verify for real
 
 [简体中文](README.md) · [Changelog](CHANGELOG.md) · [Distribution](distribution/README.md)
 
@@ -12,7 +12,9 @@ Read less noise · Preserve dirty worktrees · Recover continuity automatically 
 
 ## Version 3 scope
 
-`codex-noise-filter` supports explanation, diagnosis, review, and implementation in real repositories. It identifies the authorized task mode, narrows evidence from code, diffs, paths, configuration, logs, and failing commands, then closes the task with validation proportional to the touched scope. Version 3 adds plugin-bundled continuity hooks that automatically request goal and on-disk-state reconciliation after compaction, session resume or reconnection, model changes, and network or transport failures. Version 3.1 reliably marks pending recovery before compaction, injects a structured continuity ledger after compaction, and records bounded event/context-injection counters without user content.
+`codex-noise-filter` supports explanation, diagnosis, review, and implementation in real repositories. It identifies the authorized task mode, narrows evidence from code, diffs, paths, configuration, logs, and failing commands, then closes the task with validation proportional to the touched scope. Version 3 adds plugin-bundled continuity hooks; Version 3.1 strengthens compaction recovery and bounded audit counters; Version 3.2 adds workload-aware, single-level delegation based on independence, context isolation, write conflicts, and total coordination cost.
+
+Subagents stay off by default. The main agent delegates the minimum number of bounded lanes only when parallelism or context isolation clearly outweighs startup, handoff, verification, and extra-token costs. The main agent remains the sole orchestrator; subagents do not spawn descendants or duplicate the main agent's active scope.
 
 Version 3 preserves the noise and side-effect boundaries established in version 2:
 
@@ -44,11 +46,12 @@ Do not use it for standalone general knowledge, generic advice without repositor
 1. Read `SKILL.md` and `references/00-index.md`.
 2. Classify the request as answer, diagnosis, review, or implementation.
 3. Check the Git root, target module, branch, and dirty worktree.
-4. Start from the symptom or desired behavior, read the complete semantic unit, and expand the call chain only as risk requires.
-5. Change only the authorized scope and direct dependencies required by the goal.
-6. Run the smallest sufficient mix of static checks, target build/tests, and diff review.
-7. After a continuity event, automatically rebuild the single next step from current instructions, worktree evidence, persisted files, and active tools.
-8. Deliver the result, material changes, validation, and remaining gaps.
+4. Assess workload once at task definition or a material structure change; stay single-agent unless the benefit gate passes.
+5. Start from the symptom or desired behavior, read the complete semantic unit, and expand the call chain only as risk requires.
+6. Change only the authorized scope and direct dependencies required by the goal.
+7. Run the smallest sufficient mix of static checks, target build/tests, and diff review.
+8. After a continuity event, automatically rebuild the single next step from current instructions, worktree evidence, persisted files, and active tools.
+9. Deliver the result, material changes, validation, and remaining gaps.
 
 ## Install
 
@@ -137,12 +140,15 @@ The validator and hook tests use only the Python standard library and check fron
 - [Build plugins](https://developers.openai.com/codex/plugins/build)
 - [AGENTS.md](https://developers.openai.com/codex/agent-configuration/agents-md)
 - [Hooks](https://developers.openai.com/codex/hooks)
+- [Subagents](https://learn.chatgpt.com/docs/agent-configuration/subagents.md)
 
 ## Additional primary references
 
 - [Claude Code Hooks](https://code.claude.com/docs/en/hooks)
 - [GitHub Copilot Hooks](https://docs.github.com/en/copilot/concepts/agents/hooks)
 - [OpenCode Plugins](https://opencode.ai/docs/plugins/)
+- [Anthropic multi-agent research system](https://www.anthropic.com/engineering/multi-agent-research-system)
+- [Anthropic Building Effective Agents](https://www.anthropic.com/engineering/building-effective-agents)
 
 ## License
 
