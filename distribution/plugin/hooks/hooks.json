@@ -2,14 +2,14 @@
   "hooks": {
     "SessionStart": [
       {
-        "matcher": "resume|compact",
+        "matcher": "startup|resume|clear|compact",
         "hooks": [
           {
             "type": "command",
             "command": "python3 \"$PLUGIN_ROOT/hooks/continuity_guard.py\"",
             "commandWindows": "py -3 \"%PLUGIN_ROOT%\\hooks\\continuity_guard.py\"",
             "timeout": 5,
-            "statusMessage": "恢复连续性上下文"
+            "statusMessage": "加载编程路由与连续性上下文"
           }
         ]
       }
@@ -56,7 +56,6 @@
     ],
     "PostToolUse": [
       {
-        "matcher": "Bash|mcp__.*",
         "hooks": [
           {
             "type": "command",

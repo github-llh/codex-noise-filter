@@ -4,9 +4,9 @@
 
 在上下文自动/手动压缩、会话恢复或重新连接、模型切换、工作目录变化、网络/传输失败后，自动恢复任务的证据链，不要求用户重复已经提供的信息。
 
-- Skill 指令负责语义检查点和恢复顺序；Plugin 内置 Hook 负责感知 Codex 已公开的生命周期事件。
+- Skill 指令负责语义检查点和恢复顺序；Plugin 内置 Hook 按 Codex/Claude 原生配置感知已公开的生命周期事件。
 - 单纯切换可见窗口不会改变同一任务上下文；窗口关闭、重新连接或重新进入任务由 `SessionStart(resume)` 覆盖。
-- Codex 没有公开独立的“网络断开”或“模型切换”Hook。网络工具失败由 `PostToolUse` 识别；模型变化由相邻事件的 `model` 字段比较。
+- Codex 没有公开独立的“网络断开”或“模型切换”Hook。网络工具失败由 `PostToolUse` 识别，Claude 另用 `PostToolUseFailure`；模型变化依赖事件实际包含 `model` 字段。
 - Hook 被禁用、未信任、被 managed-only 策略跳过或当前表面不支持时，仍执行本文件的指令级恢复，不宣称机械保证。
 
 ## 语义检查点
@@ -39,7 +39,7 @@ doNotRetry:
 4. 已运行验证、结果、未覆盖边界和外部操作幂等性状态。
 5. `doNotRetry` 与唯一下一步。
 
-没有证据的字段标记为未确认；不把静态项目规则、完整日志、旧时间戳或大段历史重复塞入摘要。当前 Codex 的 `PreCompact`/`PostCompact` 输出协议不接受 `additionalContext`，因此 Hook 只在压缩前落下待恢复标记，再由 `SessionStart(compact)` 或下一次 `UserPromptSubmit` 注入上述账本复核，不照搬其他宿主的压缩 prompt 改写能力。
+没有证据的字段标记为未确认；不把静态项目规则、完整日志、旧时间戳或大段历史重复塞入摘要。当前 Codex 的 `PreCompact`/`PostCompact` 输出协议不接受 `additionalContext`，因此 Hook 只在压缩前落下待恢复标记，再由 `SessionStart(compact)`、下一次 `UserPromptSubmit` 或工具完成事件 注入上述账本复核，不照搬其他宿主的压缩 prompt 改写能力。
 
 ## 自动触发矩阵
 
@@ -47,9 +47,11 @@ doNotRetry:
 | --- | --- |
 | `PreCompact(manual|auto)` | 静默标记压缩待恢复，不返回宿主不支持的上下文字段 |
 | `PostCompact(manual|auto)` | 用“压缩已完成”替换过期的“即将压缩”，等待恢复注入 |
-| `SessionStart(compact|resume)` | 注入恢复要求并清除已消费标记 |
-| `UserPromptSubmit` | 比较当前模型/目录指纹；发现变化或待恢复标记时注入恢复要求 |
-| `PostToolUse(Bash|MCP)` | 同时具有失败状态和网络/传输特征时立即注入一次幂等性复核 |
+| `SessionStart(startup|clear)` | 注入短编程路由；不强行启用非编程任务 |
+| `SessionStart(compact|resume)` | 刷新短路由并注入恢复要求，清除已消费标记 |
+| `UserPromptSubmit` | 短路由按语义识别续问；比较模型/目录，存在原因时合并恢复 |
+| `PostToolUse` | 处理模型/目录变化、待恢复标记及网络失败；普通成功事件不写状态 |
+| Claude `PostToolUseFailure` | 以 `error` 字段识别网络失败并注入复核 |
 
 Hook 不读取不稳定的 transcript 格式，也不阻止用户 prompt、压缩或工具结果；网络失败后只要求先查副作用，不盲目重试。宿主省略 `model` 或 `cwd` 时保留最近一次已知值，不用空值覆盖。
 
@@ -76,3 +78,5 @@ Hook 不读取不稳定的 transcript 格式，也不阻止用户 prompt、压�
 - [Claude Code Hooks](https://code.claude.com/docs/en/hooks)：恢复时刷新易过期上下文、快速 SessionStart 与最小 `additionalContext`。
 - [GitHub Copilot Hooks](https://docs.github.com/en/copilot/concepts/agents/hooks)：事件审计、超时与跨平台命令边界。
 - [OpenCode Plugins](https://opencode.ai/docs/plugins/)：借鉴其压缩账本字段，但不迁移 Codex 当前不支持的 compaction prompt 改写。
+
+性能边界：新会话建档时才清理旧状态；计数记录需要处理的事件，不统计所有成功工具调用。Hook 状态仅为恢复提示，不是事务日志；并发 hook、宿主终止或超时下不能凭计数推断精确一次执行。

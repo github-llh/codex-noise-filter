@@ -1,6 +1,6 @@
 # Skill 与 Plugin 分发
 
-本文件只描述 Codex 已验证的分发表面；第三方宿主必须以其官方文档和当前可见能力为准。
+本文件描述分发共识；各宿主的格式、触发入口和边界见 [13-host-compatibility.md](13-host-compatibility.md)。
 
 ## Skill 结构
 
@@ -47,7 +47,7 @@ Skill 指令只能指导 agent，不能证明 hook 会运行。需要生命周�
 4. 非托管 Hook 首次启用或内容变化后必须由宿主完成信任审查；被禁用或跳过时退回 Skill 指令级流程。
 5. 没有实际注册和运行证据时，不写“自动阻止”或“所有表面必执行”。
 
-本项目 v3 只内置连续性 Hook，不声明 MCP 或 app，也不扩大文件、网络或外部系统权限。
+本项目 v4 生成 Codex、Claude、DeepSeek Harness 原生插件及不带 hooks 的 portable/Skill 包。Claude 包使用 `.claude-plugin/plugin.json`，默认自动发现 `hooks/hooks.json`，不重复注册；portable 包使用根 `plugin.json`。Harness 通过 `dsh.bundle` 安装，使用技能注册与上下文快照；各包共用同一份规则，不声明 MCP 或 app，不扩大文件、网络或外部系统权限。
 
 ## 发布检查
 
@@ -60,6 +60,6 @@ Skill 指令只能指导 agent，不能证明 hook 会运行。需要生命周�
 ## 官方资料
 
 - [Build skills](https://developers.openai.com/codex/build-skills)
-- [Build plugins](https://developers.openai.com/codex/plugins/build)
+- [Build plugins](https://learn.chatgpt.com/docs/build-plugins)
 - [AGENTS.md](https://developers.openai.com/codex/agent-configuration/agents-md)
 - [Hooks](https://developers.openai.com/codex/hooks)

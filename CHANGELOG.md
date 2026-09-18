@@ -1,5 +1,13 @@
 # Changelog
 
+## 4.0.0 - 2026-09-18
+
+- 对齐官方 AGENTS.md、CLAUDE.md、skills、plugins 与 hooks，增加 Codex、Claude、Claude Windows、DeepSeek Harness 原生 bundle、portable plugin 与标准 Skill 分发，并生成 Cursor/Gemini/OpenCode/Copilot/Harness 项目入口；同一份模型无关规则适配 MiMo/DeepSeek 等宿主后端。
+- 补齐 startup/clear 与 prompt 语义路由、Claude PostToolUseFailure；压缩恢复可在下一工具事件交付，成功快路径不会丢掉已知恢复原因。
+- 普通成功工具不写状态，会话建档才清理旧状态；守卫扫描改为全局节点/深度/字符预算，原始工具结果、模型与推理配置保持不变。
+- 标准库跨平台构建器生成可复现 ZIP，拒绝非空/源码/祖先输出目录；旧 Shell 入口复用同一安全构建实现。
+- 增加普通 App 指令模板、宿主支持矩阵、跨宿主回归与打包测试。没有官方扩展入口的聊天 App 不宣称自动 hooks；本地协议测试不等于各厂商真实模型质量验收。
+
 ## 3.2.0 - 2026-07-17
 
 ### 受控子智能体委派

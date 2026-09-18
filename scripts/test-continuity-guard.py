@@ -4,9 +4,11 @@
 from __future__ import annotations
 
 import json
+import importlib.util
 import os
 import subprocess
 import tempfile
+import sys
 import unittest
 from pathlib import Path
 from typing import Any
@@ -14,6 +16,10 @@ from typing import Any
 
 ROOT_DIRECTORY = Path(__file__).resolve().parent.parent
 HOOK_SCRIPT = ROOT_DIRECTORY / "distribution/plugin/hooks/continuity_guard.py"
+sys.dont_write_bytecode = True
+GUARD_SPEC = importlib.util.spec_from_file_location("guard_test", HOOK_SCRIPT)
+GUARD = importlib.util.module_from_spec(GUARD_SPEC)
+GUARD_SPEC.loader.exec_module(GUARD)
 HOOK_TIMEOUT_SECONDS = 5
 SUCCESS_EXIT_CODE = 0
 EXPECTED_STATE_SCHEMA_VERSION = 2
@@ -46,7 +52,7 @@ class ContinuityGuardTest(unittest.TestCase):
         environment = os.environ.copy()
         environment["PLUGIN_DATA"] = str(self.plugin_data)
         result = subprocess.run(
-            ["python3", str(HOOK_SCRIPT)],
+            [sys.executable, str(HOOK_SCRIPT)],
             input=json.dumps(payload),
             text=True,
             capture_output=True,
@@ -120,7 +126,7 @@ class ContinuityGuardTest(unittest.TestCase):
     def test_model_and_workspace_switches_are_detected(self) -> None:
         """模型或工作目录变化在下一次用户提交时合并为一次恢复注入。"""
 
-        self.assertIsNone(self.run_hook(self.payload(EVENT_USER_PROMPT_SUBMIT, prompt="first")))
+        self.assert_context_contains(self.run_hook(self.payload(EVENT_USER_PROMPT_SUBMIT, prompt="first")), "codex-noise-filter")
         output = self.run_hook(
             self.payload(
                 EVENT_USER_PROMPT_SUBMIT,
@@ -157,12 +163,11 @@ class ContinuityGuardTest(unittest.TestCase):
             )
         )
         self.assert_context_contains(output, "工具出现网络或传输失败")
-        self.assertIsNone(
-            self.run_hook(self.payload(EVENT_USER_PROMPT_SUBMIT, prompt="continue"))
-        )
+        next_output = self.run_hook(self.payload(EVENT_USER_PROMPT_SUBMIT, prompt="continue"))
+        self.assertNotIn("工具出现网络或传输失败", json.dumps(next_output, ensure_ascii=False))
         state = self.read_state()
         self.assertEqual([], state["pending_reasons"])
-        self.assertEqual([REASON_NETWORK_FAILURE], state["last_context_reasons"])
+        self.assertEqual([], state["last_context_reasons"])
 
     def test_successful_tool_does_not_trigger_on_log_text(self) -> None:
         """成功输出仅提到旧网络错误时不误触发。"""
@@ -216,7 +221,7 @@ class ContinuityGuardTest(unittest.TestCase):
         state["pending_reasons"] = [{"invalid": True}, injected_text]
         self.state_path().write_text(json.dumps(state, ensure_ascii=False), encoding="utf-8")
         output = self.run_hook(self.payload(EVENT_USER_PROMPT_SUBMIT, prompt="continue"))
-        self.assertIsNone(output)
+        self.assert_context_contains(output, "codex-noise-filter")
         self.assertNotIn(injected_text, self.state_path().read_text(encoding="utf-8"))
 
     def test_invalid_schema_type_falls_back_to_empty_state(self) -> None:
@@ -226,7 +231,7 @@ class ContinuityGuardTest(unittest.TestCase):
         invalid_state = {"schema_version": [], "pending_reasons": [REASON_NETWORK_FAILURE]}
         self.state_path().write_text(json.dumps(invalid_state), encoding="utf-8")
         output = self.run_hook(self.payload(EVENT_USER_PROMPT_SUBMIT, prompt="continue"))
-        self.assertIsNone(output)
+        self.assert_context_contains(output, "codex-noise-filter")
         self.assertEqual(EXPECTED_STATE_SCHEMA_VERSION, self.read_state()["schema_version"])
 
     def test_private_state_excludes_user_and_workspace_content(self) -> None:
@@ -248,6 +253,91 @@ class ContinuityGuardTest(unittest.TestCase):
         self.assertNotIn(payload["cwd"], state_text)
         self.assertNotIn(sensitive_prompt, state_text)
         self.assertNotIn(sensitive_response, state_text)
+
+    def test_startup_and_clear_offer_semantic_routing(self) -> None:
+        """新会话和清空会话均提供路由，续问不依赖硬编码关键词分类。"""
+        for source in ("startup", "clear"):
+            self.assert_context_contains(self.run_hook(self.payload(EVENT_SESSION_START, source=source)), "codex-noise-filter")
+        output = self.run_hook(self.payload(EVENT_USER_PROMPT_SUBMIT, prompt="还是这样"))
+        self.assert_context_contains(output, "结合对话")
+        self.assert_context_contains(output, "纯翻译")
+
+    def test_claude_failure_uses_error_field_and_native_data_directory(self) -> None:
+        """Claude 失败事件无需伪造 tool_response，且不依赖 Codex 的环境变量。"""
+        environment = os.environ.copy()
+        environment.pop("PLUGIN_DATA", None)
+        environment["CLAUDE_PLUGIN_DATA"] = str(self.plugin_data)
+        payload = self.payload("PostToolUseFailure", error="Exit code 1\nECONNRESET", tool_name="Bash")
+        result = subprocess.run([sys.executable, str(HOOK_SCRIPT)], input=json.dumps(payload), text=True, capture_output=True, env=environment, timeout=5)
+        self.assertEqual(0, result.returncode, result.stderr)
+        output = json.loads(result.stdout)
+        self.assertEqual("PostToolUseFailure", output["hookSpecificOutput"]["hookEventName"])
+        self.assert_context_contains(output, "工具出现网络或传输失败")
+        self.assertEqual([REASON_NETWORK_FAILURE], self.read_state()["last_context_reasons"])
+
+    def test_successful_tool_has_no_state_write(self) -> None:
+        """成功事件不创建状态目录，不触碰已有状态文件。"""
+        payload = self.payload(EVENT_POST_TOOL_USE, tool_response={"exit_code": 0, "output": "ok"})
+        self.assertIsNone(self.run_hook(payload))
+        self.assertFalse((self.plugin_data / STATE_DIRECTORY_NAME).exists())
+        self.run_hook(self.payload(EVENT_SESSION_START, source="startup"))
+        path = self.state_path()
+        before = (path.read_bytes(), path.stat().st_mtime_ns)
+        self.assertIsNone(self.run_hook(payload))
+        self.assertEqual(before, (path.read_bytes(), path.stat().st_mtime_ns))
+
+    def test_successful_tool_does_not_drop_pending_recovery(self) -> None:
+        """无后续 prompt/SessionStart 时，第一个工具完成事件仍恢复压缩状态。"""
+        self.run_hook(self.payload(EVENT_PRE_COMPACT, trigger="auto"))
+        self.run_hook(self.payload(EVENT_POST_COMPACT, trigger="auto"))
+        output = self.run_hook(self.payload(EVENT_POST_TOOL_USE, tool_response={"exit_code": 0}))
+        self.assert_context_contains(output, "上下文已完成压缩")
+        self.assertEqual([], self.read_state()["pending_reasons"])
+
+    def test_model_change_is_detected_on_successful_tool(self) -> None:
+        """成功快路径保留真实模型变化的恢复语义。"""
+        self.run_hook(self.payload(EVENT_SESSION_START, source="startup"))
+        output = self.run_hook(self.payload(EVENT_POST_TOOL_USE, model="mimo-test", tool_response={"exit_code": 0}))
+        self.assert_context_contains(output, "活动模型已切换")
+
+    def test_unknown_event_and_malformed_payload_fail_open(self) -> None:
+        """未知事件不写状态；错误诊断不回显输入或阻断用户。"""
+        self.assertIsNone(self.run_hook(self.payload("UnknownEvent")))
+        self.assertFalse((self.plugin_data / STATE_DIRECTORY_NAME).exists())
+        result = subprocess.run([sys.executable, str(HOOK_SCRIPT)], input='{"secret-value":', text=True, capture_output=True, timeout=5)
+        self.assertEqual(0, result.returncode)
+        self.assertNotIn("secret-value", result.stdout + result.stderr)
+        self.assertIn("systemMessage", json.loads(result.stdout))
+
+    def test_stateless_recovery_keeps_original_output_contract(self) -> None:
+        """私有目录不可用时仍输出复核提示，绝不替换原始工具结果。"""
+        environment = os.environ.copy()
+        for key in ("PLUGIN_DATA", "CLAUDE_PLUGIN_DATA"):
+            environment.pop(key, None)
+        payload = self.payload(EVENT_POST_TOOL_USE, tool_response={"isError": True, "error": "connection reset"})
+        result = subprocess.run([sys.executable, str(HOOK_SCRIPT)], input=json.dumps(payload), text=True, capture_output=True, env=environment, timeout=5)
+        output = json.loads(result.stdout)
+        self.assert_context_contains(output, "工具出现网络或传输失败")
+        self.assertEqual({"hookSpecificOutput"}, set(output))
+        self.assertEqual({"hookEventName", "additionalContext"}, set(output["hookSpecificOutput"]))
+
+    def test_response_scan_has_global_work_budget(self) -> None:
+        """宽树与巨大字符串共用预算，不改变调用方持有的原始响应。"""
+        response = {"items": [{"nested": list(range(100))} for _ in range(100)]}
+        before = json.dumps(response)
+        visited = list(GUARD.response_fragments(response))
+        self.assertLessEqual(len(visited), GUARD.MAX_RESPONSE_SCAN_ITEMS)
+        self.assertEqual(before, json.dumps(response))
+        huge = {"exit_code": 1, "output": "x" * (GUARD.MAX_RESPONSE_SCAN_CHARS * 2)}
+        self.assertFalse(GUARD.is_network_failure(huge))
+        self.assertEqual(GUARD.MAX_RESPONSE_SCAN_CHARS * 2, len(huge["output"]))
+
+    def test_stateless_scan_rejects_oversized_input_without_echo(self) -> None:
+        """守卫扫描超限仅报告固定警告，不输出敏感输入或阻断结果。"""
+        result = subprocess.run([sys.executable, str(HOOK_SCRIPT)], input='"' + 'private' * (GUARD.MAX_INPUT_CHARS // 7 + 1) + '"', text=True, capture_output=True, timeout=5)
+        self.assertEqual(0, result.returncode)
+        self.assertNotIn("private", result.stdout + result.stderr)
+        self.assertEqual({"systemMessage"}, set(json.loads(result.stdout)))
 
 
 if __name__ == "__main__":

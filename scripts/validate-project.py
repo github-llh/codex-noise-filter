@@ -98,10 +98,9 @@ HOOK_REQUIRED_EVENTS = {
 }
 HOOK_ALLOWED_EVENTS = HOOK_REQUIRED_EVENTS
 HOOK_REQUIRED_MATCHERS = {
-    "SessionStart": "resume|compact",
+    "SessionStart": "startup|resume|clear|compact",
     "PreCompact": "manual|auto",
     "PostCompact": "manual|auto",
-    "PostToolUse": "Bash|mcp__.*",
 }
 HOOK_REQUIRED_SCRIPT_MARKERS = {
     "STATE_SCHEMA_VERSION = 2",
@@ -266,7 +265,7 @@ def validate_manifest(manifest: dict, path: Path) -> None:
         )
 
 
-def validate_hooks(plugin_root: Path) -> None:
+def validate_hooks(plugin_root: Path, host: str = "codex") -> None:
     hook_path = plugin_root / HOOK_CONFIG_RELATIVE_PATH
     if not hook_path.is_file():
         raise ValidationError(f"plugin 默认 Hook 文件不存在: {HOOK_CONFIG_RELATIVE_PATH}")
@@ -288,8 +287,9 @@ def validate_hooks(plugin_root: Path) -> None:
     events = hook_config[HOOK_CONFIG_TOP_LEVEL_FIELD]
     if not isinstance(events, dict):
         raise ValidationError(f"{hook_path}: hooks 必须是对象")
-    missing_events = HOOK_REQUIRED_EVENTS - events.keys()
-    unknown_events = events.keys() - HOOK_ALLOWED_EVENTS
+    required_events = HOOK_REQUIRED_EVENTS | ({"PostToolUseFailure"} if host == "claude" else set())
+    missing_events = required_events - events.keys()
+    unknown_events = events.keys() - required_events
     if missing_events or unknown_events:
         raise ValidationError(
             f"{hook_path}: Hook 事件不完整，缺少 {sorted(missing_events)}，"
@@ -316,13 +316,21 @@ def validate_hooks(plugin_root: Path) -> None:
                     raise ValidationError(f"{hook_path}: {event_name} 只允许 command Hook")
                 command = handler.get("command")
                 windows_command = handler.get("commandWindows")
-                if not isinstance(command, str) or HOOK_COMMAND_MARKER not in command:
+                if host == "claude":
+                    command_marker = "CLAUDE_PLUGIN_ROOT"
+                else:
+                    command_marker = HOOK_COMMAND_MARKER
+                if not isinstance(command, str) or command_marker not in command:
                     raise ValidationError(f"{hook_path}: {event_name} 必须通过 PLUGIN_ROOT 定位脚本")
                 if (
+                    host == "codex" and (
                     not isinstance(windows_command, str)
                     or HOOK_WINDOWS_COMMAND_MARKER not in windows_command
+                    )
                 ):
                     raise ValidationError(f"{hook_path}: {event_name} 缺少 Windows 插件脚本路径")
+                if host == "claude" and "commandWindows" in handler:
+                    raise ValidationError(f"{hook_path}: Claude 不使用 Codex commandWindows 扩展")
                 timeout = handler.get("timeout")
                 if (
                     not isinstance(timeout, int)
@@ -370,6 +378,25 @@ def validate_plugin(plugin_root: Path) -> None:
             raise ValidationError(f"plugin 包含 Python 字节码: {path.relative_to(plugin_root)}")
 
 
+def validate_other_plugin(plugin_root: Path, host: str) -> None:
+    """核验独立宿主包的入口、路径与 hooks 边界。"""
+    manifest_path = plugin_root / (".claude-plugin/plugin.json" if host == "claude" else "plugin.json")
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    if not NAME_RE.fullmatch(manifest.get("name", "")) or not SEMVER_RE.fullmatch(manifest.get("version", "")):
+        raise ValidationError(f"{manifest_path}: name/version 无效")
+    skill_root = plugin_root / "skills" / manifest["name"]
+    read_frontmatter(skill_root / "SKILL.md")
+    validate_markdown_tree(skill_root)
+    if host == "claude":
+        if "hooks" in manifest:
+            raise ValidationError(f"{manifest_path}: 默认 hooks 文件不得重复注册")
+        if "interface" in manifest:
+            raise ValidationError(f"{manifest_path}: 不应携带 Codex UI 字段")
+        validate_hooks(plugin_root, host="claude")
+    elif (plugin_root / "hooks").exists() or "hooks" in manifest:
+        raise ValidationError(f"{manifest_path}: portable 包只提供 skills")
+
+
 def validate_marketplace_root(root: Path) -> None:
     manifest_path = root / MARKETPLACE_MANIFEST_RELATIVE_PATH
     unsupported_manifest_path = root / UNSUPPORTED_ROOT_MARKETPLACE_FILENAME
@@ -397,6 +424,8 @@ def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--plugin", type=Path)
     parser.add_argument("--marketplace-root", type=Path)
+    parser.add_argument("--claude-plugin", type=Path)
+    parser.add_argument("--portable-plugin", type=Path)
     args = parser.parse_args()
     root = Path(__file__).resolve().parent.parent
     try:
@@ -405,6 +434,10 @@ def main() -> int:
             validate_plugin(args.plugin.resolve())
         if args.marketplace_root:
             validate_marketplace_root(args.marketplace_root.resolve())
+        if args.claude_plugin:
+            validate_other_plugin(args.claude_plugin.resolve(), "claude")
+        if args.portable_plugin:
+            validate_other_plugin(args.portable_plugin.resolve(), "portable")
     except (OSError, json.JSONDecodeError, ValidationError) as exc:
         print(f"错误: {exc}", file=sys.stderr)
         return FAILURE_EXIT_CODE

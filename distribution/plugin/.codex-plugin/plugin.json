@@ -1,7 +1,7 @@
 {
   "name": "codex-noise-filter",
-  "version": "3.2.0",
-  "description": "Evidence-driven coding workflow with bounded delegation, automatic continuity recovery, scoped investigation, safe edits, and proportionate validation.",
+  "version": "4.0.0",
+  "description": "Model-neutral evidence-driven coding with native host activation, continuity recovery and proportionate validation.",
   "author": {
     "name": "github-llh",
     "url": "https://github.com/github-llh"
