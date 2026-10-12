@@ -1,6 +1,6 @@
 {
   "name": "codex-noise-filter",
-  "version": "4.0.0",
+  "version": "4.1.0",
   "description": "Model-neutral evidence-driven coding with native host activation, continuity recovery and proportionate validation.",
   "author": {
     "name": "github-llh",

@@ -6,7 +6,7 @@
 
 - Skill 指令负责语义检查点和恢复顺序；Plugin 内置 Hook 按 Codex/Claude 原生配置感知已公开的生命周期事件。
 - 单纯切换可见窗口不会改变同一任务上下文；窗口关闭、重新连接或重新进入任务由 `SessionStart(resume)` 覆盖。
-- Codex 没有公开独立的“网络断开”或“模型切换”Hook。网络工具失败由 `PostToolUse` 识别，Claude 另用 `PostToolUseFailure`；模型变化依赖事件实际包含 `model` 字段。
+- Codex 没有公开独立的“网络断开”或“模型切换”Hook。网络工具失败在 Codex 由 `PostToolUse` 识别，Claude 只注册 `PostToolUseFailure`；模型变化依赖事件实际包含 `model` 字段。
 - Hook 被禁用、未信任、被 managed-only 策略跳过或当前表面不支持时，仍执行本文件的指令级恢复，不宣称机械保证。
 
 ## 语义检查点
@@ -49,8 +49,8 @@ doNotRetry:
 | `PostCompact(manual|auto)` | 用“压缩已完成”替换过期的“即将压缩”，等待恢复注入 |
 | `SessionStart(startup|clear)` | 注入短编程路由；不强行启用非编程任务 |
 | `SessionStart(compact|resume)` | 刷新短路由并注入恢复要求，清除已消费标记 |
-| `UserPromptSubmit` | 短路由按语义识别续问；比较模型/目录，存在原因时合并恢复 |
-| `PostToolUse` | 处理模型/目录变化、待恢复标记及网络失败；普通成功事件不写状态 |
+| `UserPromptSubmit` | 存在待恢复原因时合并注入复核；本会话尚未注入过路由时兜底一次，之后不按轮重复 |
+| Codex `PostToolUse` | 处理模型/目录变化、待恢复标记及网络失败；普通成功事件不写状态 |
 | Claude `PostToolUseFailure` | 以 `error` 字段识别网络失败并注入复核 |
 
 Hook 不读取不稳定的 transcript 格式，也不阻止用户 prompt、压缩或工具结果；网络失败后只要求先查副作用，不盲目重试。宿主省略 `model` 或 `cwd` 时保留最近一次已知值，不用空值覆盖。

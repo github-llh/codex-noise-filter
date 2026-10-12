@@ -93,6 +93,8 @@ def build_target(target: str, output: Path) -> Path:
         write_json(plugin / ".claude-plugin/plugin.json", {
             key: manifest[key] for key in ("name", "version", "description", "author", "homepage", "repository", "license", "keywords")
         })
+        # Claude 的失败工具走 PostToolUseFailure，且 PostToolUse 不提供 model 字段；去掉 PostToolUse 避免每次工具调用都启动 Python。
+        hooks["hooks"].pop("PostToolUse", None)
         hooks["hooks"]["PostToolUseFailure"] = [{"hooks": [{"type": "command", "timeout": 5}]}]
         for groups in hooks["hooks"].values():
             for group in groups:

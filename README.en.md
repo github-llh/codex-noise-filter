@@ -8,7 +8,7 @@ A model-neutral, evidence-driven coding workflow for scoped investigation, safe 
 
 One canonical skill and guard produce separate Codex, Claude, Claude Windows, native DeepSeek Harness, portable Agent Plugins, and standard Agent Skills packages. GPT, Claude, MiMo, DeepSeek, and other providers use the integration supported by their **host**, rather than a model-specific copy of the workflow.
 
-Native plugins provide short semantic routing on session startup, resume, clear, compaction recovery, and prompt submission. Claude also uses `PostToolUseFailure`. Routing delivery is observable; actual skill selection and adherence still require representative host tests.
+Native plugins inject short semantic routing once per session (startup, resume, clear, compaction recovery) instead of on every prompt. Claude registers `PostToolUseFailure` instead of `PostToolUse`. Routing delivery is observable; actual skill selection and adherence still require representative host tests.
 
 Optimization preserves the selected model, reasoning effort, output budget, original tool results, and acceptance criteria. Successful unchanged tool events perform no state writes; historical-state pruning happens only when creating a session record. Guard scanning has global node, depth, character, and input limits. Those limits affect the guard's copy, never the original evidence delivered to the model.
 
@@ -20,7 +20,7 @@ Python 3.10+ standard library only:
 python3 scripts/build-distributions.py
 ```
 
-On Windows, use `py -3`. The default output is `dist/release-4.0.0/`, containing six host directories, reproducible ZIP files, a Harness npm tarball, five project entry layouts, and a separate chat instructions template. Existing nonempty output directories are never overwritten; choose a fresh `--output` when rebuilding. The legacy `scripts/build-plugin-package.sh` builds only the Codex marketplace using the same implementation.
+On Windows, use `py -3`. The default output is `dist/release-4.1.0/`, containing six host directories, reproducible ZIP files, a Harness npm tarball, five project entry layouts, and a separate chat instructions template. Existing nonempty output directories are never overwritten; choose a fresh `--output` when rebuilding. The legacy `scripts/build-plugin-package.sh` builds only the Codex marketplace using the same implementation.
 
 See the [installation guide](distribution/README.md) for host-specific commands, archive layouts, upgrades, Python requirements, and duplicate-install checks. Building does not update installed copies or change global settings, API keys, models, or permissions.
 

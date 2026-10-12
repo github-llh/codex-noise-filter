@@ -41,7 +41,7 @@ plugin-root/
 
 Skill 指令只能指导 agent，不能证明 hook 会运行。需要生命周期强制时：
 
-1. 使用 Codex 当前支持的 `PreCompact`、`PostCompact`、`SessionStart`、`UserPromptSubmit` 和 `PostToolUse` 事件。
+1. Codex 使用 `PreCompact`、`PostCompact`、`SessionStart`、`UserPromptSubmit` 和 `PostToolUse`；Claude 用 `PostToolUseFailure` 替代 `PostToolUse`，避免每次成功工具调用都启动脚本。
 2. Plugin Hook 通过 `$PLUGIN_ROOT` 定位只读脚本，通过 `$PLUGIN_DATA` 保存最小私有状态；不写项目目录、全局配置或长期 memory。
 3. 审查 matcher、退出行为、超时、多 hook 并发语义、敏感信息边界和故障降级。
 4. 非托管 Hook 首次启用或内容变化后必须由宿主完成信任审查；被禁用或跳过时退回 Skill 指令级流程。

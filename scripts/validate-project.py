@@ -287,7 +287,11 @@ def validate_hooks(plugin_root: Path, host: str = "codex") -> None:
     events = hook_config[HOOK_CONFIG_TOP_LEVEL_FIELD]
     if not isinstance(events, dict):
         raise ValidationError(f"{hook_path}: hooks 必须是对象")
-    required_events = HOOK_REQUIRED_EVENTS | ({"PostToolUseFailure"} if host == "claude" else set())
+    required_events = (
+        (HOOK_REQUIRED_EVENTS - {"PostToolUse"}) | {"PostToolUseFailure"}
+        if host == "claude"
+        else HOOK_REQUIRED_EVENTS
+    )
     missing_events = required_events - events.keys()
     unknown_events = events.keys() - required_events
     if missing_events or unknown_events:

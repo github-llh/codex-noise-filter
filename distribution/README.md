@@ -1,6 +1,6 @@
 # 分发与安装
 
-本目录保存 Codex 源 manifest/hooks。`SKILL.md`、`references/` 与守卫只有一份源码；构建器生成独立宿主包。当前版本 `4.0.0`。
+本目录保存 Codex 源 manifest/hooks。`SKILL.md`、`references/` 与守卫只有一份源码；构建器生成独立宿主包。当前版本 `4.1.0`。
 
 ## 构建产物
 
@@ -11,7 +11,7 @@ python3 scripts/build-distributions.py
 在 Windows 终端使用 `py -3` 代替 `python3`。输出：
 
 ```text
-dist/release-4.0.0/
+dist/release-4.1.0/
   codex/.agents/plugins/marketplace.json
   codex/plugins/codex-noise-filter/
   claude/.claude-plugin/marketplace.json
@@ -25,7 +25,7 @@ dist/release-4.0.0/
   codex-noise-filter-claude.zip
   codex-noise-filter-claude-windows.zip
   codex-noise-filter-harness.zip
-  dsh-codex-noise-filter-4.0.0.tgz
+  dsh-codex-noise-filter-4.1.0.tgz
   projects/{cursor,gemini,opencode,copilot,harness}/
   codex-noise-filter-portable.zip
   codex-noise-filter-skill.zip
@@ -41,7 +41,7 @@ dist/release-4.0.0/
 从本仓库根目录执行安装（这些命令会改变本机插件配置，仅在准备好安装时运行）：
 
 ```bash
-codex plugin marketplace add ./dist/release-4.0.0/codex
+codex plugin marketplace add ./dist/release-4.1.0/codex
 codex plugin add codex-noise-filter@codex-noise-filter-local
 codex plugin list
 ```
@@ -55,11 +55,11 @@ codex plugin list
 macOS/Linux 的 Code 会话可通过 CLI 安装：
 
 ```bash
-claude plugin marketplace add ./dist/release-4.0.0/claude
+claude plugin marketplace add ./dist/release-4.1.0/claude
 claude plugin install codex-noise-filter@codex-noise-filter-local
 ```
 
-Windows 选择 `./dist/release-4.0.0/claude-windows`，其 hooks 明确使用 PowerShell 和 `py -3`；POSIX 包使用 `python3`。要求实际 hook 执行环境中已有 Python 3.10+。不自动安装 Python、设置模型或放宽权限。
+Windows 选择 `./dist/release-4.1.0/claude-windows`，其 hooks 明确使用 PowerShell 和 `py -3`；POSIX 包使用 `python3`。要求实际 hook 执行环境中已有 Python 3.10+。不自动安装 Python、设置模型或放宽权限。
 
 支持文件上传插件的 Claude 表面可导入 `codex-noise-filter-claude.zip`；运行在 Linux VM 的 Cowork 使用 POSIX 包，即使桌面宿主是 Windows。以执行环境而非 UI 操作系统选择包。Chat 表面只使用插件 skills，hooks/subagents 需支持的 Cowork/Code 表面，不能据上传成功推断 hooks 可用。
 
@@ -72,7 +72,7 @@ Windows 选择 `./dist/release-4.0.0/claude-windows`，其 hooks 明确使用 Po
 CLI/Web 在准备安装时执行，例如已有 `web` profile：
 
 ```bash
-dsh plugin --profile web add ./dist/release-4.0.0/dsh-codex-noise-filter-4.0.0.tgz
+dsh plugin --profile web add ./dist/release-4.1.0/dsh-codex-noise-filter-4.1.0.tgz
 dsh --profile web --dump-config
 ```
 
@@ -114,7 +114,7 @@ MiMo、DeepSeek 经 Codex/Claude Code 接入时仍使用该宿主包，模型 AP
 
 ## 旧版本迁移
 
-截图中的 `1.0.1`、既有 `3.x` 或同名全局 Skill 都不会因源码升级自动刷新。先查看宿主当前安装来源、版本和同名副本，再用其插件更新/替换入口载入 `4.0.0`；CLI marketplace 更新以当前 `codex plugin marketplace --help` / `claude plugin --help` 为准，不手改插件缓存。
+截图中的 `1.0.1`、既有 `3.x` 或同名全局 Skill 都不会因源码升级自动刷新。先查看宿主当前安装来源、版本和同名副本，再用其插件更新/替换入口载入 `4.1.0`；CLI marketplace 更新以当前 `codex plugin marketplace --help` / `claude plugin --help` 为准，不手改插件缓存。
 
 已配置同名 marketplace 时优先更新原来源，不重复执行 add 注册另一份。首次内容更新后可能需要宿主重新信任 hooks；开始新会话核验。不要同时装 Claude POSIX 与 Windows 两包，或同时保留同名独立 Skill 与插件副本。
 
@@ -124,11 +124,11 @@ MiMo、DeepSeek 经 Codex/Claude Code 接入时仍使用该宿主包，模型 AP
 python3 scripts/validate-project.py
 python3 scripts/test-continuity-guard.py
 python3 scripts/test-distributions.py
-python3 scripts/validate-project.py --marketplace-root dist/release-4.0.0/codex
-python3 scripts/validate-project.py --claude-plugin dist/release-4.0.0/claude/plugins/codex-noise-filter
-python3 scripts/validate-project.py --portable-plugin dist/release-4.0.0/portable/codex-noise-filter
-claude plugin validate --strict dist/release-4.0.0/claude/plugins/codex-noise-filter
-node scripts/test-harness.mjs dist/release-4.0.0/harness/codex-noise-filter
+python3 scripts/validate-project.py --marketplace-root dist/release-4.1.0/codex
+python3 scripts/validate-project.py --claude-plugin dist/release-4.1.0/claude/plugins/codex-noise-filter
+python3 scripts/validate-project.py --portable-plugin dist/release-4.1.0/portable/codex-noise-filter
+claude plugin validate --strict dist/release-4.1.0/claude/plugins/codex-noise-filter
+node scripts/test-harness.mjs dist/release-4.1.0/harness/codex-noise-filter
 ```
 
 安装验收用 [触发检查请求](../templates/activation-check.prompt.md)，同时查宿主 hook 日志和实际 skill 读取动作。状态在宿主提供的 `PLUGIN_DATA/continuity` 或 `CLAUDE_PLUGIN_DATA/continuity` 中，`last_context_kind` 区分 activation/recovery。成功工具不写状态，计数不是所有工具次数，更不是模型质量评分。

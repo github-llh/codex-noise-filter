@@ -110,7 +110,7 @@ class ContinuityGuardTest(unittest.TestCase):
         self.assertIsNone(self.run_hook(self.payload(EVENT_POST_COMPACT, trigger="auto")))
         output = self.run_hook(self.payload(EVENT_SESSION_START, source="compact"))
         self.assert_context_contains(output, "上下文已完成压缩")
-        for expected_text in ("最新用户目标", "关键决策", "已修改文件", "已运行验证", "唯一下一步"):
+        for expected_text in ("最新目标", "关键决策", "已改文件", "验证结果", "doNotRetry", "唯一下一步"):
             self.assert_context_contains(output, expected_text)
         self.assertNotIn("上下文即将压缩", json.dumps(output, ensure_ascii=False))
         state = self.read_state()
@@ -164,10 +164,8 @@ class ContinuityGuardTest(unittest.TestCase):
         )
         self.assert_context_contains(output, "工具出现网络或传输失败")
         next_output = self.run_hook(self.payload(EVENT_USER_PROMPT_SUBMIT, prompt="continue"))
-        self.assertNotIn("工具出现网络或传输失败", json.dumps(next_output, ensure_ascii=False))
-        state = self.read_state()
-        self.assertEqual([], state["pending_reasons"])
-        self.assertEqual([], state["last_context_reasons"])
+        self.assertIsNone(next_output)
+        self.assertEqual([], self.read_state()["pending_reasons"])
 
     def test_successful_tool_does_not_trigger_on_log_text(self) -> None:
         """成功输出仅提到旧网络错误时不误触发。"""
@@ -221,7 +219,7 @@ class ContinuityGuardTest(unittest.TestCase):
         state["pending_reasons"] = [{"invalid": True}, injected_text]
         self.state_path().write_text(json.dumps(state, ensure_ascii=False), encoding="utf-8")
         output = self.run_hook(self.payload(EVENT_USER_PROMPT_SUBMIT, prompt="continue"))
-        self.assert_context_contains(output, "codex-noise-filter")
+        self.assertNotIn(injected_text, json.dumps(output, ensure_ascii=False))
         self.assertNotIn(injected_text, self.state_path().read_text(encoding="utf-8"))
 
     def test_invalid_schema_type_falls_back_to_empty_state(self) -> None:
@@ -258,9 +256,15 @@ class ContinuityGuardTest(unittest.TestCase):
         """新会话和清空会话均提供路由，续问不依赖硬编码关键词分类。"""
         for source in ("startup", "clear"):
             self.assert_context_contains(self.run_hook(self.payload(EVENT_SESSION_START, source=source)), "codex-noise-filter")
+        self.assertIsNone(self.run_hook(self.payload(EVENT_USER_PROMPT_SUBMIT, prompt="还是这样")))
+
+    def test_prompt_routing_is_injected_once_without_session_start(self) -> None:
+        """缺少 SessionStart 时首条 prompt 兜底路由一次，后续 prompt 不重复累积上下文。"""
         output = self.run_hook(self.payload(EVENT_USER_PROMPT_SUBMIT, prompt="还是这样"))
         self.assert_context_contains(output, "结合对话")
         self.assert_context_contains(output, "纯翻译")
+        self.assertIsNone(self.run_hook(self.payload(EVENT_USER_PROMPT_SUBMIT, prompt="继续")))
+        self.assertEqual(1, self.read_state()["context_injection_count"])
 
     def test_claude_failure_uses_error_field_and_native_data_directory(self) -> None:
         """Claude 失败事件无需伪造 tool_response，且不依赖 Codex 的环境变量。"""

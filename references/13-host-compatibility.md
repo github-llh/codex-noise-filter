@@ -1,6 +1,6 @@
 # 宿主适配与触发诊断
 
-规则核心与模型无关。模型供应商负责推理与 API；宿主负责加载规则、工具、插件和 hooks。不要根据模型名称推断宿主能力。以下依据 2026-09-18 打开的官方文档；在线文档可能继续变化。
+规则核心与模型无关。模型供应商负责推理与 API；宿主负责加载规则、工具、插件和 hooks。不要根据模型名称推断宿主能力。以下依据 2026-10-12 复核的官方文档；在线文档可能继续变化。
 
 ## 选择入口
 
@@ -30,10 +30,11 @@
 
 ## 触发与恢复
 
-- description 提供语义发现；显式调用与项目指导补充入口。插件 `SessionStart` 在 startup/resume/clear/compact 时注入短路由，`UserPromptSubmit` 重申适用范围，避免纯关键词分类漏掉续问。
+- description 提供语义发现；显式调用与项目指导补充入口。插件 `SessionStart` 在 startup/resume/clear/compact 时注入短路由；`UserPromptSubmit` 只在会话尚未注入路由或存在待恢复原因时输出。hook 注入的 `additionalContext` 会留在会话记录中，按轮重复注入会持续累积上下文，两家官方文档都提示多来源 hook 上下文会叠加。
 - 路由送达不等于模型已读取规则。用真实请求、实际 skill 读取动作和宿主 hook 日志区分安装、执行、遵循三个阶段。
 - `PreCompact`/`PostCompact` 只记恢复标记；在 `SessionStart`、下一条 prompt 或工具完成事件中输出合法 `additionalContext`。不向不支持上下文的事件伪造输出。
-- Codex 的失败工具结果在 `PostToolUse` 检查；Claude 另注册 `PostToolUseFailure`，读取其 `error` 字段。模型字段缺失时无法自动检测模型切换，使用指令级复核。
+- Codex 的失败工具结果在 `PostToolUse` 检查；Claude 只注册 `PostToolUseFailure` 并读取其 `error` 字段，不注册 `PostToolUse`。Claude 仅 `SessionStart` 可能携带 `model`，会话中途的模型切换依赖指令级复核。
+- Skill 正文被调用后会在会话内保留；Claude Code 压缩后只重新附带每个 skill 最近一次调用的前 5,000 token，因此关键规则放在 `SKILL.md` 顶部。模型字段缺失时无法自动检测模型切换，使用指令级复核。
 - 脚本只依赖 Python 3.10+ 标准库。Codex 使用 `PLUGIN_ROOT`/`PLUGIN_DATA`，Claude 使用 `CLAUDE_PLUGIN_ROOT`/`CLAUDE_PLUGIN_DATA`。缺失私有数据目录时无状态运行，不猜测 home 路径。
 - 普通工具成功时不写状态、不扫描历史目录；会话建档才清理历史状态。事件计数只记录状态处理，不代表全部工具次数，也不证明模型遵循了上下文。
 - 输入扫描预算只限制守卫自身工作量，不截断、替换模型收到的原始工具结果。范围外失败可能未被守卫识别，模型仍需按原始证据处理。

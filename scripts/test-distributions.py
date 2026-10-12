@@ -39,6 +39,7 @@ class DistributionTest(unittest.TestCase):
                         hooks = json.loads((plugin / "hooks/hooks.json").read_text(encoding="utf-8"))["hooks"]
                         self.assertIn("startup", hooks["SessionStart"][0]["matcher"])
                         self.assertEqual(target != "codex", "PostToolUseFailure" in hooks)
+                        self.assertEqual(target == "codex", "PostToolUse" in hooks)
                         self.assertEqual((ROOT / "distribution/plugin/hooks/continuity_guard.py").read_bytes(), (plugin / "hooks/continuity_guard.py").read_bytes())
                         environment = os.environ.copy()
                         environment.pop("PLUGIN_DATA", None)

@@ -47,11 +47,11 @@ SUPPORTED_EVENTS = (
 
 CONTEXT_KIND_RECOVERY = "recovery"
 CONTEXT_KIND_ACTIVATION = "activation"
+# 只在会话首次或恢复时注入；skill 正文调用后会在会话内保留，按轮重复注入只会累积上下文。
 ACTIVATION_CONTEXT = (
-    "当前任务若涉及真实代码、diff、配置、日志、构建、测试或 agent/skill/plugin，"
-    "使用已安装的 codex-noise-filter，按 SKILL.md 索引读取必要规则。"
-    "结合对话理解简短续问；纯翻译、文案和无仓库的常识问答不启用。"
-    "区分只读与实施，保持用户模型、推理配置和质量验收要求。"
+    "codex-noise-filter 已安装：涉及真实代码、diff、配置、日志、构建、测试或 agent/skill/plugin 时适用，"
+    "结合对话理解简短续问；纯翻译、文案和无仓库的常识问答不适用。"
+    "skill 正文调用一次即在本会话保留，压缩后才需重新调用。"
 )
 
 SOURCE_RESUME = "resume"
@@ -98,19 +98,16 @@ REASON_LABELS = {
 KNOWN_REASONS = frozenset(REASON_LABELS)
 
 CONTINUITY_LEDGER_ITEMS = (
-    "最新用户目标、验收条件与不可违反的高优先级约束",
-    "已确认事实、根因假设、关键决策及其证据来源",
-    "已修改文件、真实落盘状态和仍在运行的工具",
-    "已运行验证、结果、未覆盖边界和外部操作的幂等性状态",
-    "明确禁止重试的路径（doNotRetry）与唯一下一步",
+    "最新目标、验收条件与高优先级约束",
+    "已确认事实、关键决策及证据来源",
+    "已改文件、落盘状态与运行中工具",
+    "验证结果、未覆盖边界与外部操作幂等性",
+    "doNotRetry 与唯一下一步",
 )
 
 RECOVERY_STEPS = (
-    "重读最新用户目标、验收条件和高优先级指令，不要求用户重复已提供的信息。",
-    "在宿主可访问工作区时核对 git status、git diff、落盘文件、运行中工具及外部写操作回执；缺少能力时说明边界。",
-    "重建目标、约束、已确认事实、关键决策、已改文件、验证状态、doNotRetry 和唯一下一步。",
-    "若旧摘要、旧模型结论或工具回执与当前证据冲突，以当前工作区和最新指令为准。",
-    "从唯一下一步继续，不重复已经有成功回执或可能产生副作用的操作。",
+    "最新用户指令和工作区状态（git status、git diff、落盘文件、运行中工具）优先于旧摘要和旧回执。",
+    "已有成功回执或可能产生副作用的操作不重复执行；用户已提供的信息不需要再次询问。",
 )
 
 
@@ -363,16 +360,15 @@ def is_network_failure(response: Any, failed_event: bool = False) -> bool:
 
 
 def recovery_context(reasons: list[str]) -> str:
-    """构造供模型执行的连续性复核要求。"""
+    """构造事实陈述式的连续性复核上下文，保持短小以免累积占用窗口。"""
 
     labels = [REASON_LABELS[reason] for reason in normalize_reasons(reasons)]
     reason_text = "、".join(labels) if labels else "连续性状态发生变化"
-    steps = "\n".join(f"{index}. {step}" for index, step in enumerate(RECOVERY_STEPS, 1))
-    ledger = "\n".join(f"- {item}" for item in CONTINUITY_LEDGER_ITEMS)
+    steps = "".join(RECOVERY_STEPS)
+    ledger = "；".join(CONTINUITY_LEDGER_ITEMS)
     return (
-        f"连续性守卫已自动触发，原因：{reason_text}。"
-        f"为避免过期上下文覆盖当前事实，继续任务前执行以下复核：\n{steps}\n"
-        f"复核后的连续性账本至少覆盖：\n{ledger}"
+        f"连续性事件：{reason_text}。{steps}"
+        f"继续前需复核的连续性账本：{ledger}。"
     )
 
 
@@ -476,7 +472,12 @@ def handle_event(payload: dict[str, Any]) -> dict[str, Any] | None:
                 CONTEXT_KIND_RECOVERY, pending_reasons,
             )
 
-    if output is None and event_name in (EVENT_SESSION_START, EVENT_USER_PROMPT_SUBMIT):
+    # SessionStart 每次都路由；UserPromptSubmit 仅在本会话尚未注入过任何上下文时兜底一次。
+    needs_activation = event_name == EVENT_SESSION_START or (
+        event_name == EVENT_USER_PROMPT_SUBMIT
+        and not normalize_counter(state.get("context_injection_count"))
+    )
+    if output is None and needs_activation:
         output = context_output(state, event_name, ACTIVATION_CONTEXT, CONTEXT_KIND_ACTIVATION, [])
 
     if current_model:

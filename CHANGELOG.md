@@ -1,5 +1,14 @@
 # Changelog
 
+## 4.1.0 - 2026-10-12
+
+### 上下文与 token 优化
+
+- `UserPromptSubmit` 不再每轮注入激活路由：会话内仅在 `SessionStart` 或首次缺少路由时注入一次，存在待恢复原因时才输出复核。依据 Claude Code/Codex 官方说明：hook `additionalContext` 会写入会话记录并累积，多来源 hook 上下文会叠加。
+- 激活与恢复文本改为简短的事实陈述（官方建议 `additionalContext` 避免命令式“系统指令”措辞），并说明 skill 正文调用一次即在会话内保留，避免模型每轮重复调用 skill。
+- Claude 包移除 `PostToolUse`，只保留 `PostToolUseFailure`：Claude 失败工具走独立事件且 `PostToolUse` 不含 `model`，每次成功工具调用不再启动 Python。
+- `SKILL.md` 内联路由表，不再强制每次读取 `00-index.md`；新增“上下文预算”规则（不重复调用 skill/重读 reference、`rg` 定位后按行读取、收窄命令输出、长会话建议压缩或新建会话），关键规则前置以适配压缩后仅保留 skill 前 5,000 token。
+
 ## 4.0.0 - 2026-09-18
 
 - 对齐官方 AGENTS.md、CLAUDE.md、skills、plugins 与 hooks，增加 Codex、Claude、Claude Windows、DeepSeek Harness 原生 bundle、portable plugin 与标准 Skill 分发，并生成 Cursor/Gemini/OpenCode/Copilot/Harness 项目入口；同一份模型无关规则适配 MiMo/DeepSeek 等宿主后端。

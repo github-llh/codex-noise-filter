@@ -13,8 +13,8 @@
 保留既有名称与工程规则，以一份 `SKILL.md` 和 references 支持不同宿主。模型可以是 GPT、Claude、MiMo、DeepSeek 或其他兼容供应商；**触发能力由运行任务的宿主提供，不能由模型名称推断**。
 
 - 按用户意图区分解释、诊断、审查和实施，保护脏改，按真实证据追踪必要调用链。
-- 插件在首次启动、恢复、清空、压缩和提交 prompt 时提供短语义路由，结合前文识别“继续”“还是报错”等续问。
-- Codex/Claude 分别生成原生 manifest、marketplace 和 hooks；Claude 额外覆盖 `PostToolUseFailure`。DeepSeek Harness 单独生成原生 Cordis bundle，使用技能注册与稳定上下文快照。
+- 插件在首次启动、恢复、清空和压缩恢复时注入一次短语义路由，结合前文识别“继续”“还是报错”等续问；skill 正文调用后在会话内保留，不按轮重复调用。
+- Codex/Claude 分别生成原生 manifest、marketplace 和 hooks；Claude 以 `PostToolUseFailure` 替代 `PostToolUse`；路由每会话只注入一次，不按轮重复。DeepSeek Harness 单独生成原生 Cordis bundle，使用技能注册与稳定上下文快照。
 - 性能优化针对重复上下文、无关扫描与 Hook 空操作，保持用户选择的模型、推理强度、输出预算、原始工具结果和质量验收。
 - 普通成功工具事件不写状态；新会话建档才清理历史状态，扫描使用全局节点/深度/字符预算。
 
@@ -45,7 +45,7 @@
 python3 scripts/build-distributions.py
 ```
 
-Windows 可以使用 `py -3 scripts/build-distributions.py`。默认输出 `dist/release-4.0.0/`，包含六种目录/ZIP、Harness npm tarball、五种项目入口和聊天指令模板。构建器拒绝覆盖非空输出；再次构建使用 `--output dist/release-check-2` 等新目录。
+Windows 可以使用 `py -3 scripts/build-distributions.py`。默认输出 `dist/release-4.1.0/`，包含六种目录/ZIP、Harness npm tarball、五种项目入口和聊天指令模板。构建器拒绝覆盖非空输出；再次构建使用 `--output dist/release-check-2` 等新目录。
 
 安装命令、ZIP 导入、旧版本迁移和项目指令配置统一见 [分发说明](distribution/README.md)。**构建源码不会自动刷新已经安装的 1.x/3.x 副本。** 同一宿主选择一个原生插件包，避免插件和独立 Skill 同名重复加载。
 
@@ -76,7 +76,7 @@ python3 scripts/test-distributions.py
 bash -n scripts/build-plugin-package.sh
 python3 scripts/benchmark-hooks.py
 # 完整构建后验证 Harness 服务契约（需要 Node.js）
-node scripts/test-harness.mjs dist/release-4.0.0/harness/codex-noise-filter
+node scripts/test-harness.mjs dist/release-4.1.0/harness/codex-noise-filter
 git diff --check
 ```
 
