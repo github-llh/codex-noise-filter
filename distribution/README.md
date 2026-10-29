@@ -94,6 +94,27 @@ dsh --profile web --dump-config
 
 Desktop 使用应用自带 Plugin Manager 添加本地 bundle 目录或 tarball 并确认启用，标题、描述与图标来自 bundle 的 `locale` 与 `icon.svg`。若该版本 UI 不接受本地路径，使用下面的项目 Skill 入口，不手写或修改 Desktop 保留的 profile。桌面 executable packages、plugin activation 与 CLI 分开管理，`dsh plugin --profile web` 成功不证明 Desktop 已安装。使用当前 Desktop 实际绑定的 Harness 版本验证，预览期 API 可能演进。
 
+## 从 GitHub 仓库直接安装
+
+`master` 分支是源码树，根目录没有 `package.json` 与 `cordis.patch.yml`。对它执行 `pnpm add https://github.com/github-llh/codex-noise-filter` 装上的不是组合包，Plugin Manager 会以“这个包没有声明组合包，不能作为插件管理”拒绝，profile 里还会残留 `codex-noise-filter 0.0.0` 依赖。
+
+`harness` 分支的根目录即构建产物 bundle，可直接安装：
+
+```bash
+dsh plugin --profile <profile> add https://github.com/github-llh/codex-noise-filter#harness
+dsh --profile <profile> --dump-config   # 应出现 codex-noise-filter 条目
+```
+
+Plugin Manager 页面或 agent 工具安装时同样接受带 `#harness` 的 URL。卸载用 `dsh plugin --profile <profile> remove dsh-codex-noise-filter`。版本升级重新发布分支后即可再次 `add` 覆盖安装。
+
+每次发布执行（构建 + 以临时索引推送，不触碰 master 工作区与索引）：
+
+```bash
+scripts/publish-harness-branch.sh
+```
+
+脚本只读取构建产物构造提交并推送 `refs/heads/harness`，parent 指向当前 `master`；推送失败时本地已生成 commit，可修复凭据后按脚本输出手动重推。
+
 不安装 Cordis bundle 也可将 `projects/harness/.dsh/skills/codex-noise-filter` 放入目标仓库的 `.dsh/skills/`。在 Desktop 选择该工作区，新会话技能列表应出现同名技能；核对实际 `skill` 工具调用和资源读取。该路径使用宿主自带发现/压缩后目录刷新，不注册本项目短路由或外部 hooks。插件和项目技能二选一，避免同名来源覆盖。
 
 Native bundle 依赖宿主已启用 `skills`、`systemPrompt` 服务及模型可见的 skill 消费工具；Minimal 或自定义隐藏技能的 preset 必须以实际能力为准。本地服务契约测试不代替真实桌面安装验收。

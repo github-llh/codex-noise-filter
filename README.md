@@ -49,6 +49,8 @@ Windows 可以使用 `py -3 scripts/build-distributions.py`。默认输出 `dist
 
 安装命令、ZIP 导入、旧版本迁移和项目指令配置统一见 [分发说明](distribution/README.md)。**构建源码不会自动刷新已经安装的 1.x/3.x 副本。** 同一宿主选择一个原生插件包，避免插件和独立 Skill 同名重复加载。
 
+在 DeepSeek Harness 中直接从 GitHub 安装时使用 `harness` 分支（分支根即 bundle）：`dsh plugin add https://github.com/github-llh/codex-noise-filter#harness`。直接 `pnpm add` 仓库主分支会装上源码树而非组合包，被 Plugin Manager 拒绝，详见 [分发说明](distribution/README.md)。
+
 ## 触发可靠性
 
 触发分三个阶段验收：
