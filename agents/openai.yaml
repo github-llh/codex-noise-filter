@@ -1,8 +1,0 @@
-interface:
-  display_name: "codex-noise-filter"
-  short_description: "以证据收敛任务，按收益受控委派并自动恢复连续性。"
-  brand_color: "#2563EB"
-  default_prompt: "使用 codex-noise-filter 收敛证据与范围，按独立性、冲突和总成本判断是否最小委派，再完成验证与连续性复核。"
-
-policy:
-  allow_implicit_invocation: true

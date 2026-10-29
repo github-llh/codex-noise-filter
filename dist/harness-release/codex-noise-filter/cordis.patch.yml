@@ -1,0 +1,4 @@
+- insert:
+    - id: codex-noise-filter
+      name: 'dsh-codex-noise-filter'
+      config: {}

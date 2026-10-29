@@ -1,0 +1,32 @@
+{
+  "name": "dsh-codex-noise-filter",
+  "version": "4.1.0",
+  "description": "Model-neutral evidence-driven coding with native host activation, continuity recovery and proportionate validation.",
+  "private": true,
+  "type": "module",
+  "main": "index.js",
+  "icon": "./icon.svg",
+  "exports": {
+    ".": "./index.js",
+    "./cordis.patch.yml": "./cordis.patch.yml",
+    "./locale/*.json": "./locale/*.json",
+    "./icon": "./icon.svg",
+    "./metadata.json": "./metadata.json",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "index.js",
+    "metadata.json",
+    "cordis.patch.yml",
+    "icon.svg",
+    "locale/*.json",
+    "skills",
+    "LICENSE"
+  ],
+  "license": "Apache-2.0",
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    }
+  }
+}
