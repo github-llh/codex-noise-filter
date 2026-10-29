@@ -401,6 +401,59 @@ def validate_other_plugin(plugin_root: Path, host: str) -> None:
         raise ValidationError(f"{manifest_path}: portable 包只提供 skills")
 
 
+def validate_harness_bundle(plugin_root: Path) -> None:
+    """核验 DeepSeek Harness bundle 的 manifest、patch、展示资源与技能树。"""
+    manifest_path = plugin_root / "package.json"
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    name = manifest.get("name", "")
+    if not NAME_RE.fullmatch(name) or not SEMVER_RE.fullmatch(manifest.get("version", "")):
+        raise ValidationError(f"{manifest_path}: name/version 无效")
+    if manifest.get("type") != "module" or manifest.get("main") != "index.js":
+        raise ValidationError(f"{manifest_path}: 需要 type=module 且 main 指向 index.js")
+    if manifest.get("private") is not True:
+        raise ValidationError(f"{manifest_path}: 本地 bundle 必须标记 private")
+    if manifest.get("dsh") != {"bundle": {"patch": "./cordis.patch.yml"}}:
+        raise ValidationError(f"{manifest_path}: dsh.bundle.patch 必须指向 cordis.patch.yml")
+    exports = manifest.get("exports", {})
+    for subpath in (".", "./cordis.patch.yml", "./locale/*.json", "./icon"):
+        if subpath not in exports:
+            raise ValidationError(f"{manifest_path}: exports 缺少 {subpath}")
+    for subpath, target in exports.items():
+        if "*" in subpath or not isinstance(target, str):
+            continue
+        if not (plugin_root / target).is_file():
+            raise ValidationError(f"{manifest_path}: exports {subpath} 指向缺失文件 {target}")
+    files = manifest.get("files", [])
+    for entry in ("index.js", "metadata.json", "cordis.patch.yml", "icon.svg", "locale/*.json", "skills"):
+        if entry not in files:
+            raise ValidationError(f"{manifest_path}: files 缺少 {entry}")
+    if not list(plugin_root.glob("locale/*.json")):
+        raise ValidationError(f"{plugin_root}/locale: 没有可打包的 locale 文件")
+    if (plugin_root / "hooks").exists():
+        raise ValidationError(f"{plugin_root}: native bundle 不携带 hooks")
+    patch = (plugin_root / "cordis.patch.yml").read_text(encoding="utf-8")
+    if "- insert:" not in patch:
+        raise ValidationError(f"{plugin_root}/cordis.patch.yml: 缺少 insert 指令")
+    if not re.search(rf"id:\s*{re.escape(plugin_root.name)}", patch):
+        raise ValidationError(f"{plugin_root}/cordis.patch.yml: insert 条目 id 应为 {plugin_root.name}")
+    if not re.search(rf"name:\s*'?{re.escape(name)}'?", patch):
+        raise ValidationError(f"{plugin_root}/cordis.patch.yml: insert 条目 name 应为 {name}")
+    for locale in ("en", "zh"):
+        meta = json.loads((plugin_root / "locale" / f"{locale}.json").read_text(encoding="utf-8")).get("meta", {})
+        for field in ("title", "description"):
+            if not isinstance(meta.get(field), str) or not meta[field].strip():
+                raise ValidationError(f"{plugin_root}/locale/{locale}.json: meta.{field} 不能为空")
+    icon = plugin_root / "icon.svg"
+    text = icon.read_text(encoding="utf-8").strip()
+    if not text.startswith("<svg") or not text.endswith("</svg>"):
+        raise ValidationError(f"{icon}: 不是有效的 SVG")
+    if icon.stat().st_size > 256 * 1024:
+        raise ValidationError(f"{icon}: 超过 256 KiB 限制")
+    skill_root = plugin_root / "skills" / plugin_root.name
+    read_frontmatter(skill_root / "SKILL.md")
+    validate_markdown_tree(skill_root)
+
+
 def validate_marketplace_root(root: Path) -> None:
     manifest_path = root / MARKETPLACE_MANIFEST_RELATIVE_PATH
     unsupported_manifest_path = root / UNSUPPORTED_ROOT_MARKETPLACE_FILENAME
@@ -430,6 +483,7 @@ def main() -> int:
     parser.add_argument("--marketplace-root", type=Path)
     parser.add_argument("--claude-plugin", type=Path)
     parser.add_argument("--portable-plugin", type=Path)
+    parser.add_argument("--harness-bundle", type=Path)
     args = parser.parse_args()
     root = Path(__file__).resolve().parent.parent
     try:
@@ -442,6 +496,8 @@ def main() -> int:
             validate_other_plugin(args.claude_plugin.resolve(), "claude")
         if args.portable_plugin:
             validate_other_plugin(args.portable_plugin.resolve(), "portable")
+        if args.harness_bundle:
+            validate_harness_bundle(args.harness_bundle.resolve())
     except (OSError, json.JSONDecodeError, ValidationError) as exc:
         print(f"错误: {exc}", file=sys.stderr)
         return FAILURE_EXIT_CODE

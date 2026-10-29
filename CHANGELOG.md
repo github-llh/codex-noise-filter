@@ -1,5 +1,15 @@
 # Changelog
 
+## 未发布
+
+### DeepSeek Harness 插件导入兼容
+
+- harness bundle 对齐官方 Cordis bundle 契约：`package.json` 增加 `private`、`icon` 与 `exports`（入口、patch、locale、icon、metadata、package.json），`cordis.patch.yml` 条目补 `config: {}`；Plugin Manager 从 `locale/en.json`、`locale/zh.json` 读取标题与描述，图标使用原创 SVG。
+- `index.js` 入口只保留 `apply` 与 `inject`，返回组合清理函数，释放时同时注销技能与路由快照。
+- 新增 `scripts/test-harness-e2e.mjs`：从本机 Desktop 安装的 app.asar 提取真实 cordis Loader 与 `skills`/`systemPrompt` 服务，按 patch 条目导入 bundle，验证注册、目录摘要、正文加载、系统提示装配与释放清理。
+- `scripts/test-harness.mjs` 扩展为 bundle 结构契约测试（manifest、exports、patch、locale、icon、files 与 tarball 打包一致性）；`validate-project.py` 增加 `--harness-bundle` 校验，并在构建 harness 目标时执行。
+- 分发 README 补充安装与验证说明：CLI 可用相对路径、Plugin Manager 与 agent 工具需要绝对路径、`--dump-config` 验收、HMR 与 `restart-required`、版本兼容检查与卸载命令。
+
 ## 4.1.0 - 2026-10-12
 
 ### 上下文与 token 优化

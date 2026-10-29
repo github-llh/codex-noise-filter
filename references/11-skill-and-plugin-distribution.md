@@ -49,6 +49,8 @@ Skill 指令只能指导 agent，不能证明 hook 会运行。需要生命周�
 
 本项目 v4 生成 Codex、Claude、DeepSeek Harness 原生插件及不带 hooks 的 portable/Skill 包。Claude 包使用 `.claude-plugin/plugin.json`，默认自动发现 `hooks/hooks.json`，不重复注册；portable 包使用根 `plugin.json`。Harness 通过 `dsh.bundle` 安装，使用技能注册与上下文快照；各包共用同一份规则，不声明 MCP 或 app，不扩大文件、网络或外部系统权限。
 
+Harness bundle 遵循宿主插件契约：`package.json` 声明 `dsh.bundle.patch`、`private`、`type`、`main`/`exports`、`icon` 与 `files`；`cordis.patch.yml` 用 `insert` 加入本包条目；`locale/*.json` 提供 `meta.title`/`meta.description`，Plugin Manager 与设置页据此显示；入口 `apply(ctx)` 用 `ctx.effect` 或返回值注册清理。安装用 `dsh plugin --profile <name> add <tarball 或目录>`（转发 pnpm，CLI 可相对路径；Plugin Manager 与 agent 工具要求绝对路径），或用 Desktop Plugin Manager 添加本地 bundle。验收看 `--dump-config` 的条目与真实 `skill` 工具调用，安装成功不等于启用成功。
+
 ## 发布检查
 
 1. 校验 `SKILL.md` frontmatter、reference 链接和 `agents/openai.yaml`。

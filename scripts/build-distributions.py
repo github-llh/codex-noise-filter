@@ -64,9 +64,18 @@ def build_target(target: str, output: Path) -> Path:
     if target == "harness":
         write_json(plugin / "package.json", {
             "name": "dsh-codex-noise-filter", "version": manifest["version"],
-            "description": manifest["description"], "type": "module", "main": "index.js",
-            "files": ["index.js", "metadata.json", "cordis.patch.yml", "skills", "LICENSE"],
-            "license": "Apache-2.0", "dsh": {"bundle": {"patch": "./cordis.patch.yml"}},
+            "description": manifest["description"], "private": True,
+            "type": "module", "main": "index.js", "icon": "./icon.svg",
+            "exports": {
+                ".": "./index.js",
+                "./cordis.patch.yml": "./cordis.patch.yml",
+                "./locale/*.json": "./locale/*.json",
+                "./icon": "./icon.svg",
+                "./metadata.json": "./metadata.json",
+                "./package.json": "./package.json",
+            },
+            "files": ["index.js", "metadata.json", "cordis.patch.yml", "icon.svg", "locale/*.json", "skills", "LICENSE"],
+            "license": manifest["license"], "dsh": {"bundle": {"patch": "./cordis.patch.yml"}},
         })
         spec = importlib.util.spec_from_file_location("guard_build", ROOT / "distribution/plugin/hooks/continuity_guard.py")
         guard = importlib.util.module_from_spec(spec)
@@ -74,7 +83,15 @@ def build_target(target: str, output: Path) -> Path:
         _, description = validator().read_frontmatter(ROOT / "SKILL.md")
         write_json(plugin / "metadata.json", {"description": description, "activation": guard.ACTIVATION_CONTEXT})
         shutil.copy2(ROOT / "distribution/harness/index.js", plugin / "index.js")
-        (plugin / "cordis.patch.yml").write_text("- insert:\n    - id: codex-noise-filter\n      name: dsh-codex-noise-filter\n", encoding="utf-8")
+        shutil.copy2(ROOT / "distribution/harness/icon.svg", plugin / "icon.svg")
+        shutil.copytree(ROOT / "distribution/harness/locale", plugin / "locale", ignore=IGNORED)
+        (plugin / "cordis.patch.yml").write_text(
+            "- insert:\n    - id: codex-noise-filter\n      name: 'dsh-codex-noise-filter'\n      config: {}\n",
+            encoding="utf-8")
+        # Plugin Manager 与 Loader 只认导出的展示资源与入口；缺失会让 bundle 显示回退元数据或无法加载。
+        for exported in ("index.js", "metadata.json", "cordis.patch.yml", "icon.svg", "locale/en.json", "locale/zh.json"):
+            if not (plugin / exported).is_file():
+                raise SystemExit(f"harness bundle 缺少导出文件: {exported}")
         return plugin
     if target == "portable":
         write_json(plugin / "plugin.json", {
@@ -187,6 +204,8 @@ def main() -> int:
                 checks.validate_marketplace_root(target_root)
             elif target in ("claude", "claude-windows", "portable"):
                 checks.validate_other_plugin(plugin, "portable" if target == "portable" else "claude")
+            elif target == "harness":
+                checks.validate_harness_bundle(plugin)
             else:
                 skill = plugin if target == "skill" else plugin / "skills" / NAME
                 checks.read_frontmatter(skill / "SKILL.md")

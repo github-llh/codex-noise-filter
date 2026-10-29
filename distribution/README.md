@@ -18,7 +18,7 @@ dist/release-4.1.0/
   claude/plugins/codex-noise-filter/
   claude-windows/.claude-plugin/marketplace.json
   claude-windows/plugins/codex-noise-filter/
-  harness/codex-noise-filter/package.json
+  harness/codex-noise-filter/（package.json、cordis.patch.yml、index.js、metadata.json、icon.svg、locale/、skills/）
   portable/codex-noise-filter/plugin.json
   skill/codex-noise-filter/SKILL.md
   codex-noise-filter-codex.zip
@@ -67,7 +67,21 @@ Windows 选择 `./dist/release-4.1.0/claude-windows`，其 hooks 明确使用 Po
 
 ## DeepSeek Harness 桌面端与 CLI
 
-`harness/codex-noise-filter` 是独立 Cordis bundle，包含 `package.json` 的 `dsh.bundle`、`cordis.patch.yml`、可直接运行的 ESM 入口及完整技能。没有 npm 依赖、安装脚本、模型覆盖或 Python hook。它向 `ctx.skills` 注册技能，向 `ctx.systemPrompt.context` 注册短路由；Harness 按快照变化与压缩恢复机制交付上下文，技能正文保持按需读取。
+`harness/codex-noise-filter` 是独立 Cordis bundle（npm 包名 `dsh-codex-noise-filter`），按 Harness 插件契约组织：
+
+```text
+harness/codex-noise-filter/
+  package.json        dsh.bundle.patch、private、type=module、main/exports、icon、files
+  cordis.patch.yml    insert 条目 codex-noise-filter -> dsh-codex-noise-filter
+  index.js            ESM 入口：apply(ctx) 注册技能与短路由，返回清理函数
+  metadata.json       入口读取的技能描述与激活语
+  icon.svg            原创图标（Plugin Manager 与设置页展示）
+  locale/en.json      meta.title / meta.description（英文）
+  locale/zh.json      meta.title / meta.description（中文）
+  skills/codex-noise-filter/  同一份 SKILL.md 与 references
+```
+
+没有 npm 依赖、安装脚本、模型覆盖或 Python hook。它向 `ctx.skills` 注册技能，向 `ctx.systemPrompt.context` 注册短路由；Harness 按快照变化与压缩恢复机制交付上下文，技能正文保持按需读取。`files` 与 `exports` 覆盖全部运行时文件，Plugin Manager 从 `locale` 与 `icon` 读取展示元数据。
 
 CLI/Web 在准备安装时执行，例如已有 `web` profile：
 
@@ -76,7 +90,9 @@ dsh plugin --profile web add ./dist/release-4.1.0/dsh-codex-noise-filter-4.1.0.t
 dsh --profile web --dump-config
 ```
 
-Desktop 使用应用自带 Plugin Manager 添加本地 bundle/tarball 并确认启用。若该版本 UI 不接受本地路径，使用下面的项目 Skill 入口，不手写或修改 Desktop 保留的 profile。桌面 executable packages、plugin activation 与 CLI 分开管理，`dsh plugin --profile web` 成功不证明 Desktop 已安装。使用当前 Desktop 实际绑定的 Harness 版本验证，预览期 API 可能演进。
+`dsh plugin` 把参数原样转发给 profile 目录里的 pnpm，因此 CLI 可用相对路径；Plugin Manager 页面或 agent 工具安装时只接受绝对路径（`file:`/`link:` 同样按绝对路径解析）。安装默认启用该组合包；`--dump-config` 应出现 `codex-noise-filter` 条目。未声明 `engines.dsh` 时按 DSH peer 范围做兼容检查，不兼容会要求精确版本豁免，不要顺手放宽。卸载用 `dsh plugin --profile web remove dsh-codex-noise-filter`。内置 `web` 模板启用 HMR，安装与启停通常即时生效；其他模板重启后生效，结果里的 `restart-required` 必须如实转告。
+
+Desktop 使用应用自带 Plugin Manager 添加本地 bundle 目录或 tarball 并确认启用，标题、描述与图标来自 bundle 的 `locale` 与 `icon.svg`。若该版本 UI 不接受本地路径，使用下面的项目 Skill 入口，不手写或修改 Desktop 保留的 profile。桌面 executable packages、plugin activation 与 CLI 分开管理，`dsh plugin --profile web` 成功不证明 Desktop 已安装。使用当前 Desktop 实际绑定的 Harness 版本验证，预览期 API 可能演进。
 
 不安装 Cordis bundle 也可将 `projects/harness/.dsh/skills/codex-noise-filter` 放入目标仓库的 `.dsh/skills/`。在 Desktop 选择该工作区，新会话技能列表应出现同名技能；核对实际 `skill` 工具调用和资源读取。该路径使用宿主自带发现/压缩后目录刷新，不注册本项目短路由或外部 hooks。插件和项目技能二选一，避免同名来源覆盖。
 
@@ -127,9 +143,13 @@ python3 scripts/test-distributions.py
 python3 scripts/validate-project.py --marketplace-root dist/release-4.1.0/codex
 python3 scripts/validate-project.py --claude-plugin dist/release-4.1.0/claude/plugins/codex-noise-filter
 python3 scripts/validate-project.py --portable-plugin dist/release-4.1.0/portable/codex-noise-filter
+python3 scripts/validate-project.py --harness-bundle dist/release-4.1.0/harness/codex-noise-filter
 claude plugin validate --strict dist/release-4.1.0/claude/plugins/codex-noise-filter
-node scripts/test-harness.mjs dist/release-4.1.0/harness/codex-noise-filter
+node scripts/test-harness.mjs dist/release-4.1.0/harness/codex-noise-filter dist/release-4.1.0/dsh-codex-noise-filter-4.1.0.tgz
+node scripts/test-harness-e2e.mjs dist/release-4.1.0/harness/codex-noise-filter
 ```
+
+`test-harness-e2e.mjs` 从本机 Desktop 安装的 `app.asar` 提取真实 cordis Loader 与 `skills`/`systemPrompt` 服务，按 patch 条目导入 bundle 并验证注册、加载、装配与释放；安装路径不同用 `--asar <path>` 指定，未安装 Desktop 时跳过即可。
 
 安装验收用 [触发检查请求](../templates/activation-check.prompt.md)，同时查宿主 hook 日志和实际 skill 读取动作。状态在宿主提供的 `PLUGIN_DATA/continuity` 或 `CLAUDE_PLUGIN_DATA/continuity` 中，`last_context_kind` 区分 activation/recovery。成功工具不写状态，计数不是所有工具次数，更不是模型质量评分。
 

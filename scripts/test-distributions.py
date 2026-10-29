@@ -94,11 +94,18 @@ class DistributionTest(unittest.TestCase):
             builder.npm_archive(plugin, second)
             self.assertEqual(first.read_bytes(), second.read_bytes())
             with tarfile.open(first) as bundle:
+                names = bundle.getnames()
                 manifest = json.load(bundle.extractfile("package/package.json"))
                 self.assertNotIn("scripts", manifest)
                 self.assertNotIn("dependencies", manifest)
-                self.assertIn("package/" + manifest["main"], bundle.getnames())
-                self.assertIn("package/" + manifest["dsh"]["bundle"]["patch"].removeprefix("./"), bundle.getnames())
+                self.assertEqual(manifest["private"], True)
+                self.assertEqual(manifest["exports"]["."], "./index.js")
+                self.assertIn("./locale/*.json", manifest["exports"])
+                self.assertIn("./icon", manifest["exports"])
+                self.assertIn("package/" + manifest["main"], names)
+                self.assertIn("package/" + manifest["dsh"]["bundle"]["patch"].removeprefix("./"), names)
+                for entry in ("index.js", "icon.svg", "locale/en.json", "locale/zh.json", "metadata.json"):
+                    self.assertIn(f"package/{entry}", names)
 
     def test_unsafe_and_nonempty_outputs_preserve_existing_files(self) -> None:
         with tempfile.TemporaryDirectory() as temp:

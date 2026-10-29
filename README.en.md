@@ -29,7 +29,7 @@ See the [installation guide](distribution/README.md) for host-specific commands,
 - Codex local plugin hosts: Codex package, with supported hooks enabled and trusted.
 - Claude Code/Desktop Code: native Claude package; POSIX hooks require `python3`, Windows hooks use PowerShell and `py -3`.
 - Claude Chat: plugin skills are usable; hooks require a supporting Code/Cowork execution surface. Choose the package for the execution environment, including a Linux Cowork VM.
-- DeepSeek Harness Desktop/CLI/Web: native Cordis bundle with skill registration and a stable context snapshot. Desktop activation is separate from CLI.
+- DeepSeek Harness Desktop/CLI/Web: native Cordis bundle with skill registration, a stable context snapshot, and locale metadata plus an icon for Plugin Manager. Desktop activation is separate from CLI.
 - Cursor, Gemini CLI, OpenCode, and Copilot App/CLI/IDE: generated `projects/` layouts use their documented skill and instruction paths.
 - DeepSeek/MiMo through Codex or Claude Code: use that host's package. Deep Code can use the standard Skill package.
 - Agent Plugins hosts: portable package with root `plugin.json`, skills only.
@@ -46,9 +46,14 @@ python3 scripts/test-distributions.py
 python3 scripts/benchmark-hooks.py
 bash -n scripts/build-plugin-package.sh
 git diff --check
+python3 scripts/validate-project.py --harness-bundle dist/release-4.1.0/harness/codex-noise-filter
+node scripts/test-harness.mjs dist/release-4.1.0/harness/codex-noise-filter dist/release-4.1.0/dsh-codex-noise-filter-4.1.0.tgz
+node scripts/test-harness-e2e.mjs dist/release-4.1.0/harness/codex-noise-filter
 ```
 
 An optional `--baseline-ref <trusted-git-ref>` benchmark executes the guard from that reviewed revision in temporary storage. Metrics separate in-process handling from Python process startup. They are local synthetic overhead measurements, not end-to-end model latency or quality results.
+
+The Harness e2e test reads the installed Desktop `app.asar` to extract the real cordis Loader plus the `skills` and `systemPrompt` services, imports the bundle through its patch entry, and checks registration, loading, assembly, and disposal. Pass `--asar <path>` when the installation lives elsewhere.
 
 The guard stores only fingerprints and bounded metadata in host-provided plugin data directories. It never reads transcripts, stores prompts/tool output, modifies original tool results, or retries external writes. Without a state directory it runs statelessly. Disabled hooks and unavailable tools fall back to instruction-level behavior with explicit limitations.
 
